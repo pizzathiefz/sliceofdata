@@ -1,0 +1,170 @@
+baseURL: "https://sliceofdata.app/"
+title: sliceofdata
+theme: PaperMod
+
+enableRobotsTXT: true
+buildDrafts: false
+buildFuture: false
+buildExpired: false
+
+minify:
+  disableXML: true
+  minifyOutput: true
+
+defaultContentLanguage: ko
+defaultContentLanguageInSubdir: false
+
+languages:
+  ko:
+    languageCode: ko-KR
+    languageName: "한국어"
+    title: "sliceofdata"
+    weight: 10
+    menu:
+      main:
+        - identifier: archives
+          name: "posts"
+          url: /archives/
+          weight: 10
+        - identifier: search
+          name: "search"
+          url: /search/
+          weight: 15
+        - identifier: tags
+          name: "tags"
+          url: /tags/
+          weight: 20
+        - identifier: about
+          name: "about"
+          url: /about/
+          weight: 25
+        - identifier: notes
+          name: "notes"
+          url: https://pizzathief.pages.dev/
+          weight: 30
+    params:
+      homeInfoParams:
+        Title: "🪄"
+        Content: ""
+  en:
+    languageCode: en-US
+    languageName: "English"
+    title: "sliceofdata"
+    weight: 20
+    menu:
+      main:
+        - identifier: archives
+          name: "posts"
+          url: /archives/
+          weight: 10
+        - identifier: search
+          name: "search"
+          url: /search/
+          weight: 15
+        - identifier: tags
+          name: "tags"
+          url: /tags/
+          weight: 20
+        - identifier: about
+          name: "about"
+          url: /about/
+          weight: 25
+        - identifier: notes
+          name: "notes"
+          url: https://pizzathief.pages.dev/
+          weight: 30
+    params:
+      homeInfoParams:
+        Title: "🪄"
+        Content: ""
+
+pagination:
+  pagerSize: 5
+
+
+
+params:
+  env: production # to enable google analytics, opengraph, twitter-cards and schema.
+  title: post title
+  description: "ExampleSite description"
+  keywords: [Blog, Portfolio, PaperMod]
+  author: pizzathief
+  images: ["<link or path of image for opengraph, twitter-cards>"]
+  DateFormat: "2006-01-02"
+  defaultTheme: auto # dark, light
+  disableThemeToggle: false
+  ShowReadingTime: true
+  ShowShareButtons: true
+  ShowPostNavLinks: true
+  ShowBreadCrumbs: false
+  ShowCodeCopyButtons: false
+  ShowWordCount: false
+  ShowRssButtonInSectionTermList: true
+  UseHugoToc: true
+  disableSpecial1stPost: true
+  disableScrollToTop: false
+  comments: false
+  hidemeta: false
+  hideSummary: false
+  showtoc: true
+  tocopen: false
+
+  ShareButtons: ["linkedin", "x"]
+
+  assets:
+    # disableHLJS: true # to disable highlight.js
+    # disableFingerprinting: true
+    favicon: "/favicon.ico"
+    favicon16x16: "/favicon-16x16.png"
+    favicon32x32: "/favicon-32x32.png"
+    apple_touch_icon: "<link / abs url>"
+    safari_pinned_tab: "<link / abs url>"
+
+  label:
+    text: "slice.of.data"
+    icon: /apple-touch-icon.png
+    iconHeight: 35
+
+  socialIcons:
+    - name: email
+      url: "mailto:pizzathief0@gmail.com"
+    - name: linkedin
+      url: "https://www.linkedin.com/in/youngshin-son/"
+    - name: github
+      url: "https://github.com/pizzathiefz"
+
+  analytics:
+    google:
+      SiteVerificationTag: "XYZabc"
+
+  cover:
+    hidden: true # hide everywhere but not in structured data
+    hiddenInList: true # hide on list pages and home
+    hiddenInSingle: true # hide on single page
+
+  # editPost:
+  #   URL: "https://github.com/<path_to_repo>/content"
+  #   Text: "Suggest Changes" # edit text
+  #   appendFilePath: true # to append file path to Edit link
+
+  # for search
+  # https://fusejs.io/api/options.html
+  fuseOpts:
+    isCaseSensitive: false
+    shouldSort: true
+    location: 0
+    distance: 1000
+    threshold: 0.4
+    minMatchCharLength: 0
+    limit: 10 # refer: https://www.fusejs.io/api/methods.html#search
+    keys: ["title", "permalink", "summary", "content"]
+# Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
+pygmentsUseClasses: true
+markup:
+  highlight:
+    noClasses: false
+    # anchorLineNos: true
+    # codeFences: true
+    # guessSyntax: true
+    # lineNos: true
+    # style: monokai

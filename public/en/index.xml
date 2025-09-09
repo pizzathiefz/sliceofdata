@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>sliceofdata</title>
+    <link>http://localhost:1313/en/</link>
+    <description>Recent content on sliceofdata</description>
+    <image>
+      <title>sliceofdata</title>
+      <url>http://localhost:1313/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
+      <link>http://localhost:1313/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
+    </image>
+    <generator>Hugo -- 0.150.0</generator>
+    <language>en-US</language>
+    <lastBuildDate>Thu, 09 Jan 2025 10:00:00 +0900</lastBuildDate>
+    <atom:link href="http://localhost:1313/en/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Sample Post</title>
+      <link>http://localhost:1313/en/posts/sample-multilingual-post/</link>
+      <pubDate>Thu, 09 Jan 2025 10:00:00 +0900</pubDate>
+      <guid>http://localhost:1313/en/posts/sample-multilingual-post/</guid>
+      <description>&lt;p&gt;English&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>About</title>
+      <link>http://localhost:1313/en/about/</link>
+      <pubDate>Thu, 09 Jan 2025 00:00:00 +0900</pubDate>
+      <guid>http://localhost:1313/en/about/</guid>
+      <description>&lt;p&gt;👋 &lt;strong&gt;Youngshin Son&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;I’m a machine learning engineer with a background in the game and music streaming industry. I like building things that entertain people &amp;ndash; and I always try to enjoy myself in the process, too. Besides work, I usually end up reading books or watching movies, and I occasionally play games and do a bit of yoga. I just can&amp;rsquo;t deal with any kind of going out, facing uncertainty, or coming home without a dog wagging its tail.&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>
