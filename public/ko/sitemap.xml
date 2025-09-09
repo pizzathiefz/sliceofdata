@@ -70,6 +70,14 @@
                 href="http://localhost:1313/about/"
                 />
   </url><url>
+    <loc>http://localhost:1313/en/about/</loc>
+  </url><url>
+    <loc>http://localhost:1313/en/archives/</loc>
+  </url><url>
+    <loc>http://localhost:1313/ko/about/</loc>
+  </url><url>
+    <loc>http://localhost:1313/ko/archives/</loc>
+  </url><url>
     <loc>http://localhost:1313/categories/</loc>
     <xhtml:link
                 rel="alternate"
@@ -81,6 +89,10 @@
                 hreflang="ko-KR"
                 href="http://localhost:1313/categories/"
                 />
+  </url><url>
+    <loc>http://localhost:1313/en/</loc>
+  </url><url>
+    <loc>http://localhost:1313/ko/</loc>
   </url><url>
     <loc>http://localhost:1313/archives/</loc>
     <xhtml:link
@@ -105,7 +117,5 @@
                 hreflang="ko-KR"
                 href="http://localhost:1313/search/"
                 />
-  </url><url>
-    <loc>http://localhost:1313/tags/%EB%8B%A4%EA%B5%AD%EC%96%B4/</loc>
   </url>
 </urlset>

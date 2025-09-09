@@ -31,5 +31,33 @@
 &lt;blockquote&gt;
 &lt;p&gt;‘나는 어느 도둑에게 복숭아를 훔쳐 달라고 했네’로 시작하는 윌리엄 블레이크의 시와 이름(Peachthief)을 연결해서 한 말이다.  &amp;ndash; &lt;em&gt;제임스 팁트리 주니어, 『비애곡 Slow Music』 (1980)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/en/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/en/about/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/en/archives/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/en/archives/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/ko/about/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/ko/about/</guid>
+      <description></description>
+    </item>
+    <item>
+      <title></title>
+      <link>http://localhost:1313/ko/archives/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/ko/archives/</guid>
+      <description></description>
+    </item>
   </channel>
 </rss>

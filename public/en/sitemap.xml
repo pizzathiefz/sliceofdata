@@ -82,8 +82,6 @@
                 href="http://localhost:1313/en/categories/"
                 />
   </url><url>
-    <loc>http://localhost:1313/en/tags/multilingual/</loc>
-  </url><url>
     <loc>http://localhost:1313/en/archives/</loc>
     <xhtml:link
                 rel="alternate"

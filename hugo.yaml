@@ -45,7 +45,7 @@ languages:
     params:
       homeInfoParams:
         Title: "🪄"
-        Content: ""
+        Content: "Half ML, half everything else. Served one slice at a time."
   en:
     languageCode: en-US
     languageName: "English"
@@ -76,7 +76,7 @@ languages:
     params:
       homeInfoParams:
         Title: "🪄"
-        Content: ""
+        Content: "Half ML, half everything else. Served one slice at a time."
 
 pagination:
   pagerSize: 5
