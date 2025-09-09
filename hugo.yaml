@@ -22,9 +22,9 @@ languages:
     weight: 10
     menu:
       main:
-        - identifier: archives
+        - identifier: posts
           name: "posts"
-          url: /archives/
+          url: /posts/
           weight: 10
         - identifier: search
           name: "search"
@@ -53,9 +53,9 @@ languages:
     weight: 20
     menu:
       main:
-        - identifier: archives
+        - identifier: posts
           name: "posts"
-          url: /archives/
+          url: /posts/
           weight: 10
         - identifier: search
           name: "search"
