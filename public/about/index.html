@@ -19,7 +19,7 @@
 <meta name="author" content="pizzathief">
 <link rel="canonical" href="http://localhost:1313/about/">
 <meta name="google-site-verification" content="XYZabc">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.6808e6da2d86a2448df5b44c0eddaea735fc5afae3b3ac22a0e0ddefe0f34a08.css" integrity="sha256-aAjm2i2GokSN9bRMDt2upzX8Wvrjs6wioODd7&#43;DzSgg=" rel="preload stylesheet" as="style">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.a2d0cbfc21fa01e4504ba90ba7e42bcd044de9f2c86d62f95bfaebd03fe8dd6c.css" integrity="sha256-otDL/CH6AeRQS6kLp&#43;QrzQRN6fLIbWL5W/rr0D/o3Ww=" rel="preload stylesheet" as="style">
 <link rel="icon" href="http://localhost:1313/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
@@ -250,87 +250,6 @@
     <ul class="post-tags">
     </ul>
   </footer>
-<div class="container_disqus">
-    <script src="https://giscus.app/client.js"
-        data-repo="pizzathiefz/sliceofdata"
-        data-repo-id="R_kgDOPsr6oQ"
-        data-category="Announcements"
-        data-category-id="DIC_kwDOPsr6oc4CvOfW"
-        data-mapping="pathname"
-        data-strict="0"
-        data-reactions-enabled="1"
-        data-emit-metadata="0"
-        data-input-position="top"
-        data-theme=""
-        data-lang="en"
-        crossorigin="anonymous"
-        async>
-    </script>
-</div>
-<script>
-    
-    function getCurrentTheme() {
-        
-        let storedTheme = localStorage.getItem('pref-theme');
-        if (storedTheme) {
-            return storedTheme;
-        }
-        
-        
-        if (document.body.classList.contains('dark')) {
-            return 'dark';
-        }
-        
-        
-        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            return 'dark';
-        }
-        
-        return 'light';
-    }
-    
-    
-    function setGiscusTheme() {
-        let currentTheme = getCurrentTheme();
-        let giscusTheme = currentTheme === 'dark' ? 'noborder_dark' : 'noborder_light';
-        
-        
-        let giscusScript = document.querySelector("div.container_disqus > script");
-        if (giscusScript) {
-            giscusScript.setAttribute('data-theme', giscusTheme);
-        }
-        
-        return giscusTheme;
-    }
-    
-    
-    setGiscusTheme();
-    
-    
-    document.addEventListener('DOMContentLoaded', function() {
-        let themeToggle = document.querySelector('#theme-toggle');
-        if (themeToggle) {
-            themeToggle.addEventListener('click', () => {
-                setTimeout(() => {
-                    let newTheme = getCurrentTheme();
-                    let newGiscusTheme = newTheme === 'dark' ? 'noborder_dark' : 'noborder_light';
-                    
-                    let giscusFrame = document.querySelector('iframe.giscus-frame');
-                    if (giscusFrame) {
-                        giscusFrame.contentWindow.postMessage({
-                            giscus: {
-                                setConfig: {
-                                    theme: newGiscusTheme
-                                }
-                            }
-                        }, 'https://giscus.app');
-                    }
-                }, 100);
-            });
-        }
-    });
-</script>
-
 </article>
     </main>
     

@@ -2,44 +2,44 @@
   background-color: unset;
 }
 
-/* 포스트 제목 크기 조정 */
+/* 포스트 제목 크기 조정 - 비율 기반 */
 .post-title {
-  font-size: 1.7rem !important;
+  font-size: 150% !important;
 }
 
 /* 본문 일반 텍스트만 조정 - 코드와 LaTeX는 제외 */
 .post-content > p:not(.katex-display) {
-  font-size: 1.05rem !important;
+  font-size: 95% !important;
   line-height: 1.6 !important;
 }
 
 /* 본문 리스트 항목 조정 */
 .post-content > ul > li,
 .post-content > ol > li {
-  font-size: 1.05rem !important;
+  font-size: 95% !important;
   line-height: 1.6 !important;
 }
 
-/* 본문 헤딩 크기 조정 */
+/* 본문 헤딩 크기 조정 - 비율 기반 */
 .post-content > h1 {
-  font-size: 1.5rem !important;
+  font-size: 125% !important;
 }
 
-.post-content > h1 {
-  font-size: 1.3rem !important;
+.post-content > h2 {
+  font-size: 115% !important;
 }
 
 .post-content > h3 {
-  font-size: 1.1rem !important;
+  font-size: 105% !important;
 }
 
 /* 인용문 크기 조정 */
 .post-content > blockquote {
-  font-size: 1.05rem !important;
+  font-size: 95% !important;
   line-height: 1.6 !important;
 }
 
 .post-content > blockquote p {
-  font-size: 1.05rem !important;
+  font-size: 95% !important;
   line-height: 1.6 !important;
 }

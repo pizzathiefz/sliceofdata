@@ -10,6 +10,7 @@ ShowWordCount: false
 ShowCodeCopyButtons: false
 disableAnchoredHeadings: true
 showtoc: false
+comments: false
 ---
 {{< figure src="/about/pic.gif"  alt="annoying dog gif from undertale" width="370">}}
 
