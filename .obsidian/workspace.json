@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/posts/2024-2025/index.en.md",
+                "file": "content/posts/2024-2025/index.ko.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "index.en"
+              "title": "index.ko"
             }
           }
         ]
@@ -172,21 +172,22 @@
   },
   "active": "9f87151b5923b548",
   "lastOpenFiles": [
+    "public/assets/css/stylesheet.3160a7e16e24c33289e8c6c8d6bb99d7488f11db544edcbf9350c86576284126.css",
+    "public/assets/css/stylesheet.c5742e01ab544d6cf551574eca866c41cd3255b72f334ff6126e3d8f20af6288.css",
+    "public/assets/css/stylesheet.b2fa4e60e00fba32cae9c925485c1748d701e168d36e0ba6f519c7c20db932c5.css",
+    "public/assets/css/stylesheet.d21eda3bcf7758a9a00a8e08c98f344eadffc20122c9295175f86a4a495e80b9.css",
+    "public/assets/css/stylesheet.9baacd9c06ab89afdda3869d07cb94810decc9d01b394c009224809cfb8d92bb.css",
+    "public/assets/css/stylesheet.108c6ac027bf9bbd9e833b35f73500078d65fa9cfea35101c0655efa18136e27.css",
+    "public/assets/css/stylesheet.c6bb537c75a03d035f89343a1be2509c2c85bad4602986905bea96f09e934087.css",
+    "public/assets/css/stylesheet.ae72c06b7f4f7a110c3692535043794ecf4415ff1a6e6ab561cdcf8b1996ea75.css",
+    "public/assets/css/stylesheet.72f4cfb32abe45184ee9212dd248969b1bf87b1459080dbcbeda0c2902e37034.css",
+    "public/assets/css/stylesheet.a477610b5e17586683ae05f5d8e7b782909bb9f8257299296836292d45b777fd.css",
+    "public/assets/css/stylesheet.a9bcd213dccfd6614db85c4deaa8e52ad97373d15a13129852dbdc1a2382f62e.css",
+    "content/posts/2024-2025/index.en.md",
     "templates/post.md",
     "templates/nottranslated.md",
     "templates/post-template.md",
     "content/posts/2024-2025/index.ko.md",
-    "content/posts/2024-2025/index.en.md",
-    "layouts/partials/comments.html",
-    "public/assets/css/stylesheet.a904e28acb6af6f80b35102f4f882227dad3ca52e093913890298170c4d707df.css",
-    "public/assets/css/stylesheet.6cbd31be5c36f767ba63240a74e49576a9502a94b016e1160dee42d38ff5ab4a.css",
-    "public/assets/css/stylesheet.5fb579f45d6b1abc8ce41cb5f2a7763a3037ca9e4ab563213ed363dc89e13e0a.css",
-    "public/assets/css/stylesheet.3401c45271b51d0a6e7e7187f17ee6921af9a119c2a392bf23023114c9ce07b7.css",
-    "public/assets/css/stylesheet.7bafb980cfcabc9e76fcba479f4d8c265e00b1100749fc851fdbfec0a22c51a8.css",
-    "public/assets/css/stylesheet.a34e9c133bf1d298d5e69cc53ed0c659d0411d2ff9f580a86ac7458f5a081929.css",
-    "public/assets/css/stylesheet.cb3dd381321b15df40fa4c3687c699234f324ed7da75f2ea53c6674e17c87ddb.css",
-    "public/assets/css/stylesheet.b9c2285ade8b80d892843189195e5994191ad2847ccbd479beaa586c580cd3da.css",
-    "public/assets/css/stylesheet.ea8335707d4e291f847c6490ab97eaf78ec06137424717480474aeabde982890.css",
     "content/about/index.ko.md",
     "content/archives/index.ko.md",
     "templates/image.md",

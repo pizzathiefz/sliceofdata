@@ -1,10 +1,10 @@
 ---
-title: "\b산은 산이 있는 곳에 있다"
+title: 산은 산이 있는 곳에 있다
 date: 2024-12-25T11:50:17+09:00
 draft: false
 author: pizzathief
 description:
-summary: "\b연말 회고인지 새해 다짐인지 뭔지"
+summary: 연말 회고인지 새해 다짐인지 뭔지
 keywords:
 tags:
 categories:
@@ -27,7 +27,7 @@ searchHidden: false
 robotsNoIndex: true
 comments: true
 weight: 10
-math: false
+math: true
 ---
 시드 마이어의 문명 시리즈는 내가 살면서 가장 많은 시간을 쏟은 게임 중 하나다. 10년 전쯤 대학 합격 발표가 나던 순간에도 문명을 하고 있었고(아버지가 방문을 두드리고 나서야 결과 나온 줄 알았다) 5년 전쯤 대학원에 다닐 때도 매일 새벽 4시까지 문명을 하고 남은 시간에 논문을 썼다(룸메를 깨우지 않으려고 이불을 뒤집어쓰고 아이패드로 했다). 그런 만큼 몇 년 전 시드 마이어가 자서전을 냈을 때 사서 읽어보지 않을 도리가 없었다. 그 책에 이런 구절이 나온다.
 

@@ -1,140 +1,45 @@
-/* 커스텀 CSS - 폰트 크기 및 레이아웃 조정 */
-
-/* 포스트 본문 폰트 크기 줄이기 */
-.post-content {
-    font-size: 1.15rem;  /* 기본값보다 10% 작게 */
-    line-height: 1.65;   /* 줄간격 조정 */
+.chroma {
+  background-color: unset;
 }
 
-/* 포스트 제목 폰트 크기 줄이기 */
+/* 포스트 제목 크기 조정 */
 .post-title {
-    font-size: 1.5rem;  /* 기본값보다 작게 */
+  font-size: 1.8rem !important;
 }
 
-/* 목록 페이지의 포스트 제목 크기 */
-.entry-header h2 {
-    font-size: 1.4rem;
+/* 본문 일반 텍스트만 조정 - 코드와 LaTeX는 제외 */
+.post-content > p:not(.katex-display) {
+  font-size: 1.14rem !important;
+  line-height: 1.6 !important;
 }
 
-/* 본문 내 헤딩 크기 조정 */
-.post-content h1 {
-    font-size: 1.5rem;
+/* 본문 리스트 항목 조정 */
+.post-content > ul > li,
+.post-content > ol > li {
+  font-size: 0.95rem !important;
+  line-height: 1.6 !important;
 }
 
-.post-content h2 {
-    font-size: 1.35rem;
+/* 본문 헤딩 크기 조정 */
+.post-content > h1 {
+  font-size: 1.5rem !important;
 }
 
-.post-content h3 {
-    font-size: 1.25rem;
+.post-content > h1 {
+  font-size: 1.3rem !important;
 }
 
-/* 코드 블록 폰트 크기 */
-.post-content pre {
-    font-size: 0.85rem;
+.post-content > h3 {
+  font-size: 1.1rem !important;
 }
 
-/* 목차 폰트 크기 */
-.toc {
-    font-size: 0.85rem;
+/* 인용문 크기 조정 */
+.post-content > blockquote {
+  font-size: 1.14rem !important;
+  line-height: 1.6 !important;
 }
 
-/* 텍스트 가운데 정렬 클래스 */
-.center {
-    text-align: center;
-}
-
-.center-block {
-    display: block;
-    text-align: center;
-    margin: 0 auto;
-}
-
-/* 이미지 가운데 정렬 */
-.center-image {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-}
-
-.figure-center {
-    text-align: center;
-}
-
-.figure-center img {
-    display: inline-block;
-    margin: 0 auto;
-}기 및 레이아웃 조정 */
-
-/* 포스트 본문 폰트 크기 줄이기 - 더 구체적인 선택자 */
-.main .post-content,
-.main .post-content p,
-article .post-content,
-article .post-content p {
-    font-size: 1.2rem !important;  /* 강제 적용 */
-    line-height: 1.6;
-}
-
-/* 포스트 제목 폰트 크기 줄이기 */
-.post-title,
-.entry-header h1,
-article .post-title {
-    font-size: 1.9rem !important;
-}
-
-/* 목록 페이지의 포스트 제목 크기 */
-.entry-header h2 {
-    font-size: 1.4rem;
-}
-
-/* 본문 내 헤딩 크기 조정 */
-.post-content h1 {
-    font-size: 1.6rem;
-}
-
-.post-content h2 {
-    font-size: 1.4rem;
-}
-
-.post-content h3 {
-    font-size: 1.2rem;
-}
-
-/* 코드 블록 폰트 크기 */
-.post-content pre {
-    font-size: 0.85rem;
-}
-
-/* 목차 폰트 크기 */
-.toc {
-    font-size: 0.85rem;
-}
-
-/* 텍스트 가운데 정렬 클래스 */
-.center {
-    text-align: center;
-}
-
-.center-block {
-    display: block;
-    text-align: center;
-    margin: 0 auto;
-}
-
-/* 이미지 가운데 정렬 */
-.center-image {
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-    text-align: center;
-}
-
-.figure-center {
-    text-align: center;
-}
-
-.figure-center img {
-    display: inline-block;
-    margin: 0 auto;
+.post-content > blockquote p {
+  font-size: 1.14rem !important;
+  line-height: 1.6 !important;
 }

@@ -1,10 +1,10 @@
 ---
-title: "\b산은 산이 있는 곳에 있다"
+title: 산은 산이 있는 곳에 있다
 date: 2024-12-25T11:50:17+09:00
 draft: false
 author: pizzathief
 description:
-summary: "\b연말 회고인지 새해 다짐인지 뭔지"
+summary: 연말 회고인지 새해 다짐인지 뭔지
 keywords:
 tags:
 categories:
