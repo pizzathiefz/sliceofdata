@@ -25,7 +25,12 @@
       <link>http://localhost:1313/about/</link>
       <pubDate>Thu, 09 Jan 2025 00:00:00 +0900</pubDate>
       <guid>http://localhost:1313/about/</guid>
-      <description>&lt;p&gt;👋 안녕하세요. &lt;strong&gt;손영신&lt;/strong&gt;입니다.&lt;/p&gt;
+      <description>&lt;figure&gt;
+    &lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/about/pic.gif&#34;
+         alt=&#34;annoying dog gif from undertale&#34; width=&#34;370&#34;/&gt; 
+&lt;/figure&gt;
+
+&lt;p&gt;👋 안녕하세요. &lt;strong&gt;손영신&lt;/strong&gt;입니다.&lt;/p&gt;
 &lt;p&gt;머신러닝 엔지니어로 일하고 있고 게임과 음악 스트리밍 앱을 만드는 회사에 다녔습니다. 사람들을 즐겁게 하는 일을 하면서 그 과정에서 저도 즐거우려고 노력합니다. 시간이 나면 책을 읽고 영화를 보는 나쁜 습관이 있으며 간헐적으로 게임과 요가를 합니다. 싫어하는 것은 모든 종류의 외출, 대부분의 종류의 불확실성, 그리고 귀가했을 때 꼬리를 흔드는 개가 없는 삶입니다.&lt;/p&gt;
 &lt;p&gt;온라인에서 쓰는 이름은 다음과 같은 주석이 달린 소설의 인물에게서 따왔습니다.&lt;/p&gt;
 &lt;blockquote&gt;

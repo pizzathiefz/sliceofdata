@@ -11,21 +11,26 @@
     </image>
     <generator>Hugo -- 0.150.0</generator>
     <language>en-US</language>
-    <lastBuildDate>Thu, 09 Jan 2025 10:00:00 +0900</lastBuildDate>
+    <lastBuildDate>Wed, 10 Sep 2025 11:50:17 +0900</lastBuildDate>
     <atom:link href="http://localhost:1313/en/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Sample Post</title>
+      <title>Post Title Here</title>
       <link>http://localhost:1313/en/posts/sample-multilingual-post/</link>
-      <pubDate>Thu, 09 Jan 2025 10:00:00 +0900</pubDate>
+      <pubDate>Wed, 10 Sep 2025 11:50:17 +0900</pubDate>
       <guid>http://localhost:1313/en/posts/sample-multilingual-post/</guid>
-      <description>&lt;p&gt;English&lt;/p&gt;</description>
+      <description>Brief description of the post</description>
     </item>
     <item>
       <title>About</title>
       <link>http://localhost:1313/en/about/</link>
       <pubDate>Thu, 09 Jan 2025 00:00:00 +0900</pubDate>
       <guid>http://localhost:1313/en/about/</guid>
-      <description>&lt;p&gt;👋 &lt;strong&gt;Youngshin Son&lt;/strong&gt;&lt;/p&gt;
+      <description>&lt;figure&gt;
+    &lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/about/pic.gif&#34;
+         alt=&#34;annoying dog gif from undertale&#34; width=&#34;370&#34;/&gt; 
+&lt;/figure&gt;
+
+&lt;p&gt;👋 &lt;strong&gt;Youngshin Son&lt;/strong&gt;&lt;/p&gt;
 &lt;p&gt;I’m a machine learning engineer with a background in the game and music streaming industry. I like building things that entertain people &amp;ndash; and I always try to enjoy myself in the process, too. Besides work, I usually end up reading books or watching movies, and I occasionally play games and do a bit of yoga. I just can&amp;rsquo;t deal with any kind of going out, facing uncertainty, or coming home without a dog wagging its tail.&lt;/p&gt;</description>
     </item>
   </channel>

@@ -11,6 +11,8 @@ ShowCodeCopyButtons: false
 disableAnchoredHeadings: true
 showtoc: false
 ---
+{{< figure src="/about/pic.gif"  alt="annoying dog gif from undertale" width="370">}}
+
 👋 **Youngshin Son**
 
 I’m a machine learning engineer with a background in the game and music streaming industry. I like building things that entertain people -- and I always try to enjoy myself in the process, too. Besides work, I usually end up reading books or watching movies, and I occasionally play games and do a bit of yoga. I just can't deal with any kind of going out, facing uncertainty, or coming home without a dog wagging its tail.

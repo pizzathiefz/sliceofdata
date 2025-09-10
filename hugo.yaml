@@ -24,7 +24,7 @@ languages:
       main:
         - identifier: posts
           name: "posts"
-          url: /posts/
+          url: /archives/
           weight: 10
         - identifier: search
           name: "search"
@@ -45,7 +45,7 @@ languages:
     params:
       homeInfoParams:
         Title: "🪄"
-        Content: "Half ML, half everything else. Served one slice at a time."
+        Content: "Half data, half everything else. Served one slice at a time."
   en:
     languageCode: en-US
     languageName: "English"
@@ -55,7 +55,7 @@ languages:
       main:
         - identifier: posts
           name: "posts"
-          url: /posts/
+          url: /archives/
           weight: 10
         - identifier: search
           name: "search"
@@ -76,7 +76,7 @@ languages:
     params:
       homeInfoParams:
         Title: "🪄"
-        Content: "Half ML, half everything else. Served one slice at a time."
+        Content: "Half data, half everything else. Served one slice at a time."
 
 pagination:
   pagerSize: 5
@@ -142,10 +142,11 @@ params:
     hiddenInList: true # hide on list pages and home
     hiddenInSingle: true # hide on single page
 
-  # editPost:
-  #   URL: "https://github.com/<path_to_repo>/content"
-  #   Text: "Suggest Changes" # edit text
-  #   appendFilePath: true # to append file path to Edit link
+  editPost:
+    URL: "https://github.com/<path_to_repo>/content"
+    Text: "Suggest Changes" # edit text
+    appendFilePath: true # to append file path to Edit link
+    Icon: edit
 
   # for search
   # https://fusejs.io/api/options.html
