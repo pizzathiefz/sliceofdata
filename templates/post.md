@@ -32,7 +32,7 @@ UseHugoToc: true
 disableShare: false
 searchHidden: false
 robotsNoIndex: false
-comments: true
+comments: false
 weight: 10
 math: true
 ---

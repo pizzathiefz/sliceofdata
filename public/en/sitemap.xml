@@ -2,78 +2,17 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/en/posts/sample-multilingual-post/</loc>
-    <lastmod>2025-09-10T11:50:17+09:00</lastmod>
+    <loc>http://localhost:1313/en/posts/2024-2025/</loc>
+    <lastmod>2024-12-25T11:50:17+09:00</lastmod>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/posts/sample-multilingual-post/"
+                href="http://localhost:1313/posts/2024-2025/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/posts/sample-multilingual-post/"
-                />
-  </url><url>
-    <loc>http://localhost:1313/en/categories/</loc>
-    <lastmod>2025-09-10T11:50:17+09:00</lastmod>
-    <xhtml:link
-                rel="alternate"
-                hreflang="ko-KR"
-                href="http://localhost:1313/categories/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en-US"
-                href="http://localhost:1313/en/categories/"
-                />
-  </url><url>
-    <loc>http://localhost:1313/en/categories/category1/</loc>
-    <lastmod>2025-09-10T11:50:17+09:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/en/posts/</loc>
-    <lastmod>2025-09-10T11:50:17+09:00</lastmod>
-    <xhtml:link
-                rel="alternate"
-                hreflang="ko-KR"
-                href="http://localhost:1313/posts/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en-US"
-                href="http://localhost:1313/en/posts/"
-                />
-  </url><url>
-    <loc>http://localhost:1313/en/</loc>
-    <lastmod>2025-09-10T11:50:17+09:00</lastmod>
-    <xhtml:link
-                rel="alternate"
-                hreflang="ko-KR"
-                href="http://localhost:1313/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en-US"
-                href="http://localhost:1313/en/"
-                />
-  </url><url>
-    <loc>http://localhost:1313/en/tags/tag1/</loc>
-    <lastmod>2025-09-10T11:50:17+09:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/en/tags/tag2/</loc>
-    <lastmod>2025-09-10T11:50:17+09:00</lastmod>
-  </url><url>
-    <loc>http://localhost:1313/en/tags/</loc>
-    <lastmod>2025-09-10T11:50:17+09:00</lastmod>
-    <xhtml:link
-                rel="alternate"
-                hreflang="ko-KR"
-                href="http://localhost:1313/tags/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en-US"
-                href="http://localhost:1313/en/tags/"
+                href="http://localhost:1313/en/posts/2024-2025/"
                 />
   </url><url>
     <loc>http://localhost:1313/en/about/</loc>
@@ -87,6 +26,44 @@
                 rel="alternate"
                 hreflang="en-US"
                 href="http://localhost:1313/en/about/"
+                />
+  </url><url>
+    <loc>http://localhost:1313/en/</loc>
+    <lastmod>2025-01-09T00:00:00+09:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ko-KR"
+                href="http://localhost:1313/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-US"
+                href="http://localhost:1313/en/"
+                />
+  </url><url>
+    <loc>http://localhost:1313/en/posts/</loc>
+    <lastmod>2024-12-25T11:50:17+09:00</lastmod>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ko-KR"
+                href="http://localhost:1313/posts/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-US"
+                href="http://localhost:1313/en/posts/"
+                />
+  </url><url>
+    <loc>http://localhost:1313/en/categories/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ko-KR"
+                href="http://localhost:1313/categories/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-US"
+                href="http://localhost:1313/en/categories/"
                 />
   </url><url>
     <loc>http://localhost:1313/en/archives/</loc>
@@ -111,6 +88,18 @@
                 rel="alternate"
                 hreflang="en-US"
                 href="http://localhost:1313/en/search/"
+                />
+  </url><url>
+    <loc>http://localhost:1313/en/tags/</loc>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ko-KR"
+                href="http://localhost:1313/tags/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-US"
+                href="http://localhost:1313/en/tags/"
                 />
   </url>
 </urlset>

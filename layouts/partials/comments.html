@@ -1,0 +1,82 @@
+{{- if .Site.Params.giscus.repo }}
+<div class="container_disqus">
+    <script src="https://giscus.app/client.js"
+        data-repo="pizzathiefz/sliceofdata"
+        data-repo-id="R_kgDOPsr6oQ"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOPsr6oc4CvOfW"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme=""
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+    </script>
+</div>
+<script>
+    // 현재 테마 정확히 감지
+    function getCurrentTheme() {
+        // 1. localStorage에서 확인
+        let storedTheme = localStorage.getItem('pref-theme');
+        if (storedTheme) {
+            return storedTheme;
+        }
+        
+        // 2. body 클래스에서 확인
+        if (document.body.classList.contains('dark')) {
+            return 'dark';
+        }
+        
+        // 3. 시스템 설정에서 확인
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+        
+        return 'light';
+    }
+    
+    // Giscus 테마 설정
+    function setGiscusTheme() {
+        let currentTheme = getCurrentTheme();
+        let giscusTheme = currentTheme === 'dark' ? 'noborder_dark' : 'noborder_light';
+        
+        // Giscus 스크립트에 테마 적용
+        let giscusScript = document.querySelector("div.container_disqus > script");
+        if (giscusScript) {
+            giscusScript.setAttribute('data-theme', giscusTheme);
+        }
+        
+        return giscusTheme;
+    }
+    
+    // 페이지 로드 시 즉시 테마 설정
+    setGiscusTheme();
+    
+    // DOM 로드 완료 후 테마 토글 이벤트 등록
+    document.addEventListener('DOMContentLoaded', function() {
+        let themeToggle = document.querySelector('#theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                setTimeout(() => {
+                    let newTheme = getCurrentTheme();
+                    let newGiscusTheme = newTheme === 'dark' ? 'noborder_dark' : 'noborder_light';
+                    
+                    let giscusFrame = document.querySelector('iframe.giscus-frame');
+                    if (giscusFrame) {
+                        giscusFrame.contentWindow.postMessage({
+                            giscus: {
+                                setConfig: {
+                                    theme: newGiscusTheme
+                                }
+                            }
+                        }, 'https://giscus.app');
+                    }
+                }, 100);
+            });
+        }
+    });
+</script>
+{{- end }}
