@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/about/index.ko.md",
+                "file": "content/about/index.en.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "index.ko"
+              "title": "index.en"
             }
           }
         ]
@@ -94,7 +94,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "content/about/index.ko.md",
+                "file": "content/about/index.en.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +104,7 @@
                 "unlinkedCollapsed": true
               },
               "icon": "links-coming-in",
-              "title": "index.ko 의 백링크"
+              "title": "index.en 의 백링크"
             }
           },
           {
@@ -113,12 +113,12 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "content/about/index.ko.md",
+                "file": "content/about/index.en.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
               "icon": "links-going-out",
-              "title": "index.ko 의 나가는 링크"
+              "title": "index.en 의 나가는 링크"
             }
           },
           {
@@ -142,13 +142,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "content/about/index.ko.md",
+                "file": "content/about/index.en.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "index.ko 의 개요"
+              "title": "index.en 의 개요"
             }
           }
         ]
@@ -172,27 +172,27 @@
   },
   "active": "9f87151b5923b548",
   "lastOpenFiles": [
-    "content/about/index.en.md",
-    "templates/image.md",
-    "templates/post.md",
-    "content/about/index.ko.md",
     "content/about/pic.gif",
-    "content/archives/index.en.md",
-    "content/archives/index.ko.md",
+    "content/about/index.ko.md",
+    "templates/post.md",
+    "content/posts/sample-multilingual-post/index.ko.md",
     "content/posts/sample-multilingual-post/index.en.md",
+    "templates/image.md",
+    "templates",
     "public/en/tags/tag2/page/1/index.html",
     "public/en/tags/tag2/page/1",
-    "public/en/tags/tag2/index.html",
     "public/en/tags/tag2/page",
     "public/en/tags/tag2/index.xml",
+    "public/en/tags/tag2/index.html",
     "public/en/tags/tag2",
     "public/en/tags/tag1/page/1/index.html",
     "public/en/tags/tag1/page/1",
-    "public/en/tags/tag1/index.html",
     "public/en/tags/tag1/page",
-    "content/about/pic 1.gif",
-    "public/about/pic 1.gif",
     "public/about/pic.gif",
-    "content/posts/sample-multilingual-post/index.ko.md"
+    "public/about/pic 1.gif",
+    "content/about/index.en.md",
+    "content/archives/index.en.md",
+    "content/archives/index.ko.md",
+    "content/about/pic 1.gif"
   ]
 }

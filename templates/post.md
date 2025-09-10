@@ -33,7 +33,7 @@ disableShare: false
 searchHidden: false
 robotsNoIndex: false
 comments: true
-weight: 1
+weight: 10
 math: true
 ---
 
