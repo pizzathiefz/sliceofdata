@@ -21,7 +21,7 @@ hidemeta: false
 hideSummary: false
 showtoc: false
 tocopen: false
-UseHugoToc: true
+UseHugoToc: false
 disableShare: true
 searchHidden: false
 robotsNoIndex: true
