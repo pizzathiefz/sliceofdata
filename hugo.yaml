@@ -21,6 +21,11 @@ markup:
 defaultContentLanguage: ko
 defaultContentLanguageInSubdir: false
 
+sitemap:
+  changefreq: daily
+  filename: 'sitemap.xml'
+  priority: 0.5
+
 languages:
   ko:
     languageCode: ko-KR
@@ -151,7 +156,7 @@ params:
     hiddenInSingle: true # hide on single page
 
   editPost:
-    URL: "https://github.com/pizzatheifz/sliceofdata/blob/main/content"
+    URL: "https://github.com/pizzathiefz/sliceofdata/blob/main/content"
     Text: "Suggest Changes" # edit text
     appendFilePath: true # to append file path to Edit link
 

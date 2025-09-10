@@ -4,6 +4,8 @@
   <url>
     <loc>http://localhost:1313/en/posts/2024-2025/</loc>
     <lastmod>2024-12-25T11:50:17+09:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
@@ -17,6 +19,8 @@
   </url><url>
     <loc>http://localhost:1313/en/about/</loc>
     <lastmod>2025-01-09T00:00:00+09:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
@@ -30,6 +34,8 @@
   </url><url>
     <loc>http://localhost:1313/en/</loc>
     <lastmod>2025-01-09T00:00:00+09:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
@@ -43,6 +49,8 @@
   </url><url>
     <loc>http://localhost:1313/en/posts/</loc>
     <lastmod>2024-12-25T11:50:17+09:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
@@ -55,6 +63,8 @@
                 />
   </url><url>
     <loc>http://localhost:1313/en/categories/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
@@ -67,6 +77,8 @@
                 />
   </url><url>
     <loc>http://localhost:1313/en/archives/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
@@ -79,6 +91,8 @@
                 />
   </url><url>
     <loc>http://localhost:1313/en/search/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
@@ -91,6 +105,8 @@
                 />
   </url><url>
     <loc>http://localhost:1313/en/tags/</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
