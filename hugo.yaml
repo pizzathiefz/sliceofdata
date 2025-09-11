@@ -17,6 +17,9 @@ markup:
     guessSyntax: true
     lineNos: true
     style: monoaki
+  goldmark:
+    renderer:
+      unsafe: true # to allow html in markdown files
 
 defaultContentLanguage: ko
 defaultContentLanguageInSubdir: false
@@ -50,10 +53,14 @@ languages:
           name: "about"
           url: /about/
           weight: 25
+        - identifier: subscribe
+          name: "subscribe"
+          url: /subscribe
+          weight: 30
         - identifier: notes
           name: "notes"
           url: https://pizzathief.pages.dev/
-          weight: 30
+          weight: 40
     params:
       homeInfoParams:
         Title: "🪄"
@@ -81,10 +88,14 @@ languages:
           name: "about"
           url: /about/
           weight: 25
+        - identifier: subscribe
+          name: "subscribe"
+          url: /subscribe
+          weight: 30
         - identifier: notes
           name: "notes"
           url: https://pizzathief.pages.dev/
-          weight: 30
+          weight: 40
     params:
       homeInfoParams:
         Title: "🪄"
@@ -94,12 +105,10 @@ pagination:
   pagerSize: 5
 
 
-
 params:
   env: production # to enable google analytics, opengraph, twitter-cards and schema.
   title: post title
   description: "ExampleSite description"
-  keywords: [Blog, Portfolio, PaperMod]
   author: pizzathief
   images: ["<link or path of image for opengraph, twitter-cards>"]
   DateFormat: "2006-01-02"

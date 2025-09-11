@@ -36,5 +36,20 @@
 &lt;blockquote&gt;
 &lt;p&gt;‘나는 어느 도둑에게 복숭아를 훔쳐 달라고 했네’로 시작하는 윌리엄 블레이크의 시와 이름(Peachthief)을 연결해서 한 말이다.  &amp;ndash; &lt;em&gt;제임스 팁트리 주니어, 『비애곡 Slow Music』 (1980)&lt;/em&gt;&lt;/p&gt;</description>
     </item>
+    <item>
+      <title>Subscribe</title>
+      <link>http://localhost:1313/subscribe/</link>
+      <pubDate>Thu, 09 Jan 2025 00:00:00 +0900</pubDate>
+      <guid>http://localhost:1313/subscribe/</guid>
+      <description>&lt;style&gt;
+  .small {
+    font-size: 15px;
+  }
+&lt;/style&gt;
+&lt;center&gt;
+&lt;p class=&#34;small&#34;&gt;📧 새로운 글이 올라오면 메일로 알려드릴게요!&lt;/p&gt;
+&lt;/center&gt;
+&lt;iframe width=&#34;540&#34; height=&#34;505&#34; src=&#34;https://4dcddd6a.sibforms.com/serve/MUIFAEQbJerEMhCjvHE5rg26lnikgdK3iGYLkAikAeT3EP1My0MGIz_uNyJeVcE0jQkeg8koXOFY2L6XMzQp5DWRQee2XD7pJJD6AVS35lZ7nJ1zwKtq5ops84nziA1y3bg1nc5cOmnM62W2XjH7aLuXirPYo8FPlCoeczgxE80cpZo5K68GlcR-f919C0aIvWSX_lgSivxPlDZz&#34; frameborder=&#34;0&#34; scrolling=&#34;auto&#34; allowfullscreen style=&#34;display: block;margin-left: auto;margin-right: auto;max-width: 100%;&#34;&gt;&lt;/iframe&gt;</description>
+    </item>
   </channel>
 </rss>

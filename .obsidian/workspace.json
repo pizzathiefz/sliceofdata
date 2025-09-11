@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/posts/2024-2025/index.ko.md",
+                "file": "content/about/index.ko.md",
                 "mode": "source",
                 "source": false
               },
@@ -78,7 +78,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 200
+    "width": 290.5
   },
   "right": {
     "id": "f7d84570f69b1393",
@@ -172,6 +172,11 @@
   },
   "active": "9f87151b5923b548",
   "lastOpenFiles": [
+    "content/about/index.en.md",
+    "content/posts/2024-2025/index.ko.md",
+    "content/archives/index.en.md",
+    "content/archives/index.ko.md",
+    "content/about/index.ko.md",
     "templates/post-template.md",
     "public/assets/css/stylesheet.a2d0cbfc21fa01e4504ba90ba7e42bcd044de9f2c86d62f95bfaebd03fe8dd6c.css",
     "public/assets/css/stylesheet.b406b3df79b7ba5ed9f88db9858fdbb0e383d524061a0a51552a315faa4dd496.css",
@@ -186,18 +191,13 @@
     "content/posts/2024-2025/index.en.md",
     "templates/post.md",
     "templates/nottranslated.md",
-    "content/posts/2024-2025/index.ko.md",
-    "content/about/index.ko.md",
-    "content/archives/index.ko.md",
     "templates/image.md",
     "public/posts/2024-2025/new-year-resolution.png",
     "content/posts/2024-2025/new-year-resolution.png",
     "content/posts/2024-2025/2024-12-30-2024-2025-1.png",
-    "content/about/index.en.md",
     "content/about/pic.gif",
     "public/about/pic.gif",
     "public/about/pic 1.gif",
-    "content/archives/index.en.md",
     "content/about/pic 1.gif"
   ]
 }

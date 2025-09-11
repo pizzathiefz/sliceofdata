@@ -6,16 +6,6 @@
     <lastmod>2024-12-25T11:50:17+09:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
-    <xhtml:link
-                rel="alternate"
-                hreflang="en-US"
-                href="http://localhost:1313/en/posts/2024-2025/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="ko-KR"
-                href="http://localhost:1313/posts/2024-2025/"
-                />
   </url><url>
     <loc>http://localhost:1313/about/</loc>
     <lastmod>2025-01-09T00:00:00+09:00</lastmod>
@@ -47,20 +37,25 @@
                 href="http://localhost:1313/"
                 />
   </url><url>
-    <loc>http://localhost:1313/posts/</loc>
-    <lastmod>2024-12-25T11:50:17+09:00</lastmod>
+    <loc>http://localhost:1313/subscribe/</loc>
+    <lastmod>2025-01-09T00:00:00+09:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/posts/"
+                href="http://localhost:1313/en/subscribe/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/posts/"
+                href="http://localhost:1313/subscribe/"
                 />
+  </url><url>
+    <loc>http://localhost:1313/posts/</loc>
+    <lastmod>2024-12-25T11:50:17+09:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
   </url><url>
     <loc>http://localhost:1313/categories/</loc>
     <changefreq>daily</changefreq>
