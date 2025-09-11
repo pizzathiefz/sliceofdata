@@ -14,6 +14,14 @@ comments: false
 searchHidden: true
 robotsNoIndex: true
 ---
+
+<style>
+.post-content > p:not(.katex-display) { font-size: 85% !important; line-height: 1.5 !important; }
+.post-content > ul > li, .post-content > ol > li { font-size: 85% !important; line-height: 1.5 !important; }
+.post-content > blockquote { font-size: 93% !important; line-height: 1.5 !important; }
+.post-content > blockquote p { font-size: 93% !important; line-height: 1.5 !important; }
+</style>
+
 {{< figure src="/about/pic.gif"  alt="annoying dog gif from undertale" width="370">}}
 
 👋 안녕하세요. **손영신**입니다.

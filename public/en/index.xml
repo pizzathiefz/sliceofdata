@@ -18,7 +18,13 @@
       <link>http://localhost:1313/en/about/</link>
       <pubDate>Thu, 09 Jan 2025 00:00:00 +0900</pubDate>
       <guid>http://localhost:1313/en/about/</guid>
-      <description>&lt;figure&gt;
+      <description>&lt;style&gt;
+.post-content &gt; p:not(.katex-display) { font-size: 85% !important; line-height: 1.5 !important; }
+.post-content &gt; ul &gt; li, .post-content &gt; ol &gt; li { font-size: 85% !important; line-height: 1.5 !important; }
+.post-content &gt; blockquote { font-size: 93% !important; line-height: 1.5 !important; }
+.post-content &gt; blockquote p { font-size: 93% !important; line-height: 1.5 !important; }
+&lt;/style&gt;
+&lt;figure&gt;
     &lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/about/pic.gif&#34;
          alt=&#34;annoying dog gif from undertale&#34; width=&#34;370&#34;/&gt; 
 &lt;/figure&gt;
