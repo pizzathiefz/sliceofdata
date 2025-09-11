@@ -41,10 +41,6 @@ languages:
           name: "posts"
           url: /archives/
           weight: 10
-        - identifier: search
-          name: "search"
-          url: /search/
-          weight: 15
         - identifier: tags
           name: "tags"
           url: /tags/
@@ -76,10 +72,6 @@ languages:
           name: "posts"
           url: /archives/
           weight: 10
-        - identifier: search
-          name: "search"
-          url: /search/
-          weight: 15
         - identifier: tags
           name: "tags"
           url: /tags/
@@ -155,9 +147,9 @@ params:
     - name: github
       url: "https://github.com/pizzathiefz"
 
-  analytics:
-    google:
-      SiteVerificationTag: "XYZabc"
+  # analytics:
+  #   google:
+  #     SiteVerificationTag: "XYZabc"
 
   cover:
     hidden: true # hide everywhere but not in structured data
