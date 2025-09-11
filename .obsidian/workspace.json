@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/about/index.ko.md",
+                "file": "content/posts/vec2vec/index.en.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "index.ko"
+              "title": "index.en"
             }
           }
         ]
@@ -172,32 +172,38 @@
   },
   "active": "9f87151b5923b548",
   "lastOpenFiles": [
-    "content/about/index.en.md",
+    "public/assets/css/stylesheet.55d080ff2849963acf1ed17f4df30a5fb7c31856f1775acd5f9984d4fbe0392c.css",
+    "public/assets/css/stylesheet.be8b2766cf02d5a1e16fae85f50fccd94a6fa632de8e16ef2085cca93ff2f7cd.css",
+    "public/assets/css/stylesheet.fca7ab22af73bec7ff7f86ef58b05b10a2ac595a477ca6e0cc2c240bb54de111.css",
+    "public/assets/css/stylesheet.d031d1ec8d921ae1516f13a7777939b71c98a068f9a6bf40195c353050977534.css",
+    "public/assets/css/stylesheet.f099e2fde40ccbdc2b137ba62345b79ef7b783f8e025a4f74075843bc19ff680.css",
+    "public/assets/css/stylesheet.f2f7d28f17bbefa8e8dab45ffc7328dce9ed5242d309f25d7f9eb14a195df9d8.css",
+    "content/posts/2024-2025/index.en.md",
+    "content/posts/vec2vec/index.en.md",
+    "content/posts/vec2vec/index.ko.md",
+    "public/en/posts/vec2vec/index.html",
+    "public/en/posts/vec2vec",
+    "public/en/categories/data/page/1/index.html",
+    "public/en/categories/data/page/1",
+    "public/en/categories/data/page",
     "content/posts/2024-2025/index.ko.md",
+    "templates/post.md",
+    "content/posts/vec2vec/results.png",
+    "content/posts/vec2vec/vec2vec-architecture.png",
+    "templates/image.md",
+    "public/posts/vec2vec/vec2vec-architecture.png",
+    "public/posts/vec2vec/results.png",
+    "public/posts/vec2vec/prompt.png",
+    "public/posts/vec2vec/platonic-representation-hypothesis.png",
+    "public/posts/vec2vec/inversion.png",
+    "public/posts/vec2vec/embedding-vector.png",
+    "content/posts/vec2vec/inversion.png",
+    "content/posts/vec2vec/prompt.png",
+    "content/about/index.ko.md",
+    "content/about/index.en.md",
     "content/archives/index.en.md",
     "content/archives/index.ko.md",
-    "content/about/index.ko.md",
     "templates/post-template.md",
-    "public/assets/css/stylesheet.a2d0cbfc21fa01e4504ba90ba7e42bcd044de9f2c86d62f95bfaebd03fe8dd6c.css",
-    "public/assets/css/stylesheet.b406b3df79b7ba5ed9f88db9858fdbb0e383d524061a0a51552a315faa4dd496.css",
-    "public/assets/css/stylesheet.229e5edab90852a180d22bd62b44f8d7fa92623e06a4b90b6bec114ba0d01473.css",
-    "public/assets/css/stylesheet.68173131afa55a6df485744d594fdda8b8fa16c74d3627b96ade2e87dec7ad2a.css",
-    "public/assets/css/stylesheet.3160a7e16e24c33289e8c6c8d6bb99d7488f11db544edcbf9350c86576284126.css",
-    "public/assets/css/stylesheet.c5742e01ab544d6cf551574eca866c41cd3255b72f334ff6126e3d8f20af6288.css",
-    "public/assets/css/stylesheet.b2fa4e60e00fba32cae9c925485c1748d701e168d36e0ba6f519c7c20db932c5.css",
-    "public/assets/css/stylesheet.d21eda3bcf7758a9a00a8e08c98f344eadffc20122c9295175f86a4a495e80b9.css",
-    "public/assets/css/stylesheet.9baacd9c06ab89afdda3869d07cb94810decc9d01b394c009224809cfb8d92bb.css",
-    "public/assets/css/stylesheet.108c6ac027bf9bbd9e833b35f73500078d65fa9cfea35101c0655efa18136e27.css",
-    "content/posts/2024-2025/index.en.md",
-    "templates/post.md",
-    "templates/nottranslated.md",
-    "templates/image.md",
-    "public/posts/2024-2025/new-year-resolution.png",
-    "content/posts/2024-2025/new-year-resolution.png",
-    "content/posts/2024-2025/2024-12-30-2024-2025-1.png",
-    "content/about/pic.gif",
-    "public/about/pic.gif",
-    "public/about/pic 1.gif",
-    "content/about/pic 1.gif"
+    "templates/nottranslated.md"
   ]
 }

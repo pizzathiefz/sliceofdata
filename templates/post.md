@@ -18,7 +18,7 @@ categories:
 slug: <% tp.file.folder().split("/").pop() %>
 ShowReadingTime: true
 ShowShareButtons: true
-ShowPostNavLinks: true
+ShowPostNavLinks: false
 ShowBreadCrumbs: false
 ShowCodeCopyButtons: true
 ShowWordCount: false
@@ -32,7 +32,7 @@ UseHugoToc: true
 disableShare: false
 searchHidden: false
 robotsNoIndex: false
-comments: false
+comments: true
 weight: 10
 math: true
 ---

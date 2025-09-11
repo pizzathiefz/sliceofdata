@@ -4,7 +4,7 @@
 
 /* 포스트 제목 크기 조정 - 비율 기반 */
 .post-title {
-  font-size: 150% !important;
+  font-size: 160% !important;
 }
 
 /* 본문 일반 텍스트만 조정 - 코드와 LaTeX는 제외 */
@@ -26,11 +26,11 @@
 }
 
 .post-content > h2 {
-  font-size: 115% !important;
+  font-size: 140% !important;
 }
 
 .post-content > h3 {
-  font-size: 105% !important;
+  font-size: 125% !important;
 }
 
 /* 인용문 크기 조정 */

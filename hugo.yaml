@@ -124,6 +124,7 @@ params:
   showtoc: true
   tocopen: false
   ShareButtons: ["linkedin", "x"]
+  math: true
 
   assets:
     disableHLJS: true # Hugo Chroma를 사용하기 위해 highlight.js 비활성화

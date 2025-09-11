@@ -11,8 +11,15 @@
     </image>
     <generator>Hugo -- 0.150.0</generator>
     <language>en-US</language>
-    <lastBuildDate>Thu, 09 Jan 2025 00:00:00 +0900</lastBuildDate>
+    <lastBuildDate>Mon, 26 May 2025 20:38:11 +0900</lastBuildDate>
     <atom:link href="http://localhost:1313/en/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>vec2vec: Bridging Embeddings from Different Spaces</title>
+      <link>http://localhost:1313/en/posts/vec2vec/</link>
+      <pubDate>Mon, 26 May 2025 20:38:11 +0900</pubDate>
+      <guid>http://localhost:1313/en/posts/vec2vec/</guid>
+      <description>A brief summary of Harnessing the Universal Geometry of Embeddings (2025)</description>
+    </item>
     <item>
       <title>About</title>
       <link>http://localhost:1313/en/about/</link>

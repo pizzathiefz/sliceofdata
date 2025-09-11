@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ko" dir="auto">
+
+<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>vec2vec, 서로 다른 공간에서 온 임베딩을 번역하다 | sliceofdata</title>
+<meta name="keywords" content="vec2vec, embedding, 임베딩">
+<meta name="description" content="Harnessing the Universal Geometry of Embeddings (2025) 를 읽어보았습니다.">
+<meta name="author" content="pizzathief">
+<link rel="canonical" href="http://localhost:1313/posts/vec2vec/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.55d080ff2849963acf1ed17f4df30a5fb7c31856f1775acd5f9984d4fbe0392c.css" integrity="sha256-VdCA/yhJljrPHtF/TfMKX7fDGFbxd1rNX5mE1PvgOSw=" rel="preload stylesheet" as="style">
+<link rel="icon" href="http://localhost:1313/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
+<link rel="apple-touch-icon" href="http://localhost:1313/%3Clink%20/%20abs%20url%3E">
+<link rel="mask-icon" href="http://localhost:1313/%3Clink%20/%20abs%20url%3E">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="ko" href="http://localhost:1313/posts/vec2vec/">
+<link rel="alternate" hreflang="en" href="http://localhost:1313/en/posts/vec2vec/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {
+  delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\(', right: '\\)', display: false},
+    {left: '\\[', right: '\\]', display: true}
+  ],
+  throwOnError: false
+});"></script>
+<meta property="og:url" content="http://localhost:1313/posts/vec2vec/">
+  <meta property="og:site_name" content="sliceofdata">
+  <meta property="og:title" content="vec2vec, 서로 다른 공간에서 온 임베딩을 번역하다">
+  <meta property="og:description" content="Harnessing the Universal Geometry of Embeddings (2025) 를 읽어보았습니다.">
+  <meta property="og:locale" content="ko-KR">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2025-05-26T20:38:11+09:00">
+    <meta property="article:modified_time" content="2025-05-26T20:38:11+09:00">
+    <meta property="article:tag" content="AI-ML">
+      <meta property="og:image" content="http://localhost:1313/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="http://localhost:1313/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name="twitter:title" content="vec2vec, 서로 다른 공간에서 온 임베딩을 번역하다">
+<meta name="twitter:description" content="Harnessing the Universal Geometry of Embeddings (2025) 를 읽어보았습니다.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "http://localhost:1313/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "vec2vec, 서로 다른 공간에서 온 임베딩을 번역하다",
+      "item": "http://localhost:1313/posts/vec2vec/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "vec2vec, 서로 다른 공간에서 온 임베딩을 번역하다",
+  "name": "vec2vec, 서로 다른 공간에서 온 임베딩을 번역하다",
+  "description": "Harnessing the Universal Geometry of Embeddings (2025) 를 읽어보았습니다.",
+  "keywords": [
+    "vec2vec", "embedding", "임베딩"
+  ],
+  "articleBody": "딥러닝의 세계에서 임베딩 벡터가 핵심적인 존재가 된 건 꽤 오래 된 일입니다. 기본적으로 모델은 숫자를 요구하기 때문에, 원본 데이터가 이미지든 텍스트든 간에 그 의미를 잘 함축하고 있는(representation) 작은 크기의 dense한 수치형 벡터로 변환하는 것은 딥러닝식 문제 풀이의 가장 첫번째 단계라고 할 수 있죠. 아주 고전적인 모델부터 최신의 LLM까지 이런 임베딩을 통해 유사성을 계산하고 의미 기반의 연산을 진행할 수 있게 되는 것입니다.\n출처\n임베딩을 이야기할 때 종종 등장하는 표현이 있습니다.\n임베딩이 같은 공간에 있지 않다, align이 되지 않았다\n어떤 의미냐면, 서로 다른 모델로 학습된 임베딩은 서로 다른 임베딩 공간에 분포하게 됩니다. 텍스트로 예시를 들면 완전히 같은 단어(dog)라도 A모델로 학습된 dog 벡터와 B모델로 학습된 dog 벡터는 다른 값을 가질 것입니다. 그렇기 때문에 A모델로 학습된 dog 벡터와 B모델로 학습된 cat벡터를 코사인 유사도 같은 메트릭으로 거리를 잰 다음 가깝지 않다고 뭐라고 할 수는 없습니다. 마치 완전히 다른 외국어를 사용하는 것처럼 두 임베딩은 같은 의미 체계를 공유하지 않기 때문이죠. 따라서 다른 임베딩 공간에서 얻은 임베딩 벡터는 별도의 정렬 작업 없이 직접 비교하거나 짬뽕해서 사용하면 안 된다 라는 게 일반적으로 알려져 있는 주의사항입니다.\n플라톤(갑자기?) 표현 이론 The Platonic Representation Hypothesis 라는 논문은 이 주제에 대해 상당히 재미있는 이론을 제시합니다. 그건 바로 충분한 크기의 데이터로 학습된 representation 모델들은 서로 다른 아키텍쳐로 따로 학습되었을지라도 결국 동일한 표현을 학습하게 된다는 것입니다.\n본질과 그림자\n뜬금 없이 플라톤이 왜 나오냐 하면, 아마 학교 다닐 때 한번쯤은 들어봤을 이데아 이론 때문인데요. 이데아라고 부를 수 있는 변하지 않는 본질이 존재하고, 우리가 실제로 감각하고 보는 것들은 마치 어두운 동굴 속에 갇힌 사람들이 벽에 비치는 사물의 그림자를 보는 것과 같은, 이데아의 불완전한 묘사라는 이론입니다(만 알아도 됩니다. 저도 잘 모릅니다). 위 그림에서 보면 Z라는 현실(본질적인 특성)이 존재할 때, 이미지와 텍스트는 이를 각각 다른 방식으로 묘사하는 것을 알 수 있습니다. 이미지와 텍스트를 통해 학습한 모델은 이 현실 Z의 projection을 관찰하여 정보를 얻게 되는 거죠.\n어쨌든 그 뒤에는 하나의 진실(본질; 통계적 속성)이 존재하기 때문에, 데이터와 모델의 크기가 커질수록, 그리고 downstream task에서 잘 작동하는 유능한 모델이 될수록, 여러 임베딩이 하나의 표현으로 수렴하게 된다는 것이 이 논문이 제시하는 가설입니다. 실제로 굉장히 다양한 방식으로 훈련된 임베딩에 대해 alignment 지표를 관찰한 결과를 간접적인 증거로 같이 제시하고 있습니다.\n그냥 본질이 똑같애서 그래 말고 구체적으로 왜 그렇게 되는가?에 대한 답변은 다음과 같습니다.\nTask Generality : 데이터가 대규모이고 모델의 태스크가 범용적일(어려울) 수록 제약이 많아지고 결국 그 제약을 만족시킬 수 있는 가능한 표현(\bsolution)의 공간은 더더욱 작아짐(즉 도달 가능한 목표 공간은 거기서 거기일 것임) Model Capacity : 모델이 커질수록 최적해를 더 효과적으로 찾을 수 있기 때문에 충분히 유능한 모델은 수렴할 가능성이 높음. Simplicity Bias : 입출력이 동일하더라도 내부 표현은 다르게 학습할 수 있지만 딥한 네트워크는 본질적으로 가장 simple fit을 찾도록 편향되어 있기 때문에 여러 가능한 복잡한 표현 중에서도 공유된 solution 공간으로 수렴할 가능성이 큼. vec2vec Harnessing the Universal Geometry of Embeddings 는 이 플라톤 표현 이론을 조금 더 발전시켜서 실제로 완전히 서로 다른 모델로 학습된 두 개의 임베딩을 (인코더를 모르더라도, 쌍으로 맵핑된 정답 없이도 완전히 비지도 방식으로) 성공적으로 연결할 수 있다는 것을 보여줍니다. 범용적으로 사용할 수 있는 임베딩 번역기 솔루션인 거죠. 이걸 vec2vec이라고 부릅니다.\n캡션\n구조 vec2vec의 구조는 위 그림과 같고, 입력 어댑터(A), 출력 어댑터(B), 공유된 backbone 네트워크(T) 이렇게 3가지 어댑터로 쪼개지는 구조입니다. 우리는 서로 다른 모델에서 학습된 2개의 임베딩을 연결하는 게 목표이니까 각각 임베딩에 사용된 모델1, 모델2가 있고 한쪽의 인코더는 모르는 상황이라고 합시다. 기본적인 가정은, 각 임베딩들을 어떤 보편적인 잠재 표현(universal latent representation; 플라톤 표현 이론에서 생각하는 “본질” 적인 표현)으로 맵핑할 수 있다는 것입니다.\n입력 어댑터 A: 각 개별 임베딩 공간에서 나온 임베딩을 보편적인 잠재 표현으로 변환하는 역할 Shared Backbone Network T: 중간에서 잠재 공간 내에서 임베딩을 변환하는 역할 입력 어댑터 B: 보편적인 잠재 표현에서 나온 임베딩을 각 개별 임베딩 공간의 표현으로 변환하는 역할 residual connections, layer normalization, and SiLU nonlinearities 조합의 MLP를 사용했다고 하고요. 위 3개 층을 적절히 조합하면 다음과 같은 4종류의 함수가 나올 수 있습니다. (∘를 일반적인 합성함수 기호로 생각하여 거꾸로 읽으면 됨)\n변환 함수: F1 = B2 ∘ T ∘ A1: 모델1 공간에서 모델2 공간으로 변환 F2 = B1 ∘ T ∘ A2: 모델1 공간에서 모델2 공간으로 변환 재구성 함수: R1 = B1 ∘ T ∘ A1: 모델1 공간에서 잠재 공간을 거쳐 다시 모델1 공간으로 재구성 R2 = B2 ∘ T ∘ A2: 모델2 공간에서 잠재 공간을 거쳐 다시 모델2 공간으로 재구성 A랑 B는 알겠는데 중간에 T는 왜 필요한가? 라는 생각이 들 수 있는데요, A는 단순히 각 모델에서 잠재 공간으로 일치시켜주는 역할이라면 T는 모델 1,2,3,..등 여러 다른 소스, 다른 도메인에서 온 임베딩들이 잠재 공간 내에서 정말 공통의 표현으로 잘 정렬될 수 있도록 하기 위한 목적의 MLP가 하나 더 있는 거라고 이해하면 됩니다.\n학습 vec2vec의 목표는 동일한 텍스트에 대해 여러 방식으로 학습된 임베딩이 공유된 보편적인 잠재 표현 기준으로 거의 동일해지는 것입니다. 그렇게 하려면 다음과 같은 여러 가지 세부 목표(손실 함수)를 만족시켜야 합니다.\n재구성 손실 (Reconstruction Loss) : 임베딩이 잠재 공간을 거쳐 원래 공간으로 돌아왔을 때 온전히 잘 돌아와야 함 사이클 일관성 손실 (Cycle Consistency Loss) : 임베딩이 잠재 공간을 거쳐 다른 공간에 갔다가 다시 원래 공간으로 돌아왔을 때 온전히 잘 돌아와야 함 벡터 공간 보존 (Vector Space Preservation Loss) : 변환된 임베딩들 간의 pairwise 거리가 변환 전의 임베딩들 간의 거리와 비슷해야 함 (= 임베딩 공간 내의 상대적인 구조가 변환하면서 왜곡되지 않도록) 적대적 손실 (Adversarial Loss) : 일반적인 GAN 학습 방식과 동일함. F와 R이 generator라면 discriminator 네트워크를 따로 둬서 변환된(생성된) 임베딩 분포를 타겟 분포와 잘 맞출 수 있도록 함 앞의 두 가지 손실은 2개의 임베딩 공간이 잠재 공간을 사이에 두고 벡터가 이리 갔다 저리 갔다 돌아왔다 난리를 쳐도 안정적으로 값이 유지될 때 우리의 A-T-B 어댑터가 완전하다고 볼 수 있어 라는 논리라는 것을 알 수 있습니다. 제가 번역기에다 대고 한국어로 무슨 문장을 말하고, 그게 번역된 불어 문장을 들은 프랑스인이 (자기가 들은 말을) 똑같이 따라해서 다시 번역기를 거쳐서 저한테 왔을 때, 그게 제가 말한 문장이어야 한단 거죠. GAN loss같은 경우는 ablation(없애보기) 했을 때 성능이 많이 떨어지는 것으로 보아 잠재공간으로 변환하는(새 벡터를 생성하는) 과정에서 핵심적인 역할을 하는 것으로 보인다고 합니다.\n평가와 결과 다시 vec2vec 번역의 목표를 다른 문장으로 써보면, 소스 임베딩 $u_i = M_1(d_i)$가 주어졌지만 $M_1$이 뭔지는 모르는 상황에서, 동일한 원본 문서에 대한 타겟 모델의 임베딩 $v_i=M_2(d_i)$ 에 최대한 가까운 벡터 $F(u_i)$ 를 생성하는 것입니다. 사용한 평가 지표는 다음과 같습니다.\nMean Cosine Similarity : 번역된 임베딩 $F(u_i)$가 실제 타겟 임베딩 $v_i$와 얼마나 유사한가 = 1.0이어야 이상적 Top-1 Accuracy: 번역된 임베딩 $F(u_i)$가 타겟 임베딩 후보 집합 $M_2(d_j)$ 내에서 실제 타겟 임베딩 $v_i$와 가장 가까운(역시 코사인 유사도 기준) 임베딩으로 올바르게 식별되는 비율 = 1.0이어야 이상적 Mean Rank: 번역된 임베딩 $F(u_i)$가 타겟 임베딩 후보 집합 $M_2(d_j)$ 을 비교했을 때 실제 타겟 임베딩 $v_i$의 평균 순위 = 1위어야 이상적 연구에서 vec2vec은\bNatural Questions(NQ) 데이터를 통해 학습했는데, 같은 데이터를 통한 평가(in-distrbution) 결과 뿐 아니라 아예 도메인이 다른 트윗 데이터나 의료 기록 데이터에서도 좋은 성능을 보여 일반화 능력이 확인되었습니다.\n임베딩도 보안이 필요하다 보통 회사에서 임베딩 데이터를 저장할 때 다른 데이터만큼 보안을 신경써야 한다고 생각하지는 않을 겁니다. 예를 들어 ‘고객 A는 이름이 OOO이고 28세 여성이고 서울시 도봉구에 살며 상품 A,B,C를 구매했고,…’ 이런 정보는 뒷구르기하면서 봐도 유출되면 큰일나는 고객 A의 개인정보입니다. 반면에 어떤 모델을 학습시켜서 유저의 구매 패턴을 나타내는 임베딩을 얻었다고 하면, 하나 뽑아서 관찰했을 때 (0.324, -0.4253, 0.988, …, 이하 256차원의 벡터) 이런 꼴로 생겼잖아요? 누가 이 데이터를 훔쳐가봤자 무슨 정보인지 도저히 알 도리가 없을 거라는 생각이 들죠.\n하지만 vec2vec 논문의 마지막 섹션에서는 vec2vec을 활용해 모르는 모델로 학습된 임베딩의 modality와 언어 정보 정도만 알았을 때에도 그 안에서 얼만큼 정보를 추출해낼 수 있는지를 보여주고 있습니다.\n사용한 프롬프트\n이메일 데이터를 이용한 실험인데요, 이전 상황과 동일하게 이메일 텍스트를 알려지지 않은 모델($M_1$)에 넣고 임베딩을 얻은 뒤 vec2vec을 사용하여 알려진 다른 모델($M_2$)의 임베딩으로 변환했습니다. 그다음에 이 변환된 임베딩을 사용하여 원래의 텍스트 이메일 입력을 재구성(zero-shot inversion) 합니다. 그 다음 원본 이메일과 재구성된 이메일을 LLM(GPT-4o)에 넣고 원본 이메일의 정보가 유출되었는지를 yes/no로 물어봅니다.\n그 결과 특정 모델 쌍에 대해서는 변환된 임베딩을 통해 거의 문서의 최대 80%까지 정보를 추출했다는 것을 알 수 있고, 재구성된 텍스트가 완벽하지는 않았지만 이름, 날짜, 승진 정보, 재무 정보, 서비스 중단, 심지어 점심 주문과 같은 민감한 정보를 추출할 수 있었다고 합니다. 즉 이 정보 추출 실험을 통해 알 수 있는 것은 vec2vec이 두 개 임베딩 공간을 효율적으로 변환할 수 있고, 그게 단순히 기하학적인 구조만이 아닌 텍스트의 의미론적인 내용까지 보존한다는 것입니다. 그리고 임베딩이 ‘봐도 뭔지 알 수 없는 몇백개의 숫자일 뿐’이라는 생각은 조금 위험할 수도 있겠다는 생각이 들게 하네요.\n",
+  "wordCount" : "1307",
+  "inLanguage": "ko",
+  "image": "http://localhost:1313/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E","datePublished": "2025-05-26T20:38:11+09:00",
+  "dateModified": "2025-05-26T20:38:11+09:00",
+  "author":{
+    "@type": "Person",
+    "name": "pizzathief"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "http://localhost:1313/posts/vec2vec/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "sliceofdata",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "http://localhost:1313/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="http://localhost:1313/" accesskey="h" title="slice.of.data (Alt + H)">
+                <img src="http://localhost:1313/apple-touch-icon.png" alt="" aria-label="logo"
+                    height="35">slice.of.data</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="http://localhost:1313/en/" title="English"
+                            aria-label="English">En</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="http://localhost:1313/archives/" title="posts">
+                    <span>posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/tags/" title="tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/about/" title="about">
+                    <span>about</span>
+                </a>
+            </li>
+            <li>
+                <a href="http://localhost:1313/subscribe" title="subscribe">
+                    <span>subscribe</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://pizzathief.pages.dev/" title="notes">
+                    <span>notes</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      vec2vec, 서로 다른 공간에서 온 임베딩을 번역하다
+    </h1>
+    <div class="post-description">
+      Harnessing the Universal Geometry of Embeddings (2025) 를 읽어보았습니다.
+    </div>
+    <div class="post-meta"><span title='2025-05-26 20:38:11 +0900 KST'>2025-05-26</span>&nbsp;·&nbsp;7 min&nbsp;·&nbsp;pizzathief&nbsp;|&nbsp;번역:
+<ul class="i18n_list">
+    <li>
+        <a href="http://localhost:1313/en/posts/vec2vec/">En</a>
+    </li>
+</ul>&nbsp;|&nbsp;<a href="https://github.com/pizzathiefz/sliceofdata/blob/main/content/posts/vec2vec/index.ko.md" rel="noopener noreferrer edit" target="_blank">Suggest Changes</a>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#플라톤갑자기-표현-이론">플라톤(갑자기?) 표현 이론</a></li>
+    <li><a href="#vec2vec">vec2vec</a>
+      <ul>
+        <li><a href="#구조">구조</a></li>
+        <li><a href="#학습">학습</a></li>
+        <li><a href="#평가와-결과">평가와 결과</a></li>
+      </ul>
+    </li>
+    <li><a href="#임베딩도-보안이-필요하다">임베딩도 보안이 필요하다</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><p>딥러닝의 세계에서 임베딩 벡터가 핵심적인 존재가 된 건 꽤 오래 된 일입니다. 기본적으로 모델은 숫자를 요구하기 때문에, 원본 데이터가 이미지든 텍스트든 간에 그 의미를 잘 함축하고 있는(representation) 작은 크기의 dense한 수치형 벡터로 변환하는 것은 딥러닝식 문제 풀이의 가장 첫번째 단계라고 할 수 있죠. 아주 고전적인 모델부터 최신의 LLM까지 이런 임베딩을 통해 유사성을 계산하고 의미 기반의 연산을 진행할 수 있게 되는 것입니다.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/vec2vec/embedding-vector.png#center"
+         alt="출처" width="500"/> <figcaption>
+            <p><a href="https://www.pinecone.io/learn/vector-embeddings/">출처</a></p>
+        </figcaption>
+</figure>
+
+<p>임베딩을 이야기할 때 종종 등장하는 표현이 있습니다.</p>
+<blockquote>
+<p>임베딩이 같은 공간에 있지 않다, align이 되지 않았다</p></blockquote>
+<p>어떤 의미냐면, 서로 다른 모델로 학습된 임베딩은 서로 다른 임베딩 공간에 분포하게 됩니다. 텍스트로 예시를 들면 완전히 같은 단어(dog)라도 A모델로 학습된 dog 벡터와 B모델로 학습된 dog 벡터는 다른 값을 가질 것입니다. 그렇기 때문에 A모델로 학습된 dog 벡터와 B모델로 학습된 cat벡터를 코사인 유사도 같은 메트릭으로 거리를 잰 다음 가깝지 않다고 뭐라고 할 수는 없습니다. 마치 완전히 다른 외국어를 사용하는 것처럼 두 임베딩은 같은 의미 체계를 공유하지 않기 때문이죠. 따라서 <strong>다른 임베딩 공간에서 얻은 임베딩 벡터는 별도의 정렬 작업 없이 직접 비교하거나 짬뽕해서 사용하면 안 된다</strong> 라는 게 일반적으로 알려져 있는 주의사항입니다.</p>
+<br>
+<h2 id="플라톤갑자기-표현-이론">플라톤(갑자기?) 표현 이론<a hidden class="anchor" aria-hidden="true" href="#플라톤갑자기-표현-이론">#</a></h2>
+<p><a href="https://arxiv.org/abs/2405.07987">The Platonic Representation Hypothesis</a> 라는 논문은 이 주제에 대해 상당히 재미있는 이론을 제시합니다. 그건 바로 충분한 크기의 데이터로 학습된 representation 모델들은 서로 다른 아키텍쳐로 따로 학습되었을지라도 결국 동일한 표현을 학습하게 된다는 것입니다.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/vec2vec/platonic-representation-hypothesis.png#center"
+         alt="본질과 그림자" width="400"/> <figcaption>
+            <p>본질과 그림자</p>
+        </figcaption>
+</figure>
+
+<p>뜬금 없이 플라톤이 왜 나오냐 하면, 아마 학교 다닐 때 한번쯤은 들어봤을 이데아 이론 때문인데요. 이데아라고 부를 수 있는 변하지 않는 본질이 존재하고, 우리가 실제로 감각하고 보는 것들은 마치 어두운 동굴 속에 갇힌 사람들이 벽에 비치는 사물의 그림자를 보는 것과 같은, 이데아의 불완전한 묘사라는 이론입니다(만 알아도 됩니다. 저도 잘 모릅니다). 위 그림에서 보면 Z라는 현실(본질적인 특성)이 존재할 때, 이미지와 텍스트는 이를 각각 다른 방식으로 묘사하는 것을 알 수 있습니다. 이미지와 텍스트를 통해 학습한 모델은 이 현실 Z의 projection을 관찰하여 정보를 얻게 되는 거죠.</p>
+<p>어쨌든 그 뒤에는 하나의 진실(본질; 통계적 속성)이 존재하기 때문에, 데이터와 모델의 크기가 커질수록, 그리고 downstream task에서 잘 작동하는 유능한 모델이 될수록, 여러 임베딩이 하나의 표현으로 수렴하게 된다는 것이 이 논문이 제시하는 가설입니다. 실제로 굉장히 다양한 방식으로 훈련된 임베딩에 대해 alignment 지표를 관찰한 결과를 간접적인 증거로 같이 제시하고 있습니다.</p>
+<p>그냥 본질이 똑같애서 그래 말고 구체적으로 왜 그렇게 되는가?에 대한 답변은 다음과 같습니다.</p>
+<ul>
+<li>Task Generality : 데이터가 대규모이고 모델의 태스크가 범용적일(어려울) 수록 제약이 많아지고 결국 그 제약을 만족시킬 수 있는 가능한 표현(solution)의 공간은 더더욱 작아짐(즉 도달 가능한 목표 공간은 거기서 거기일 것임)</li>
+<li>Model Capacity : 모델이 커질수록 최적해를 더 효과적으로 찾을 수 있기 때문에 충분히 유능한 모델은 수렴할 가능성이 높음.</li>
+<li>Simplicity Bias : 입출력이 동일하더라도 내부 표현은 다르게 학습할 수 있지만 딥한 네트워크는 본질적으로 가장 simple fit을 찾도록 편향되어 있기 때문에 여러 가능한 복잡한 표현 중에서도 공유된 solution 공간으로 수렴할 가능성이 큼.</li>
+</ul>
+<br>
+<h2 id="vec2vec">vec2vec<a hidden class="anchor" aria-hidden="true" href="#vec2vec">#</a></h2>
+<p><a href="https://arxiv.org/html/2505.12540v2">Harnessing the Universal Geometry of Embeddings</a> 는 이 플라톤 표현 이론을 조금 더 발전시켜서 실제로 완전히 서로 다른 모델로 학습된 두 개의 임베딩을 (인코더를 모르더라도, 쌍으로 맵핑된 정답 없이도 <strong>완전히 비지도 방식으로</strong>) 성공적으로 연결할 수 있다는 것을 보여줍니다. 범용적으로 사용할 수 있는 임베딩 번역기 솔루션인 거죠. 이걸 <strong>vec2vec</strong>이라고 부릅니다.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/vec2vec/vec2vec-architecture.png#center"
+         alt="캡션" width="580"/> <figcaption>
+            <p>캡션</p>
+        </figcaption>
+</figure>
+
+<h3 id="구조">구조<a hidden class="anchor" aria-hidden="true" href="#구조">#</a></h3>
+<p>vec2vec의 구조는 위 그림과 같고, 입력 어댑터(A), 출력 어댑터(B), 공유된 backbone 네트워크(T) 이렇게 3가지 어댑터로 쪼개지는 구조입니다.  우리는 서로 다른 모델에서 학습된 2개의 임베딩을 연결하는 게 목표이니까 각각 임베딩에 사용된 모델1, 모델2가 있고 한쪽의 인코더는 모르는 상황이라고 합시다. 기본적인 가정은, 각 임베딩들을 어떤 보편적인 잠재 표현(universal latent representation; 플라톤 표현 이론에서 생각하는 &ldquo;본질&rdquo; 적인 표현)으로 맵핑할 수 있다는 것입니다.</p>
+<ul>
+<li>입력 어댑터 A: 각 개별 임베딩 공간에서 나온 임베딩을 보편적인 잠재 표현으로 변환하는 역할</li>
+<li>Shared Backbone Network T: 중간에서 잠재 공간 내에서 임베딩을 변환하는 역할</li>
+<li>입력 어댑터 B: 보편적인 잠재 표현에서 나온 임베딩을 각 개별 임베딩 공간의 표현으로 변환하는 역할</li>
+</ul>
+<p>residual connections, layer normalization, and SiLU nonlinearities 조합의 MLP를 사용했다고 하고요. 위 3개 층을 적절히 조합하면 다음과 같은 4종류의 함수가 나올 수 있습니다. (∘를 일반적인 합성함수 기호로 생각하여 거꾸로 읽으면 됨)</p>
+<ul>
+<li>변환 함수:
+<ul>
+<li>F1 = B2 ∘ T ∘ A1: 모델1 공간에서 모델2 공간으로 변환</li>
+<li>F2 = B1 ∘ T ∘ A2: 모델1 공간에서 모델2 공간으로 변환</li>
+</ul>
+</li>
+<li>재구성 함수:
+<ul>
+<li>R1 = B1 ∘ T ∘ A1: 모델1 공간에서 잠재 공간을 거쳐 다시 모델1 공간으로 재구성</li>
+<li>R2 = B2 ∘ T ∘ A2: 모델2 공간에서 잠재 공간을 거쳐 다시 모델2 공간으로 재구성</li>
+</ul>
+</li>
+</ul>
+<p>A랑 B는 알겠는데 중간에 T는 왜 필요한가? 라는 생각이 들 수 있는데요, A는 단순히 각 모델에서 잠재 공간으로 일치시켜주는 역할이라면 T는 모델 1,2,3,..등 여러 다른 소스, 다른 도메인에서 온 임베딩들이 잠재 공간 내에서 정말 공통의 표현으로 잘 정렬될 수 있도록 하기 위한 목적의 MLP가 하나 더 있는 거라고 이해하면 됩니다.</p>
+<h3 id="학습">학습<a hidden class="anchor" aria-hidden="true" href="#학습">#</a></h3>
+<p>vec2vec의 목표는 동일한 텍스트에 대해 여러 방식으로 학습된 임베딩이 공유된 보편적인 잠재 표현 기준으로 거의 동일해지는 것입니다. 그렇게 하려면 다음과 같은 여러 가지 세부 목표(손실 함수)를 만족시켜야 합니다.</p>
+<ul>
+<li>재구성 손실 (Reconstruction Loss) : 임베딩이 잠재 공간을 거쳐 원래 공간으로 돌아왔을 때 온전히 잘 돌아와야 함</li>
+<li>사이클 일관성 손실 (Cycle Consistency Loss) : 임베딩이 잠재 공간을 거쳐 다른 공간에 갔다가 다시 원래 공간으로 돌아왔을 때 온전히 잘 돌아와야 함</li>
+<li>벡터 공간 보존 (Vector Space Preservation Loss) : 변환된 임베딩들 간의 pairwise 거리가 변환 전의 임베딩들 간의 거리와 비슷해야 함 (= 임베딩 공간 내의 상대적인 구조가 변환하면서 왜곡되지 않도록)</li>
+<li>적대적 손실 (Adversarial Loss) : 일반적인 GAN 학습 방식과 동일함. F와 R이 generator라면 discriminator 네트워크를 따로 둬서 변환된(생성된) 임베딩 분포를 타겟 분포와 잘 맞출 수 있도록 함</li>
+</ul>
+<p>앞의 두 가지 손실은 2개의 임베딩 공간이 잠재 공간을 사이에 두고 벡터가 이리 갔다 저리 갔다 돌아왔다 난리를 쳐도 안정적으로 값이 유지될 때 우리의 A-T-B 어댑터가 완전하다고 볼 수 있어 라는 논리라는 것을 알 수 있습니다.  제가 번역기에다 대고 한국어로 무슨 문장을 말하고, 그게 번역된 불어 문장을 들은 프랑스인이 (자기가 들은 말을) 똑같이 따라해서 다시 번역기를 거쳐서 저한테 왔을 때, 그게 제가 말한 문장이어야 한단 거죠. GAN loss같은 경우는 ablation(없애보기) 했을 때 성능이 많이 떨어지는 것으로 보아 잠재공간으로 변환하는(새 벡터를 생성하는) 과정에서 핵심적인 역할을 하는 것으로 보인다고 합니다.</p>
+<h3 id="평가와-결과">평가와 결과<a hidden class="anchor" aria-hidden="true" href="#평가와-결과">#</a></h3>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/vec2vec/results.png#center" width="480"/> 
+</figure>
+
+<p>다시 vec2vec 번역의 목표를 다른 문장으로 써보면, 소스 임베딩 $u_i = M_1(d_i)$가 주어졌지만 $M_1$이 뭔지는 모르는 상황에서, 동일한 원본 문서에 대한 타겟 모델의 임베딩 $v_i=M_2(d_i)$ 에 최대한 가까운 벡터 $F(u_i)$ 를 생성하는 것입니다. 사용한 평가 지표는 다음과 같습니다.</p>
+<ul>
+<li>Mean Cosine Similarity : 번역된 임베딩 $F(u_i)$가 실제 타겟 임베딩 $v_i$와 얼마나 유사한가 = 1.0이어야 이상적</li>
+<li>Top-1 Accuracy: 번역된 임베딩 $F(u_i)$가 타겟 임베딩 후보 집합 $M_2(d_j)$ 내에서 실제 타겟 임베딩 $v_i$와 가장 가까운(역시 코사인 유사도 기준) 임베딩으로 올바르게 식별되는 비율 = 1.0이어야 이상적</li>
+<li>Mean Rank: 번역된 임베딩 $F(u_i)$가 타겟 임베딩 후보 집합 $M_2(d_j)$ 을 비교했을 때 실제 타겟 임베딩 $v_i$의 평균 순위 = 1위어야 이상적</li>
+</ul>
+<p>연구에서 vec2vec은Natural Questions(NQ) 데이터를 통해 학습했는데, 같은 데이터를 통한 평가(in-distrbution) 결과 뿐 아니라 아예 도메인이 다른 트윗 데이터나 의료 기록 데이터에서도 좋은 성능을 보여 일반화 능력이 확인되었습니다.</p>
+<br>
+<h2 id="임베딩도-보안이-필요하다">임베딩도 보안이 필요하다<a hidden class="anchor" aria-hidden="true" href="#임베딩도-보안이-필요하다">#</a></h2>
+<p>보통 회사에서 임베딩 데이터를 저장할 때 다른 데이터만큼 보안을 신경써야 한다고 생각하지는 않을 겁니다. 예를 들어 &lsquo;고객 A는 이름이 OOO이고 28세 여성이고 서울시 도봉구에 살며 상품 A,B,C를 구매했고,&hellip;&rsquo; 이런 정보는 뒷구르기하면서 봐도 유출되면 큰일나는 고객 A의 개인정보입니다. 반면에 어떤 모델을 학습시켜서 유저의 구매 패턴을 나타내는 임베딩을 얻었다고 하면, 하나 뽑아서 관찰했을 때 (0.324, -0.4253, 0.988, &hellip;, 이하 256차원의 벡터) 이런 꼴로 생겼잖아요? 누가 이 데이터를 훔쳐가봤자 무슨 정보인지 도저히 알 도리가 없을 거라는 생각이 들죠.</p>
+<p>하지만 vec2vec 논문의 마지막 섹션에서는 vec2vec을 활용해 모르는 모델로 학습된 임베딩의 modality와 언어 정보 정도만 알았을 때에도 그 안에서 얼만큼 정보를 추출해낼 수 있는지를 보여주고 있습니다.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/vec2vec/prompt.png#center"
+         alt="사용한 프롬프트" width="480"/> <figcaption>
+            <p>사용한 프롬프트</p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/vec2vec/inversion.png#center" width="480"/> 
+</figure>
+
+<p>이메일 데이터를 이용한 실험인데요, 이전 상황과 동일하게 이메일 텍스트를 알려지지 않은 모델($M_1$)에 넣고 임베딩을 얻은 뒤 vec2vec을 사용하여 알려진 다른 모델($M_2$)의 임베딩으로 변환했습니다. 그다음에 이 변환된 임베딩을 사용하여 원래의 텍스트 이메일 입력을 재구성(zero-shot inversion) 합니다. 그 다음 원본 이메일과 재구성된 이메일을 LLM(GPT-4o)에 넣고 원본 이메일의 정보가 유출되었는지를 yes/no로 물어봅니다.</p>
+<p>그 결과 특정 모델 쌍에 대해서는 변환된 임베딩을 통해 거의 문서의 최대 80%까지 정보를 추출했다는 것을 알 수 있고, 재구성된 텍스트가 완벽하지는 않았지만 이름, 날짜, 승진 정보, 재무 정보, 서비스 중단, 심지어 점심 주문과 같은 민감한 정보를 추출할 수 있었다고 합니다. 즉 이 정보 추출 실험을 통해 알 수 있는 것은 vec2vec이 두 개 임베딩 공간을 효율적으로 변환할 수 있고, 그게 <strong>단순히 기하학적인 구조만이 아닌 텍스트의 의미론적인 내용까지 보존한다</strong>는 것입니다. 그리고 임베딩이 &lsquo;봐도 뭔지 알 수 없는 몇백개의 숫자일 뿐&rsquo;이라는 생각은 조금 위험할 수도 있겠다는 생각이 들게 하네요.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="http://localhost:1313/tags/ai-ml/">AI-ML</a></li>
+    </ul>
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share vec2vec, 서로 다른 공간에서 온 임베딩을 번역하다 on x"
+            href="https://x.com/intent/tweet/?text=vec2vec%2c%20%ec%84%9c%eb%a1%9c%20%eb%8b%a4%eb%a5%b8%20%ea%b3%b5%ea%b0%84%ec%97%90%ec%84%9c%20%ec%98%a8%20%ec%9e%84%eb%b2%a0%eb%94%a9%ec%9d%84%20%eb%b2%88%ec%97%ad%ed%95%98%eb%8b%a4&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fvec2vec%2f&amp;hashtags=AI-ML">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share vec2vec, 서로 다른 공간에서 온 임베딩을 번역하다 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fposts%2fvec2vec%2f&amp;title=vec2vec%2c%20%ec%84%9c%eb%a1%9c%20%eb%8b%a4%eb%a5%b8%20%ea%b3%b5%ea%b0%84%ec%97%90%ec%84%9c%20%ec%98%a8%20%ec%9e%84%eb%b2%a0%eb%94%a9%ec%9d%84%20%eb%b2%88%ec%97%ad%ed%95%98%eb%8b%a4&amp;summary=vec2vec%2c%20%ec%84%9c%eb%a1%9c%20%eb%8b%a4%eb%a5%b8%20%ea%b3%b5%ea%b0%84%ec%97%90%ec%84%9c%20%ec%98%a8%20%ec%9e%84%eb%b2%a0%eb%94%a9%ec%9d%84%20%eb%b2%88%ec%97%ad%ed%95%98%eb%8b%a4&amp;source=http%3a%2f%2flocalhost%3a1313%2fposts%2fvec2vec%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+<div class="container_disqus">
+    <script src="https://giscus.app/client.js"
+        data-repo="pizzathiefz/sliceofdata"
+        data-repo-id="R_kgDOPsr6oQ"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOPsr6oc4CvOfW"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme=""
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+    </script>
+</div>
+<script>
+    
+    function getCurrentTheme() {
+        
+        let storedTheme = localStorage.getItem('pref-theme');
+        if (storedTheme) {
+            return storedTheme;
+        }
+        
+        
+        if (document.body.classList.contains('dark')) {
+            return 'dark';
+        }
+        
+        
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+        
+        return 'light';
+    }
+    
+    
+    function setGiscusTheme() {
+        let currentTheme = getCurrentTheme();
+        let giscusTheme = currentTheme === 'dark' ? 'noborder_dark' : 'noborder_light';
+        
+        
+        let giscusScript = document.querySelector("div.container_disqus > script");
+        if (giscusScript) {
+            giscusScript.setAttribute('data-theme', giscusTheme);
+        }
+        
+        return giscusTheme;
+    }
+    
+    
+    setGiscusTheme();
+    
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        let themeToggle = document.querySelector('#theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                setTimeout(() => {
+                    let newTheme = getCurrentTheme();
+                    let newGiscusTheme = newTheme === 'dark' ? 'noborder_dark' : 'noborder_light';
+                    
+                    let giscusFrame = document.querySelector('iframe.giscus-frame');
+                    if (giscusFrame) {
+                        giscusFrame.contentWindow.postMessage({
+                            giscus: {
+                                setConfig: {
+                                    theme: newGiscusTheme
+                                }
+                            }
+                        }, 'https://giscus.app');
+                    }
+                }, 100);
+            });
+        }
+    });
+</script>
+
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2025 <a href="http://localhost:1313/">sliceofdata</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
