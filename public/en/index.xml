@@ -21,6 +21,13 @@
       <description>A brief summary of Harnessing the Universal Geometry of Embeddings (2025)</description>
     </item>
     <item>
+      <title>SOLID Principles Explained with ML Code</title>
+      <link>http://localhost:1313/en/posts/solid-principles-for-ml/</link>
+      <pubDate>Fri, 14 Feb 2025 17:24:18 +0900</pubDate>
+      <guid>http://localhost:1313/en/posts/solid-principles-for-ml/</guid>
+      <description>OOP made less scary (and more useful) for data practitioners</description>
+    </item>
+    <item>
       <title>About</title>
       <link>http://localhost:1313/en/about/</link>
       <pubDate>Thu, 09 Jan 2025 00:00:00 +0900</pubDate>

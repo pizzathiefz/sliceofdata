@@ -17,10 +17,25 @@
                 href="http://localhost:1313/posts/vec2vec/"
                 />
   </url><url>
+    <loc>http://localhost:1313/posts/solid-principles-for-ml/</loc>
+    <lastmod>2025-02-14T17:24:18+09:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+  </url><url>
     <loc>http://localhost:1313/posts/2024-2025/</loc>
     <lastmod>2024-12-25T11:50:17+09:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-US"
+                href="http://localhost:1313/en/posts/2024-2025/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="ko-KR"
+                href="http://localhost:1313/posts/2024-2025/"
+                />
   </url><url>
     <loc>http://localhost:1313/tags/ai-ml/</loc>
     <lastmod>2025-05-26T20:38:11+09:00</lastmod>

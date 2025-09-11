@@ -14,11 +14,18 @@
     <lastBuildDate>Mon, 26 May 2025 20:38:11 +0900</lastBuildDate>
     <atom:link href="http://localhost:1313/en/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>Bridging Embeddings from Different Spaces</title>
+      <title>vec2vec: Bridging Embeddings from Different Spaces</title>
       <link>http://localhost:1313/en/posts/vec2vec/</link>
       <pubDate>Mon, 26 May 2025 20:38:11 +0900</pubDate>
       <guid>http://localhost:1313/en/posts/vec2vec/</guid>
       <description>A brief summary of Harnessing the Universal Geometry of Embeddings (2025)</description>
+    </item>
+    <item>
+      <title>The Mountain is Where the Mountain is</title>
+      <link>http://localhost:1313/en/posts/2024-2025/</link>
+      <pubDate>Wed, 25 Dec 2024 11:50:17 +0900</pubDate>
+      <guid>http://localhost:1313/en/posts/2024-2025/</guid>
+      <description>Year-end reflection or New Year&amp;rsquo;s resolution, who knows</description>
     </item>
   </channel>
 </rss>

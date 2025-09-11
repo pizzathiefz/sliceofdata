@@ -10,11 +10,8 @@ keywords:
   - keyword2
   - tag1
 tags:
-  - tag1
-  - tag2
-  - category
 categories:
-  - category1
+  - data
 slug: <% tp.file.folder().split("/").pop() %>
 ShowReadingTime: true
 ShowShareButtons: true

@@ -8,15 +8,15 @@ buildFuture: false
 buildExpired: false
 
 # Read: https://github.com/adityatelange/hugo-PaperMod/wiki/FAQs#using-hugos-syntax-highlighter-chroma
-pygmentsUseClasses: true
+# pygmentsUseClasses: true
 markup:
   highlight:
-    noClasses: false 
-    anchorLineNos: true
+    noClasses: true 
+    anchorLineNos: false
     codeFences: true
     guessSyntax: true
     lineNos: true
-    style: monoaki
+    style: nord
   goldmark:
     renderer:
       unsafe: true # to allow html in markdown files

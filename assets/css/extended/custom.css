@@ -1,6 +1,58 @@
 .chroma {
   background-color: unset;
+  border-radius: 18px !important;
+  overflow: hidden;
 }
+
+/* 코드블록 둥근 모서리 추가 */
+.post-content pre,
+.post-content .highlight,
+.post-content .chroma,
+.post-content div[class*="highlight"] {
+  border-radius: 18px !important;
+  overflow: hidden;
+}
+
+/* 극강 방법 - 모든 가능한 요소들 제거 */
+.chroma .lntable,
+.chroma .lntable *,
+.chroma .lntd,
+.chroma .lnt,
+.chroma .ln,
+.chroma table,
+.chroma tbody,
+.chroma tr,
+.chroma td,
+.chroma th,
+.chroma pre,
+.chroma code,
+.chroma span,
+.chroma div,
+.highlight table,
+.highlight tbody,
+.highlight tr,
+.highlight td,
+.highlight th,
+.highlight pre,
+.highlight .lntable,
+.highlight .lntable *,
+.highlight .lntd,
+.highlight .lnt,
+.highlight .ln {
+  border-radius: 0 !important;
+  border: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+/* 마지막 수단 - 전역으로 모든 하위 요소 제거 */
+.post-content .chroma *:not(.chroma),
+.post-content .highlight *:not(.highlight) {
+  border-radius: 0 !important;
+  border: none !important;
+}
+
 
 /* 포스트 제목 크기 조정 - 비율 기반 */
 .post-title {
