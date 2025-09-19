@@ -3,3 +3,6 @@
 
 # Templates folder
 templates/
+
+# Temporary files folder
+temp/
