@@ -3,8 +3,8 @@ title: ML 코드로 배워보는 SOLID 원칙
 date: 2025-02-14T17:24:18+09:00
 draft: false
 author: pizzathief
-description: 객체 지향 설계의 5가지 원칙을 데이터쟁이가 알아들을 수 있는 예시와 함께 정리해보았습니다.
-summary: 객체 지향 설계의 5가지 원칙을 데이터쟁이가 알아들을 수 있는 예시와 함께 정리해보았습니다.
+description:
+summary: 데이터쟁이가 알아들을 수 있는 예시와 함께하는 객체 지향 설계의 5가지 원칙
 keywords:
   - solid
   - 객체 지향 프로그래밍

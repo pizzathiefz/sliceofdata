@@ -3,8 +3,8 @@ title: vec2vec, 서로 다른 공간에서 온 임베딩을 번역하다
 date: 2025-05-26T20:38:11+09:00
 draft: false
 author: pizzathief
-description: Harnessing the Universal Geometry of Embeddings (2025) 를 읽어보았습니다.
-summary: Harnessing the Universal Geometry of Embeddings (2025) 를 읽어보았습니다.
+description:
+summary: Harnessing the Universal Geometry of Embeddings (2025) 빠르게 읽어보기
 keywords:
   - vec2vec
   - embedding

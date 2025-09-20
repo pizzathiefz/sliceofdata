@@ -11,7 +11,7 @@ categories:
 slug: 2024-2025
 ShowReadingTime: true
 ShowShareButtons: false
-ShowPostNavLinks: true
+ShowPostNavLinks: false
 ShowBreadCrumbs: false
 ShowCodeCopyButtons: true
 ShowWordCount: false

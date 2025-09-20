@@ -3,7 +3,7 @@ title: SOLID Principles Explained with ML Code
 date: 2025-02-14T17:24:18+09:00
 draft: false
 author: pizzathief
-description: OOP made less scary (and more useful) for data practitioners
+description:
 summary: OOP made less scary (and more useful) for data practitioners
 keywords:
   - solid
