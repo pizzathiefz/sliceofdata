@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
+  <channel>
+    <title>AI-ML on sliceofdata</title>
+    <link>https://sliceofdata.app/tags/ai-ml/</link>
+    <description>Recent content in AI-ML on sliceofdata</description>
+    <generator>Hugo -- 0.150.0</generator>
+    <language>ko-KR</language>
+    <lastBuildDate>Mon, 26 May 2025 20:38:11 +0900</lastBuildDate>
+    <atom:link href="https://sliceofdata.app/tags/ai-ml/feed.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>vec2vec, 서로 다른 공간에서 온 임베딩을 번역하다</title>
+      <link>https://sliceofdata.app/posts/vec2vec/</link>
+      <pubDate>Mon, 26 May 2025 20:38:11 +0900</pubDate>
+      <guid>https://sliceofdata.app/posts/vec2vec/</guid>
+      <description>Harnessing the Universal Geometry of Embeddings (2025) 빠르게 읽어보기</description>
+    </item>
+    <item>
+      <title>ML 코드로 배워보는 SOLID 원칙</title>
+      <link>https://sliceofdata.app/posts/solid-principles-for-ml/</link>
+      <pubDate>Fri, 14 Feb 2025 17:24:18 +0900</pubDate>
+      <guid>https://sliceofdata.app/posts/solid-principles-for-ml/</guid>
+      <description>데이터쟁이가 알아들을 수 있는 예시와 함께하는 객체 지향 설계의 5가지 원칙</description>
+    </item>
+    <item>
+      <title>Data Drift를 발견하는 법</title>
+      <link>https://sliceofdata.app/posts/data-drift-detection/</link>
+      <pubDate>Mon, 06 Feb 2023 11:31:39 +0900</pubDate>
+      <guid>https://sliceofdata.app/posts/data-drift-detection/</guid>
+      <description>강은 흐르고 데이터는 변한다</description>
+    </item>
+  </channel>
+</rss>
