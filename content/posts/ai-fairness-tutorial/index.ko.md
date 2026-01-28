@@ -4,7 +4,7 @@ date: 2021-08-22T17:08:27+09:00
 draft: false
 author: pizzathief
 description:
-summary: "\b차별은 기계한테 당해도 서러운 법"
+summary: "차별은 기계한테 당해도 서러운 법"
 keywords:
   - ai fairness
 tags:
