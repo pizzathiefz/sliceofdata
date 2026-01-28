@@ -29,6 +29,10 @@ sitemap:
   filename: 'sitemap.xml'
   priority: 0.5
 
+outputFormats:
+  RSS:
+    baseName: feed
+
 languages:
   ko:
     languageCode: ko-KR
