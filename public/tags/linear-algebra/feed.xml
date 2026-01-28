@@ -13,14 +13,14 @@
       <link>https://sliceofdata.app/posts/svd/</link>
       <pubDate>Sat, 23 Dec 2023 16:56:52 +0900</pubDate>
       <guid>https://sliceofdata.app/posts/svd/</guid>
-      <description>고유값분해만 뭔지 알고 오세요</description>
+      <description><![CDATA[고유값분해만 뭔지 알고 오세요]]></description>
     </item>
     <item>
       <title>수학을 까먹은 사람을 위한 고유값분해와 주성분분석(PCA)</title>
       <link>https://sliceofdata.app/posts/evd-and-pca/</link>
       <pubDate>Thu, 30 Nov 2023 17:02:35 +0900</pubDate>
       <guid>https://sliceofdata.app/posts/evd-and-pca/</guid>
-      <description>행렬과 벡터만 뭔지 알고 오세요</description>
+      <description><![CDATA[행렬과 벡터만 뭔지 알고 오세요]]></description>
     </item>
   </channel>
 </rss>

@@ -13,14 +13,14 @@
       <link>https://sliceofdata.app/posts/spark-rdd/</link>
       <pubDate>Wed, 08 Jun 2022 11:33:16 +0900</pubDate>
       <guid>https://sliceofdata.app/posts/spark-rdd/</guid>
-      <description>몰라도 되는 것 같지만 중요한 그것</description>
+      <description><![CDATA[몰라도 되는 것 같지만 중요한 그것]]></description>
     </item>
     <item>
       <title>내 스파크 잡을 구해줘</title>
       <link>https://sliceofdata.app/posts/spark-data-skew/</link>
       <pubDate>Sun, 07 Feb 2021 11:07:08 +0900</pubDate>
       <guid>https://sliceofdata.app/posts/spark-data-skew/</guid>
-      <description>data skewness 에 맞서는 소소한 성능 최적화 팁들</description>
+      <description><![CDATA[data skewness 에 맞서는 소소한 성능 최적화 팁들]]></description>
     </item>
   </channel>
 </rss>
