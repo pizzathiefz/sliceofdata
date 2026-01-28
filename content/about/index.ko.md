@@ -1,5 +1,6 @@
 ---
 title: About
+description: "about"
 date: 2025-01-09T00:00:00+09:00
 hidemeta: true
 disableShare: true

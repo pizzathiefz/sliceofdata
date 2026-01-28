@@ -27,19 +27,7 @@
       <link>https://sliceofdata.app/en/about/</link>
       <pubDate>Thu, 09 Jan 2025 00:00:00 +0900</pubDate>
       <guid>https://sliceofdata.app/en/about/</guid>
-      <description>&lt;style&gt;
-.post-content &gt; p:not(.katex-display) { font-size: 85% !important; line-height: 1.5 !important; }
-.post-content &gt; ul &gt; li, .post-content &gt; ol &gt; li { font-size: 85% !important; line-height: 1.5 !important; }
-.post-content &gt; blockquote { font-size: 93% !important; line-height: 1.5 !important; }
-.post-content &gt; blockquote p { font-size: 93% !important; line-height: 1.5 !important; }
-&lt;/style&gt;
-&lt;figure&gt;
-    &lt;img loading=&#34;lazy&#34; src=&#34;https://sliceofdata.app/about/pic.gif&#34;
-         alt=&#34;annoying dog gif from undertale&#34; width=&#34;370&#34;/&gt; 
-&lt;/figure&gt;
-
-&lt;p&gt;👋 &lt;strong&gt;Youngshin Son&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;I’m a machine learning engineer with a background in the game and music streaming industry. I like building things that entertain people &amp;ndash; and I always try to enjoy myself in the process, too. Besides work, I usually end up reading books or watching movies, and I occasionally play games and do a bit of yoga. I just can&amp;rsquo;t deal with any kind of going out, facing uncertainty, or coming home without a dog wagging its tail.&lt;/p&gt;</description>
+      <description>about</description>
     </item>
     <item>
       <title>Subscribe</title>
