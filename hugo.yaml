@@ -102,7 +102,6 @@ params:
   title: post title
   description: "ExampleSite description"
   author: pizzathief
-  images: ["<link or path of image for opengraph, twitter-cards>"]
   DateFormat: "2006-01-02"
   defaultTheme: auto # dark, light
   disableThemeToggle: false

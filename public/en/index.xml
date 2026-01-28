@@ -2,36 +2,31 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>sliceofdata</title>
-    <link>http://localhost:1313/en/</link>
+    <link>https://sliceofdata.app/en/</link>
     <description>Recent content on sliceofdata</description>
-    <image>
-      <title>sliceofdata</title>
-      <url>http://localhost:1313/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</url>
-      <link>http://localhost:1313/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E</link>
-    </image>
     <generator>Hugo -- 0.150.0</generator>
     <language>en-US</language>
     <lastBuildDate>Mon, 26 May 2025 20:38:11 +0900</lastBuildDate>
-    <atom:link href="http://localhost:1313/en/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://sliceofdata.app/en/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>vec2vec: Bridging Embeddings from Different Spaces</title>
-      <link>http://localhost:1313/en/posts/vec2vec/</link>
+      <link>https://sliceofdata.app/en/posts/vec2vec/</link>
       <pubDate>Mon, 26 May 2025 20:38:11 +0900</pubDate>
-      <guid>http://localhost:1313/en/posts/vec2vec/</guid>
+      <guid>https://sliceofdata.app/en/posts/vec2vec/</guid>
       <description>A brief summary of Harnessing the Universal Geometry of Embeddings (2025)</description>
     </item>
     <item>
       <title>SOLID Principles Explained with ML Code</title>
-      <link>http://localhost:1313/en/posts/solid-principles-for-ml/</link>
+      <link>https://sliceofdata.app/en/posts/solid-principles-for-ml/</link>
       <pubDate>Fri, 14 Feb 2025 17:24:18 +0900</pubDate>
-      <guid>http://localhost:1313/en/posts/solid-principles-for-ml/</guid>
+      <guid>https://sliceofdata.app/en/posts/solid-principles-for-ml/</guid>
       <description>OOP made less scary (and more useful) for data practitioners</description>
     </item>
     <item>
       <title>About</title>
-      <link>http://localhost:1313/en/about/</link>
+      <link>https://sliceofdata.app/en/about/</link>
       <pubDate>Thu, 09 Jan 2025 00:00:00 +0900</pubDate>
-      <guid>http://localhost:1313/en/about/</guid>
+      <guid>https://sliceofdata.app/en/about/</guid>
       <description>&lt;style&gt;
 .post-content &gt; p:not(.katex-display) { font-size: 85% !important; line-height: 1.5 !important; }
 .post-content &gt; ul &gt; li, .post-content &gt; ol &gt; li { font-size: 85% !important; line-height: 1.5 !important; }
@@ -39,7 +34,7 @@
 .post-content &gt; blockquote p { font-size: 93% !important; line-height: 1.5 !important; }
 &lt;/style&gt;
 &lt;figure&gt;
-    &lt;img loading=&#34;lazy&#34; src=&#34;http://localhost:1313/about/pic.gif&#34;
+    &lt;img loading=&#34;lazy&#34; src=&#34;https://sliceofdata.app/about/pic.gif&#34;
          alt=&#34;annoying dog gif from undertale&#34; width=&#34;370&#34;/&gt; 
 &lt;/figure&gt;
 
@@ -48,9 +43,9 @@
     </item>
     <item>
       <title>Subscribe</title>
-      <link>http://localhost:1313/en/subscribe/</link>
+      <link>https://sliceofdata.app/en/subscribe/</link>
       <pubDate>Thu, 09 Jan 2025 00:00:00 +0900</pubDate>
-      <guid>http://localhost:1313/en/subscribe/</guid>
+      <guid>https://sliceofdata.app/en/subscribe/</guid>
       <description>&lt;style&gt;
   .mono {
     font-family: &#34;Courier New&#34;, Courier, monospace;

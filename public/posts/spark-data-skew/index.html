@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="ko" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>내 스파크 잡을 구해줘 | sliceofdata</title>
+<meta name="keywords" content="spark, data skew">
+<meta name="description" content="data skewness 에 맞서는 소소한 성능 최적화 팁들">
+<meta name="author" content="pizzathief">
+<link rel="canonical" href="https://sliceofdata.app/posts/spark-data-skew/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.27cad2a1c5348b9448235a32de472a54bfb4b517f58e15427dc5a1a01bf486da.css" integrity="sha256-J8rSocU0i5RII1oy3kcqVL&#43;0tRf1jhVCfcWhoBv0hto=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://sliceofdata.app/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://sliceofdata.app/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://sliceofdata.app/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://sliceofdata.app/%3Clink%20/%20abs%20url%3E">
+<link rel="mask-icon" href="https://sliceofdata.app/%3Clink%20/%20abs%20url%3E">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="ko" href="https://sliceofdata.app/posts/spark-data-skew/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {
+  delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\(', right: '\\)', display: false},
+    {left: '\\[', right: '\\]', display: true}
+  ],
+  throwOnError: false
+});"></script>
+<meta property="og:url" content="https://sliceofdata.app/posts/spark-data-skew/">
+  <meta property="og:site_name" content="sliceofdata">
+  <meta property="og:title" content="내 스파크 잡을 구해줘">
+  <meta property="og:description" content="data skewness 에 맞서는 소소한 성능 최적화 팁들">
+  <meta property="og:locale" content="ko-KR">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2021-02-07T11:07:08+09:00">
+    <meta property="article:modified_time" content="2021-02-07T11:07:08+09:00">
+    <meta property="article:tag" content="Spark">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="내 스파크 잡을 구해줘">
+<meta name="twitter:description" content="data skewness 에 맞서는 소소한 성능 최적화 팁들">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://sliceofdata.app/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "내 스파크 잡을 구해줘",
+      "item": "https://sliceofdata.app/posts/spark-data-skew/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "내 스파크 잡을 구해줘",
+  "name": "내 스파크 잡을 구해줘",
+  "description": "data skewness 에 맞서는 소소한 성능 최적화 팁들",
+  "keywords": [
+    "spark", "data skew"
+  ],
+  "articleBody": "이 글을 쓰게 된 이유 저는 회사에서 일정 시간마다 돌아가는 스파크 배치 잡을 pyspark로 작성하는 일이 많습니다. 며칠 전에 등록한 배치 잡이 실패한 일이 있었는데요. 처음에 실패한 거 보고 엇 뭘 잘못했지? 근데 테스트 할 땐 좀 오래 걸리긴 했어도 문제 없이 돌아갔는데? 라는 생각을 했죠.\n실행 로그를 확인해 보니,\njava.lang.OutOfMemoryError 로 시작함 = 메모리 없어서 니가 시킨 거 중간에 킬됐어! 라는 소리 코드 에러는 아니었지만, 일정에 쫓긴다는 이유로 코드를 호다닥 엉망으로 작성한 탓이었습니다. 너무 많은 데이터를 셔플링 하게 되었고 공간 부족으로 실패했던 것입니다. 어쩌다 다행히 실패하지 않더라도, 느려서 배치가 연달아 지연되는 것도 큰 문제입니다.\n저는 피할 수만 있다면 이 OOM 친구를 다시 만나고 싶지 않았습니다. 그래서 스파크에서 구린 성능의 코드를 작성하는 것을 어떻게 피할 수 있는가? 를 한 번 찾아보았습니다.\n우선 모니터링을 하자 👀 언제 어디서나 제일 중요한 것은 상황 파악입니다. 내가 시킨 일이 망했나? 망했다면 어느 포인트에서, 뭘 하다가 망했나? 를 알아봐야 합니다.\n스파크는 웹 UI를 제공해서 실행 중인 애플리케이션과 워크로드에 대한 지표를 화면에 띄워줍니다. 드라이버와 익스큐터가 어떤 상태인지를 체크하고, 각 잡, 스테이지, 태스크에서 어떤 일이 일어났는지를 체크해야 개선이든 디버깅이든 할 수가 있겠죠.\n위와 같은 타임라인부터, 각 스테이지가 실행될 때 스파크가 수행하는 DAG를 시각화해 볼 수도 있고요.\n각 태스크 별 요약 통계를 제공하는 탭도 있습니다. 어떤 잡 어떤 스테이지가 제일 오래 걸렸는지, 익스큐터들이 골고루 일을 하고 있는지(일부가 놀고 있어서 느려지는 건 아닌지), 셔플링을 너무 많이 하고 있진 않은지 등을 확인할 수 있어요.\n스파크 UI에 대한 더 자세한 내용이 궁금하다면 공식 문서에서 확인하면 됩니다.\n자 이제 그럼 정확히 어떤 문제가 있을 수 있고, 나는 어떻게 해야 하는가의 단계로 넘어가보겠습니다.\n🛣️ 성능 최적화에는 크게 두 갈래의 길이 있습니다. 하나는 스파크 컨피그 설정을 잘 만지는 것이고 다른 하나는 코드를 잘 작성하는 것입니다. 전자도 알아둘수록 물론 매우 좋겠지만! 오늘은 후자를 위주로 살펴보겠습니다.\n가장 흔한 문제, 데이터 편향 (Data Skewness) 스파크는 모든 익스큐터가 병렬로 작업을 수행할 수 있도록 파티션이라고 불리는 청크 단위로 데이터를 분할합니다. 파티션은 클러스터 머신에 존재하는 로우의 집합으로, 쉽게 말하면 데이터를 물리적으로 나눈 방식을 뜻합니다(파티션이 하나라면 아무리 많은 익스큐터가 있어도 병렬 수행이 아닙니다).\n따라서 이상적인 상황이라면, 데이터를 잘 파티셔닝해서 고르게 분배되도록 해야 최적의 성능을 볼 수 있을 것입니다. 하지만 특정 트랜스포메이션에 의해 일부 파티션에 데이터가 쏠리게 되는 경우가 있는데, 이를 데이터 편향(skew) 이 발생했다고 부릅니다.\n복잡한 앱을 작성하다보면 사실 어느 단계에서 편향이 발생하는지도 확인하기 어려울 텐데요. 어찌 되었든 한쪽으로 쏠린 데이터는 특히 셔플(shuffle) 시에 문제가 됩니다. 셔플은 각 파티션 내에서만 트랜스포메이션이 영향을 끼치는 게 아니라(narrow transformation), 서로 다른 파티션 간에 영향을 미칠 때(wide transformation) 발생합니다. 예를 들어 조인의 경우 조인하고 자하는 특정 키 값에 대해 동일한 키가 동일한 파티션 내에 있도록 해야 하기 때문에 후자에 속합니다.\n한 파티션의 데이터를 다른 파티션에 이동하거나 재구성하면서 모든 익스큐터 간 통신이 발생해야 하므로 셔플은 비용이 많이 드는 작업입니다. 편향된 데이터에 수행하게 되면 아주 느려지게 됩니다. 200개 태스크 중 199개의 태스크는 금방 끝났는데 하나만 왜 이렇게 세월아네월아 하고 있지? 하는 경우도 많고요(너 하나만 일하면 내가 퇴근할 수 있는데!). 심하면 제가 경험했던 것처럼 Out of memory로 잡이 실패할 수 있습니다.\n이때 시도해볼 수 있는 방법들은 다음과 같습니다.\n(재)파티셔닝 이미지 출처\n위의 예시는 필터 트랜스포메이션을 통해 데이터 편향이 발생한 경우, 파티셔닝 방법을 사용하여 다시 파티션을 설정해준 것을 도식화한 내용입니다.\nrepartition() : 파티션 개수를 늘이거나 줄일 수 있음, 셔플 발생 coalesce() : 파티션 개수를 줄일 수만 있음 단, repartition 메서드는 무조건 전체 데이터를 셔플하게 됩니다. 파티션 개수를 늘리거나, 컬럼을 기준으로 파티션을 만드는 경우에만 사용하는 것이 좋습니다. (df.repartition(F.col(\"column_name\")))\n반면 coalesce 의 경우 파티션을 늘릴 순 없으나, 셔플을 하지 않는 버전의 repartition 이기 때문에 파티션 개수를 줄여서 병합하고 싶으면 coalesce 를 씁시다. 두 메소드 모두 목적하는 파티션의 개수와 기준 칼럼을 인자로 받을 수 있습니다.\n브로드캐스트 조인 스파크에서 기본 조인은 셔플 조인입니다. 파티셔닝 없이 전체 익스큐터 노드 간의 통신이 발생하기 때문에, 테이블의 크기가 크고 데이터가 편향되어 있을수록 더 매우 많은 자원이 필요합니다.\n셔플 조인\n하지만 만약 작은 데이터프레임과 큰 데이터프레임을 조인하고 싶다면, 아래와 같은 브로드캐스트 조인을 선택할 수 있습니다.\n브로드캐스트 조인\n브로드캐스트 조인이란, 둘 중 더 작은 테이블을 한꺼번에 드라이버에 복사해놓고 쓰는 것입니다. 그래서 이 첫 단계(복제)만 지나가면 그 다음부터는 워커 간 통신이 필요하지 않고, 각 단일 익스큐터가 개별적으로 조인을 하면 되기 때문에 훨씬 효율적입니다.\n주의해야 할 점은 다음과 같습니다.\n하드코딩된 제한이 있다(8GB 이상이거나 로우의 개수가 512000000 이상이면 안 됨). 작지 않은 데이터프레임을 브로드캐스트로 메모리에 올려버리면 오히려 메모리가 부족해서 망할 수 있다. 스파크SQL은 옵티마이저가 알아서 브로드캐스트 조인을 해줄 수도 있다. 세팅을 통해 조절하거나 힌팅이 가능하긴 하다. Salting 뭔가 편법 같으면서도 오 이런 팁이? 싶기도 한, 개인적으로 굉장히 재미있게 느꼈던 방법입니다. Salting은 간단히 말하면 랜덤한 값을 가지는 칼럼을 추가한 뒤 이걸 이용해서 파티션이 잘 나눠지도록 하는 건데요. 무슨 말인지 잘 이해가 안 갈 것 같으니 예시를 들어 보겠습니다.\n큰 테이블 A와 비교적 작은 테이블 B를 조인해야 하는데, A에서 우리가 조인해야 하는 키 값의 분포가 상당히 편향되어 있다고 칩시다. 예를 들면 키 값 별로 페퍼로니는 30개, 포테이토는 50개, 치킨 바베큐는 100개, 하와이안은 1만개의 레코드가 있다면요? 이 키 값만 가지고 조인을 하게 되면 파티션 간 데이터가 매우 불균형한 결과물을 얻게 될 겁니다.\n이때 A를 가지고 0부터 N까지 랜덤 정수 값을 갖는 칼럼을 옆에 살짝 뿌려줍니다. 🧂 그다음에 이 두개를 합친 것을 새로운 조인 키 (Salted Key) 로 쓰겠습니다.\n원래 키와의 차이점은 Salted key가 비교적 더 고르게 분포되었다는 점입니다. 딱봐도 이전에는 하와이안 4개가 반복해서 나올 때 새로운 데이터에서는 하와이안0, 하와이안3, 하와이안2, 하와이안5 이렇게 여러 개가 나오니까요.\n그러면 작은 테이블 B에는 무슨 짓을 해야 할까요? B는 dimension table처럼 매우 크기가 작은, 예컨대 가격표라고 해봅시다. 여기다도 저 숫자 키를 넣어줘야 하는데요, 이때는 숫자 키의 크기, N=9였다면 10만큼 B를 뻥튀기를 해줍니다. 이제 B에도 저 Salted key 변수가 만들어졌죠.\n그다음에 이 새로운 키로 조인을 하게 되면, 이 랜덤한 정수가 일종의 파티션ID 역할을 해서 각 파티션에 고르게 데이터를 나눠줄 수 있습니다! 그다음에 정수 칼럼은 버려도 됩니다.\n(적절한) 캐싱 스파크는 lazy evaluation 원칙에 따라 액션이 진행되기 전에는 실제 트랜스포메이션을 아무것도 실행하지 않고 기다리며, 같은 프로그램 내에서도 액션을 할 때마다 모든 연산을 다시 시작해야 합니다. 따라서 데이터를 메모리/디스크에 캐싱하면 반복되는 연산을 줄일 수 있는 이점이 있습니다. 데이터프레임은 cache(), RDD는 persist() 를 이용합니다.\n물론 캐싱은 만능치트키는 아닙니다. 예를 들어 한번 데이터를 캐싱해버리면 그 다음부터 옵티마이저가 선택할 수 있는 최적의 갈래가 줄어들기도 합니다. 그러니 캐싱은 셀프 조인이라든지, ML 모델을 훈련시킨다든지 하는 것처럼 해당 데이터를 반복적으로 사용해야 할 경우에만 적절히 사용하는 것이 좋습니다.\n참고한 책과 글들 스파크 완벽 가이드 Fighting the skew in Spark Spark 튜닝하기 [Apache Spark] 조인(Join), 셔플(Shuffle) 최적화 Why Your Spark Apps Are Slow Or Failing, Part II The art of joining in Spark ",
+  "wordCount" : "1021",
+  "inLanguage": "ko",
+  "datePublished": "2021-02-07T11:07:08+09:00",
+  "dateModified": "2021-02-07T11:07:08+09:00",
+  "author":{
+    "@type": "Person",
+    "name": "pizzathief"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://sliceofdata.app/posts/spark-data-skew/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "sliceofdata",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://sliceofdata.app/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://sliceofdata.app/" accesskey="h" title="slice.of.data (Alt + H)">
+                <img src="https://sliceofdata.app/apple-touch-icon.png" alt="" aria-label="logo"
+                    height="35">slice.of.data</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://sliceofdata.app/en/" title="English"
+                            aria-label="English">En</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://sliceofdata.app/archives/" title="posts">
+                    <span>posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://sliceofdata.app/tags/" title="tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://sliceofdata.app/about/" title="about">
+                    <span>about</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://sliceofdata.app/subscribe" title="subscribe">
+                    <span>subscribe</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://pizzathief.pages.dev/" title="notes">
+                    <span>notes</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      내 스파크 잡을 구해줘
+    </h1>
+    <div class="post-meta"><span title='2021-02-07 11:07:08 +0900 KST'>2021-02-07</span>&nbsp;·&nbsp;5 min&nbsp;·&nbsp;pizzathief&nbsp;|&nbsp;<a href="https://github.com/pizzathiefz/sliceofdata/blob/main/content/posts/spark-data-skew/index.ko.md" rel="noopener noreferrer edit" target="_blank">Suggest Changes</a>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#이-글을-쓰게-된-이유">이 글을 쓰게 된 이유</a></li>
+    <li><a href="#우선-모니터링을-하자-">우선 모니터링을 하자 👀</a></li>
+    <li><a href="#가장-흔한-문제-데이터-편향-data-skewness">가장 흔한 문제, 데이터 편향 (Data Skewness)</a>
+      <ul>
+        <li><a href="#재파티셔닝">(재)파티셔닝</a></li>
+        <li><a href="#브로드캐스트-조인">브로드캐스트 조인</a></li>
+        <li><a href="#salting">Salting</a></li>
+        <li><a href="#적절한-캐싱">(적절한) 캐싱</a></li>
+      </ul>
+    </li>
+    <li><a href="#참고한-책과-글들">참고한 책과 글들</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="이-글을-쓰게-된-이유">이 글을 쓰게 된 이유<a hidden class="anchor" aria-hidden="true" href="#이-글을-쓰게-된-이유">#</a></h2>
+<p>저는 회사에서 일정 시간마다 돌아가는 스파크 배치 잡을 pyspark로 작성하는 일이 많습니다. 며칠 전에 등록한 배치 잡이 실패한 일이 있었는데요. 처음에 실패한 거 보고 엇 뭘 잘못했지? 근데 테스트 할 땐 좀 오래 걸리긴 했어도 문제 없이 돌아갔는데? 라는 생각을 했죠.</p>
+<p>실행 로그를 확인해 보니,</p>
+<ul>
+<li><code>java.lang.OutOfMemoryError</code> 로 시작함 =  메모리 없어서 니가 시킨 거 중간에 킬됐어! 라는 소리</li>
+</ul>
+<p>코드 에러는 아니었지만, 일정에 쫓긴다는 이유로 코드를 호다닥 엉망으로 작성한 탓이었습니다. 너무 많은 데이터를 셔플링 하게 되었고 공간 부족으로 실패했던 것입니다. 어쩌다 다행히 실패하지 않더라도, 느려서 배치가 연달아 지연되는 것도 큰 문제입니다.</p>
+<p>저는 피할 수만 있다면 이 OOM 친구를 다시 만나고 싶지 않았습니다. 그래서 스파크에서 <strong>구린 성능의 코드를 작성하는 것을 어떻게 피할 수 있는가?</strong> 를 한 번 찾아보았습니다.</p>
+<br>
+<h2 id="우선-모니터링을-하자-">우선 모니터링을 하자 👀<a hidden class="anchor" aria-hidden="true" href="#우선-모니터링을-하자-">#</a></h2>
+<p>언제 어디서나 제일 중요한 것은 상황 파악입니다. 내가 시킨 일이 망했나? 망했다면 어느 포인트에서, 뭘 하다가 망했나? 를 알아봐야 합니다.</p>
+<p>스파크는 웹 UI를 제공해서 실행 중인 애플리케이션과 워크로드에 대한 지표를 화면에 띄워줍니다. 드라이버와 익스큐터가 어떤 상태인지를 체크하고, 각 잡, 스테이지, 태스크에서 어떤 일이 일어났는지를 체크해야 개선이든 디버깅이든 할 수가 있겠죠.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/spark-data-skew/all-jobs-page-detail.png#center" width="480"/> 
+</figure>
+
+<p>위와 같은 타임라인부터, 각 스테이지가 실행될 때 스파크가 수행하는 DAG를 시각화해 볼 수도 있고요.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/spark-data-skew/job-page-detail.png#center" width="400"/> 
+</figure>
+
+<p><strong>각 태스크 별 요약 통계</strong>를 제공하는 탭도 있습니다. 어떤 잡 어떤 스테이지가 제일 오래 걸렸는지, 익스큐터들이 골고루 일을 하고 있는지(일부가 놀고 있어서 느려지는 건 아닌지), 셔플링을 너무 많이 하고 있진 않은지 등을 확인할 수 있어요.</p>
+<p>스파크 UI에 대한 더 자세한 내용이 궁금하다면 <a href="https://spark.apache.org/docs/3.0.0-preview/web-ui.html">공식 문서</a>에서 확인하면 됩니다.</p>
+<p>자 이제 그럼 정확히 어떤 문제가 있을 수 있고, 나는 어떻게 해야 하는가의 단계로 넘어가보겠습니다.</p>
+<blockquote>
+<p>🛣️ 성능 최적화에는 크게 두 갈래의 길이 있습니다. 하나는 스파크 컨피그 설정을 <strong>잘</strong> 만지는 것이고 다른 하나는 코드를 <strong>잘</strong> 작성하는 것입니다. 전자도 알아둘수록 물론 매우 좋겠지만! 오늘은 후자를 위주로 살펴보겠습니다.</p></blockquote>
+<br>
+<h2 id="가장-흔한-문제-데이터-편향-data-skewness">가장 흔한 문제, 데이터 편향 (Data Skewness)<a hidden class="anchor" aria-hidden="true" href="#가장-흔한-문제-데이터-편향-data-skewness">#</a></h2>
+<p>스파크는 모든 익스큐터가 병렬로 작업을 수행할 수 있도록 파티션이라고 불리는 청크 단위로 데이터를 분할합니다. 파티션은 클러스터 머신에 존재하는 로우의 집합으로, 쉽게 말하면 데이터를 물리적으로 나눈 방식을 뜻합니다(파티션이 하나라면 아무리 많은 익스큐터가 있어도 병렬 수행이 아닙니다).</p>
+<p>따라서 이상적인 상황이라면, 데이터를 잘 파티셔닝해서 고르게 분배되도록 해야 최적의 성능을 볼 수 있을 것입니다. 하지만 특정 트랜스포메이션에 의해 일부 파티션에 데이터가 쏠리게 되는 경우가 있는데, 이를 <strong>데이터 편향(skew)</strong> 이 발생했다고 부릅니다.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/spark-data-skew/narrow-and-wide-dependencies.png#center" width="480"/> 
+</figure>
+
+<p>복잡한 앱을 작성하다보면 사실 어느 단계에서 편향이 발생하는지도 확인하기 어려울 텐데요. 어찌 되었든 한쪽으로 쏠린 데이터는 특히 <strong>셔플(shuffle)</strong> 시에 문제가 됩니다. 셔플은 각 파티션 내에서만 트랜스포메이션이 영향을 끼치는 게 아니라(narrow transformation), 서로 다른 파티션 간에 영향을 미칠 때(wide transformation) 발생합니다. 예를 들어 조인의 경우 조인하고 자하는 특정 키 값에 대해 동일한 키가 동일한 파티션 내에 있도록 해야 하기 때문에 후자에 속합니다.</p>
+<p>한 파티션의 데이터를 다른 파티션에 이동하거나 재구성하면서 모든 익스큐터 간 통신이 발생해야 하므로 셔플은 비용이 많이 드는 작업입니다. <strong>편향된 데이터에 수행하게 되면 아주 느려지게 됩니다</strong>. 200개 태스크 중 199개의 태스크는 금방 끝났는데 하나만 왜 이렇게 세월아네월아 하고 있지? 하는 경우도 많고요(<del>너 하나만 일하면 내가 퇴근할 수 있는데!</del>). 심하면 제가 경험했던 것처럼 Out of memory로 잡이 실패할 수 있습니다.</p>
+<p>이때 시도해볼 수 있는 방법들은 다음과 같습니다.</p>
+<br>
+<h3 id="재파티셔닝">(재)파티셔닝<a hidden class="anchor" aria-hidden="true" href="#재파티셔닝">#</a></h3>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/spark-data-skew/repartition.png#center"
+         alt="이미지 출처" width="480"/> <figcaption>
+            <p><a href="https://gritmind.blog/2020/10/16/spark_tune/">이미지 출처</a></p>
+        </figcaption>
+</figure>
+
+<p>위의 예시는 필터 트랜스포메이션을 통해 데이터 편향이 발생한 경우, 파티셔닝 방법을 사용하여 다시 파티션을 설정해준 것을 도식화한 내용입니다.</p>
+<ul>
+<li><code>repartition()</code> : 파티션 개수를 늘이거나 줄일 수 있음, 셔플 발생</li>
+<li><code>coalesce()</code> : 파티션 개수를 줄일 수만 있음</li>
+</ul>
+<p>단, <code>repartition</code> 메서드는 무조건 전체 데이터를 셔플하게 됩니다. 파티션 개수를 늘리거나, 컬럼을 기준으로 파티션을 만드는 경우에만 사용하는 것이 좋습니다. (<code>df.repartition(F.col(&quot;column_name&quot;))</code>)</p>
+<p>반면 <code>coalesce</code> 의 경우 파티션을 늘릴 순 없으나, 셔플을 하지 않는 버전의 <code>repartition</code> 이기 때문에 파티션 개수를 줄여서 병합하고 싶으면 <code>coalesce</code> 를 씁시다. 두 메소드 모두 목적하는 파티션의 개수와 기준 칼럼을 인자로 받을 수 있습니다.</p>
+<br>
+<h3 id="브로드캐스트-조인">브로드캐스트 조인<a hidden class="anchor" aria-hidden="true" href="#브로드캐스트-조인">#</a></h3>
+<p>스파크에서 기본 조인은 셔플 조인입니다. 파티셔닝 없이 전체 익스큐터 노드 간의 통신이 발생하기 때문에, 테이블의 크기가 크고 데이터가 편향되어 있을수록 더 매우 많은 자원이 필요합니다.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/spark-data-skew/shuffle-join.png#center"
+         alt="셔플 조인" width="410"/> <figcaption>
+            <p>셔플 조인</p>
+        </figcaption>
+</figure>
+
+<p>하지만 만약 작은 데이터프레임과 큰 데이터프레임을 조인하고 싶다면, 아래와 같은 <strong>브로드캐스트 조인</strong>을 선택할 수 있습니다.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/spark-data-skew/broadcast-join.png#center"
+         alt="브로드캐스트 조인" width="480"/> <figcaption>
+            <p>브로드캐스트 조인</p>
+        </figcaption>
+</figure>
+
+<p>브로드캐스트 조인이란, 둘 중 더 작은 테이블을 한꺼번에 드라이버에 복사해놓고 쓰는 것입니다. 그래서 이 첫 단계(복제)만 지나가면 그 다음부터는 워커 간 통신이 필요하지 않고, 각 단일 익스큐터가 개별적으로 조인을 하면 되기 때문에 훨씬 효율적입니다.</p>
+<p>주의해야 할 점은 다음과 같습니다.</p>
+<ul>
+<li>하드코딩된 제한이 있다(8GB 이상이거나 로우의 개수가 512000000 이상이면 안 됨).</li>
+<li>작지 않은 데이터프레임을 브로드캐스트로 메모리에 올려버리면 오히려 메모리가 부족해서 망할 수 있다.</li>
+<li>스파크SQL은 옵티마이저가 알아서 브로드캐스트 조인을 해줄 수도 있다. 세팅을 통해 조절하거나 힌팅이 가능하긴 하다.</li>
+</ul>
+<br>
+<h3 id="salting">Salting<a hidden class="anchor" aria-hidden="true" href="#salting">#</a></h3>
+<p>뭔가 편법 같으면서도 오 이런 팁이? 싶기도 한, 개인적으로 굉장히 재미있게 느꼈던 방법입니다. Salting은 간단히 말하면 <strong>랜덤한 값을 가지는 칼럼을 추가한 뒤 이걸 이용해서 파티션이 잘 나눠지도록</strong> 하는 건데요. 무슨 말인지 잘 이해가 안 갈 것 같으니 예시를 들어 보겠습니다.</p>
+<p>큰 테이블 A와 비교적 작은 테이블 B를 조인해야 하는데, A에서 우리가 조인해야 하는 키 값의 분포가 상당히 편향되어 있다고 칩시다. 예를 들면 키 값 별로 페퍼로니는 30개, 포테이토는 50개, 치킨 바베큐는 100개, 하와이안은 1만개의 레코드가 있다면요? 이 키 값만 가지고 조인을 하게 되면 파티션 간 데이터가 매우 불균형한 결과물을 얻게 될 겁니다.</p>
+<p>이때 A를 가지고 0부터 N까지 랜덤 정수 값을 갖는 칼럼을 옆에 살짝 뿌려줍니다. 🧂  그다음에 이 두개를 합친 것을 <strong>새로운 조인 키 (Salted Key)</strong> 로 쓰겠습니다.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/spark-data-skew/salting.png#center" width="540"/> 
+</figure>
+
+<p>원래 키와의 차이점은 Salted key가 <strong>비교적</strong> 더 고르게 분포되었다는 점입니다. 딱봐도 이전에는 하와이안 4개가 반복해서 나올 때 새로운 데이터에서는 하와이안0, 하와이안3, 하와이안2, 하와이안5 이렇게 여러 개가 나오니까요.</p>
+<p>그러면 작은 테이블 B에는 무슨 짓을 해야 할까요? B는 dimension table처럼 매우 크기가 작은, 예컨대 가격표라고 해봅시다. 여기다도 저 숫자 키를 넣어줘야 하는데요, 이때는 숫자 키의 크기, N=9였다면 10만큼 B를 뻥튀기를 해줍니다. 이제 B에도 저 Salted key 변수가 만들어졌죠.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/spark-data-skew/salting-result.png#center" width="460"/> 
+</figure>
+
+<p>그다음에 이 새로운 키로 조인을 하게 되면, <strong>이 랜덤한 정수가 일종의 파티션ID 역할을 해서 각 파티션에 고르게 데이터를 나눠줄 수 있습니다</strong>! 그다음에 정수 칼럼은 버려도 됩니다.</p>
+<br>
+<h3 id="적절한-캐싱">(적절한) 캐싱<a hidden class="anchor" aria-hidden="true" href="#적절한-캐싱">#</a></h3>
+<p>스파크는 lazy evaluation 원칙에 따라 액션이 진행되기 전에는 실제 트랜스포메이션을 아무것도 실행하지 않고 기다리며, 같은 프로그램 내에서도 액션을 할 때마다 모든 연산을 다시 시작해야 합니다. 따라서 데이터를 메모리/디스크에 캐싱하면 반복되는 연산을 줄일 수 있는 이점이 있습니다. 데이터프레임은 <code>cache()</code>, RDD는 <code>persist()</code> 를 이용합니다.</p>
+<p>물론 캐싱은 만능치트키는 아닙니다. 예를 들어 한번 데이터를 캐싱해버리면 그 다음부터 옵티마이저가 선택할 수 있는 최적의 갈래가 줄어들기도 합니다. 그러니 캐싱은 셀프 조인이라든지, ML 모델을 훈련시킨다든지 하는 것처럼 <strong>해당 데이터를 반복적으로 사용해야 할 경우</strong>에만 적절히 사용하는 것이 좋습니다.</p>
+<br>
+<hr>
+<br>
+<h2 id="참고한-책과-글들">참고한 책과 글들<a hidden class="anchor" aria-hidden="true" href="#참고한-책과-글들">#</a></h2>
+<ul>
+<li><a href="https://www.hanbit.co.kr/store/books/look.php?p_code=B6709029941">스파크 완벽 가이드</a></li>
+<li><a href="https://datarus.wordpress.com/2015/05/04/fighting-the-skew-in-spark/">Fighting the skew in Spark</a></li>
+<li><a href="https://gritmind.blog/2020/10/16/spark_tune/">Spark 튜닝하기</a></li>
+<li><a href="https://jaemunbro.medium.com/apache-spark-%EC%A1%B0%EC%9D%B8-join-%EC%B5%9C%EC%A0%81%ED%99%94-c9e54d20ae06">[Apache Spark] 조인(Join), 셔플(Shuffle) 최적화</a></li>
+<li><a href="https://dzone.com/articles/why-your-spark-apps-are-slow-or-failing-part-ii-da">Why Your Spark Apps Are Slow Or Failing, Part II</a></li>
+<li><a href="https://towardsdatascience.com/the-art-of-joining-in-spark-dcbd33d693c">The art of joining in Spark</a></li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://sliceofdata.app/tags/spark/">Spark</a></li>
+    </ul>
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 내 스파크 잡을 구해줘 on x"
+            href="https://x.com/intent/tweet/?text=%eb%82%b4%20%ec%8a%a4%ed%8c%8c%ed%81%ac%20%ec%9e%a1%ec%9d%84%20%ea%b5%ac%ed%95%b4%ec%a4%98&amp;url=https%3a%2f%2fsliceofdata.app%2fposts%2fspark-data-skew%2f&amp;hashtags=spark">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 내 스파크 잡을 구해줘 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fsliceofdata.app%2fposts%2fspark-data-skew%2f&amp;title=%eb%82%b4%20%ec%8a%a4%ed%8c%8c%ed%81%ac%20%ec%9e%a1%ec%9d%84%20%ea%b5%ac%ed%95%b4%ec%a4%98&amp;summary=%eb%82%b4%20%ec%8a%a4%ed%8c%8c%ed%81%ac%20%ec%9e%a1%ec%9d%84%20%ea%b5%ac%ed%95%b4%ec%a4%98&amp;source=https%3a%2f%2fsliceofdata.app%2fposts%2fspark-data-skew%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+<div class="container_disqus">
+    <script src="https://giscus.app/client.js"
+        data-repo="pizzathiefz/sliceofdata"
+        data-repo-id="R_kgDOPsr6oQ"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOPsr6oc4CvOfW"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme=""
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+    </script>
+</div>
+<script>
+    
+    function getCurrentTheme() {
+        
+        let storedTheme = localStorage.getItem('pref-theme');
+        if (storedTheme) {
+            return storedTheme;
+        }
+        
+        
+        if (document.body.classList.contains('dark')) {
+            return 'dark';
+        }
+        
+        
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+        
+        return 'light';
+    }
+    
+    
+    function setGiscusTheme() {
+        let currentTheme = getCurrentTheme();
+        let giscusTheme = currentTheme === 'dark' ? 'noborder_dark' : 'noborder_light';
+        
+        
+        let giscusScript = document.querySelector("div.container_disqus > script");
+        if (giscusScript) {
+            giscusScript.setAttribute('data-theme', giscusTheme);
+        }
+        
+        return giscusTheme;
+    }
+    
+    
+    setGiscusTheme();
+    
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        let themeToggle = document.querySelector('#theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                setTimeout(() => {
+                    let newTheme = getCurrentTheme();
+                    let newGiscusTheme = newTheme === 'dark' ? 'noborder_dark' : 'noborder_light';
+                    
+                    let giscusFrame = document.querySelector('iframe.giscus-frame');
+                    if (giscusFrame) {
+                        giscusFrame.contentWindow.postMessage({
+                            giscus: {
+                                setConfig: {
+                                    theme: newGiscusTheme
+                                }
+                            }
+                        }, 'https://giscus.app');
+                    }
+                }, 100);
+            });
+        }
+    });
+</script>
+
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://sliceofdata.app/">sliceofdata</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

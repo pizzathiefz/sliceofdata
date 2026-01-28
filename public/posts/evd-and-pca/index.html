@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="ko" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>수학을 까먹은 사람을 위한 고유값분해와 주성분분석(PCA) | sliceofdata</title>
+<meta name="keywords" content="eigenvalue decomposition, pca, 고유값분해, 차원 축소, 주성분분석, 선형대수">
+<meta name="description" content="행렬과 벡터만 뭔지 알고 오세요">
+<meta name="author" content="pizzathief">
+<link rel="canonical" href="https://sliceofdata.app/posts/evd-and-pca/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.27cad2a1c5348b9448235a32de472a54bfb4b517f58e15427dc5a1a01bf486da.css" integrity="sha256-J8rSocU0i5RII1oy3kcqVL&#43;0tRf1jhVCfcWhoBv0hto=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://sliceofdata.app/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://sliceofdata.app/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://sliceofdata.app/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://sliceofdata.app/%3Clink%20/%20abs%20url%3E">
+<link rel="mask-icon" href="https://sliceofdata.app/%3Clink%20/%20abs%20url%3E">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="ko" href="https://sliceofdata.app/posts/evd-and-pca/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {
+  delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\(', right: '\\)', display: false},
+    {left: '\\[', right: '\\]', display: true}
+  ],
+  throwOnError: false
+});"></script>
+<meta property="og:url" content="https://sliceofdata.app/posts/evd-and-pca/">
+  <meta property="og:site_name" content="sliceofdata">
+  <meta property="og:title" content="수학을 까먹은 사람을 위한 고유값분해와 주성분분석(PCA)">
+  <meta property="og:description" content="행렬과 벡터만 뭔지 알고 오세요">
+  <meta property="og:locale" content="ko-KR">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2023-11-30T17:02:35+09:00">
+    <meta property="article:modified_time" content="2023-11-30T17:02:35+09:00">
+    <meta property="article:tag" content="Linear-Algebra">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="수학을 까먹은 사람을 위한 고유값분해와 주성분분석(PCA)">
+<meta name="twitter:description" content="행렬과 벡터만 뭔지 알고 오세요">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://sliceofdata.app/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "수학을 까먹은 사람을 위한 고유값분해와 주성분분석(PCA)",
+      "item": "https://sliceofdata.app/posts/evd-and-pca/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "수학을 까먹은 사람을 위한 고유값분해와 주성분분석(PCA)",
+  "name": "수학을 까먹은 사람을 위한 고유값분해와 주성분분석(PCA)",
+  "description": "행렬과 벡터만 뭔지 알고 오세요",
+  "keywords": [
+    "eigenvalue decomposition", "pca", "고유값분해", "차원 축소", "주성분분석", "선형대수"
+  ],
+  "articleBody": " 개발자를 위한 실전 선형대수학의 12장을 주로 참고했습니다.\n고유값분해 이해하기 기본 개념 우선 고유값분해를 이해하려면 당연히 고유값(eigenvalue) 와 고유벡터(eigenvector) 를 개념적으로 알아야 합니다. 이 두 가지 개념은 다음과 같은 엄청나게 간단한 식으로 표현됩니다.\n$$ A\\mathbf{v} = \\lambda \\mathbf{v} $$\n$**$ $A$: 행렬, $\\mathbf{v}$: 벡터, $\\lambda$ : 스칼라(상수)\n이 식은 물론 $A$가 $\\lambda$와 같다는 말이 아니고 같은 벡터에 대해 이 행렬이 미치는 영향과 스칼라 값이 미치는 효과가 동일하다는 뜻인데요. 기하학적으로는(그림으로 보자는 뜻) 행렬이 벡터를 늘리거나 줄이긴 하지만 회전시키지 않는 경우를 의미합니다.\n잠깐 기억을 되살려 보면, 벡터에는 방향과 크기가 있죠.\n‘방향’이 다른 벡터들 (그림 출처)\n2u는 u에다가 상수값을 곱한 것으로 u와 방향은 같으나 ‘크기’가 다르다 (그림 출처)\n많은 경우, 벡터에 행렬을 곱하면 다음과 같이 방향이 바뀝니다.\n(그림 출처)\n근데 어떤 특별한 행렬과 특별한 벡터가 만나면, 신기하게도 방향은 안 바뀌고 크기만 변할 수도 있습니다!\n(그림 출처)\n이때 이 벡터가 이 행렬의 고유벡터이며, 벡터가 늘어나거나 줄어드는 양이 고유값입니다. 예를 들면,\n$$ \\begin{bmatrix} 1 \u0026 2 \\\\ 2 \u0026 1 \\end{bmatrix} \\begin{bmatrix} 1 \\\\ 1 \\end{bmatrix} = 3 \\begin{bmatrix} 1 \\\\ 1 \\end{bmatrix} $$\n즉 이 행렬의 고유벡터는 $\\begin{bmatrix} 1 \u0026 1 \\end{bmatrix}$ 이고 고유값은 3 여기까지 보고 알 수 있는 것은 고유값과 고유벡터는 특정 행렬에 따라오는 존재라는 것입니다. 특별한 매칭 관계랄까요. 단 1:1 매칭은 아닙니다. 왜인지는 더 아래에서 설명하겠습니다.\n한 가지 더 알 수 있는 것은 정의 상 고유값과 고유벡터를 얻으려면 행렬 $A$ 가 정방행렬(행과 열의 수가 같은 정사각형 행렬)이어야 한다는 것입니다. 위 식을 다시 들여다보면 알 수 있는데, 벡터 $\\mathbf{v}$ 가 $N$ 차원이라고 쳤을 때 $A$가 $N \\times N$ 이어야 $A \\mathbf{v}$ 와 $\\lambda \\mathbf{v}$가 같은 차원이 되지, $A$ 가 $M \\times N (M \\neq N)$ 이면 $A \\mathbf{v}$ 는 $M$ 차원이 되어버려서 애초에 저 식이 성립할 수 없으니까요.\n하는 법 고유값분해를 하는 방법은 주어진 행렬에 대해 고유값과 고유벡터를 찾는 것입니다. 순서는 고유값이 먼저입니다.\n위 식을 다시 고쳐보겠습니다.\n$$ A\\mathbf{v} - \\lambda \\mathbf{v} = (A- \\lambda I) \\mathbf{v} = 0 $$\n행렬에서 스칼라를 빼줄 수는 없으니까 $A$랑 사이즈가 같은 단위행렬이라는 애를 불러와서 빼줬습니다. 단위 행렬이 뭐였더라? 대각 원소만 1이고 나머지는 0인 정방행렬입니다. 이 행렬은 어떤 행렬을 곱해도 동일한 행렬이 된다는 점에서 상수 계산의 숫자 1이랑 비슷한 친구입니다. 이렇게 하게 되면 사실상 대각 성분에 스칼라 값만큼을 더하거나 빼주는 것인데, 이걸 행렬 이동이라고도 불러요. 간단한 예시는 이렇습니다. 행렬을 3만큼 이동한 것이죠.\n$$ \\begin{bmatrix} 2 \u0026 2 \\\\ 1 \u0026 3 \\end{bmatrix} + 3 \\begin{bmatrix} 1 \u0026 0 \\\\ 0 \u0026 1 \\end{bmatrix} = \\begin{bmatrix} 5 \u0026 2 \\\\ 1 \u0026 6 \\end{bmatrix} $$\n다시 돌아와서, 이동시킨 $A- \\lambda I$ 를 $A’$ 라는 새로운 행렬로 생각합시다. 즉 $A ’ \\mathbf{v} = 0$ 입니다. 이런 일이 벌어지려면 어떤 조건이 필요할까요? 물론 아주 쉬운 답은 $\\mathbf{v}$ 가 영벡터(0으로만 이루어진 벡터)이면 됩니다. 하지만 이 답은 너무 쉬워요. 수학은 이런 답을 뻔하다, 자명하다(trivial)고 하며 의미 있는 답으로 쳐주지 않습니다. 이 식을 가능하게 하는 자명하지 않은 답은, 벡터 $\\mathbf{v}$ 가 영벡터가 아니면서 행렬 $A’$의 영공간에 있다 는 것입니다.\n이 부분을 이해하려면 몇 가지 개념들이 필요합니다.\n벡터의 선형독립 행렬의 공간, 영공간 행렬의 계수(rank) 순서대로 간단히 짚어 보겠습니다.\n벡터의 선형독립\n다음과 같이 여러 개의 벡터에 각각 다른 스칼라 값을 곱해서 더하는 것을 선형가중결합이라고 한다. $\\mathbf{w} = \\lambda_1\\mathbf{v}_1 + \\cdots \\lambda_m\\mathbf{v}_m$ 주어진 벡터 집합 중 한 개의 벡터에 대해, 만약 다른 벡터들을 어떻게든 선형가중결합해서 이 벡터를 만들 수 있다면 이 벡터 집합은 서로 선형종속(linearly dependent)이며, 그렇지 못하면 선형독립(linearly independent)이다. 예를 들어 ${ \\begin{bmatrix} 1 \\ 0 \\end{bmatrix} , \\begin{bmatrix} 0 \\ 1 \\end{bmatrix}, \\begin{bmatrix} 1 \\ 1 \\end{bmatrix} \\ }$ 은 선형종속이다. 첫번째랑 두번째를 더하면 세번째가 됨. 예를 들어 ${ \\begin{bmatrix} 1 \\ 0 \\end{bmatrix} , \\begin{bmatrix} 1 \\ -1 \\end{bmatrix}, \\begin{bmatrix} 1 \\ 1 \\end{bmatrix} \\ }$ 은 선형독립이다. 다른 두 개에 무슨 짓을 해도 나머지 하나를 만들 수 없음. 선형종속의 정의를 쓰면 $\\lambda_1\\mathbf{v}_1 = \\lambda_2\\mathbf{v}_2 + \\cdots \\lambda_m\\mathbf{v}_m$ 인데 이건 사실 다시 쓰면 $0 = \\lambda_1\\mathbf{v}_1 + \\cdots \\lambda_m\\mathbf{v}_m$ 물론 모든 람다값이 0이면 다 되지만 역시 자명한 답은 안 쳐준다. 행렬의 공간\n행렬을 열벡터의 집합으로 간주하고(세로로 자른다는 소리), 이 열벡터를 가지고 무한하게 선형가중결합을 한다고 생각하자. 그러면 무한 개의 벡터를 만들 수 있을 텐데, 만들어지는 무한한 집합을 이 행렬의 공간(열공간)이라고 한다. $$ C (\\begin{bmatrix} 1\u0026 1 \\\\ 3 \u0026 2 \\end{bmatrix}) = \\lambda_1 \\begin{bmatrix} 1 \\\\ 3 \\end{bmatrix} + \\lambda_2 \\begin{bmatrix} 1 \\\\ 2 \\end{bmatrix} , \\lambda \\in \\mathbb{R}$$ 즉 $\\lambda_1$ 과 $\\lambda_2$에 어떤 실수값이든 넣어서 만들 수 있는 모든 벡터들이 이 행렬의 열공간이다. 예를 들어서 $\\lambda_1 = 11$, $\\lambda_2=-15$ 이면 우리는 $\\begin{bmatrix} -4 \u0026 3 \\end{bmatrix}$ 를 얻을 수 있으며, 이 벡터는 이 행렬의 열공간에 포함된다고 할 수 있음. 즉 가중치 $\\lambda$ 의 조합 $\\mathbf{x} = \\begin{bmatrix} 11 \u0026 -15 \\end{bmatrix}$ 가 존재해서, $A\\mathbf{x} = \\mathbf{b}$ 가 가능하다면, 벡터 $\\mathbf{b}$ 는 행렬 $A$ 의 열공간 안에 포함된다는 것이다. 그런데 재미있는 사실: 이 행렬의 열공간은 $\\mathbb{R}^2$ 이다! 즉 모든 실수값 2개로 이루어진 벡터를 저 2개의 열벡터를 선형결합해서 만들 수 있다. 물론 모든 행렬의 열공간이 이렇지는 않다. $$C (\\begin{bmatrix} 2\u0026 4 \\\\ 1 \u0026 2 \\end{bmatrix}) = \\lambda_1 \\begin{bmatrix} 2 \\\\ 4 \\end{bmatrix} + \\lambda_2 \\begin{bmatrix} 1 \\\\ 2 \\end{bmatrix} , \\lambda \\in \\mathbb{R}$$ 이 경우 두 벡터를 아무리 선형결합 시켜도 $\\mathbb{R}^2$ 의 무한한 영역을 커버할 수 없는데, 두 개의 열벡터가 선형독립이 아니기 때문임. 이 벡터들로 만들 수 있는 공간은 2차원이 아니라 1차원인 것이다. (그림 출처)_\n행렬의 계수(rank)\n열 공간의 차원의 수, 선형독립 집합을 형성할 수 있는 최대 열의 수를 뜻한다. 즉 위 행렬의 공간 예시 중 첫번째 행렬은 rank가 2고, 두번째 행렬은 rank가 1이다. 가능한 최대값은 행의 수랑 열의 수 중 더 작은 값이며 (즉 $3 \\times 4$ 행렬의 가능한 최대 계수는 3임) 열과 행의 계수는 동일하므로 한쪽만 보면 된다. 물론 행렬에 따라서 최대 계수를 계수로 가질 수도 안 가질 수도 있다. 위 행렬의 공간 예시 중 두번째 행렬은 $2 \\times 2$ 행렬로 최대 계수는 2이지만 실제 계수가 1인 행렬이었다. 이 행렬처럼 최대 계수를 가지지 않는 행렬은 행렬을 이루고 있는 $N$개의 벡터가 선형독립이 아니라는 뜻이다(선형독립인 애들 개수가 $N$개보다 작다는 뜻이다). 이런 특징을 최대계수보다 모자라 rank-deficient하다고 부르며, 이러한 행렬은 특이(singular) 행렬이라고도 한다. 다른 이름으로는 비가역(non-invertible) 행렬인데, 행렬식 값이 0으로서 역행렬(상수 계산에서 역수와 동일하게 곱해서 단위행렬이 되는 행렬, $AA^{-1}=I$)을 구할 수 없다. 행렬의 영공간\n영공간은 $A\\mathbf{y} = 0$ 이 되는 모든 벡터 $\\mathbf{y}$ (이번에도 영벡터는 빼고..!) 영공간은 비어 있을 수도 있고 비어있지 않을 수도 있다. 영공간이 비어 있지 않으려면, 행렬의 열벡터들이 선형종속이어야 한다. 선형종속의 정의 $0 = \\lambda_1\\mathbf{v}_1 + \\cdots \\lambda_m\\mathbf{v}_m$ 를 다시 떠올려 보면 당연하다. 살짝 멀리 갔다 돌아왔는데요, 우리는 $A’$ 의 영공간의 벡터 $\\mathbf{v}$를 찾아야 한다는 것을 기억합시다. $A’$의 영공간이 비어있지 않으려면, $A’$는 선형종속 벡터 집합, 즉 rank-deficient한 singular 행렬이어야 하며, 행렬식의 값은 0입니다. 이게 바로 우리가 고유값을 구하게 해주는 가장 큰 힌트입니다.\n2X2 행렬을 예시로 들면 다음과 같습니다. ($\\vert A \\vert$ 요건 행렬식의 표기예요)\n$$ \\vert A’ \\vert = \\vert A - \\lambda I \\vert = \\vert \\begin{bmatrix} a \u0026 b \\\\ c \u0026 d \\end{bmatrix} - \\lambda \\begin{bmatrix} 1 \u0026 0 \\\\ 0 \u0026 1 \\end{bmatrix} \\vert = \\vert \\begin{bmatrix} a-\\lambda \u0026 b \\\\ c \u0026 d- \\lambda \\end{bmatrix} \\vert = 0 $$\n행렬식 공식을 대입하면,\n$$ (a-\\lambda)(d-\\lambda)-bc = \\lambda^2 - (a+d)\\lambda + (ad-bc) =0$$\n이 이차 방정식을 풀면 2개의 $\\lambda$ 값이 나오겠죠. 즉 $2 \\times 2$ 행렬에서 우리가 찾는 $\\lambda$ 는 2개이며, 이는 행렬 크기가 올라가도 일반화될 수 있습니다. 결론적으로 $M \\times M$ 행렬에 대해서는 $M$ 개의 고유값이 존재합니다.\n제법 긴 과정을 거쳐 고유값을 구했습니다. 고유벡터는 어떻게 정해질까요?\n맨 처음 예시로 돌아가서, 다음 행렬의 고유값 2개 중 하나는 3이었습니다.\n$$ \\begin{bmatrix} 1 \u0026 2 \\\\ 2 \u0026 1 \\end{bmatrix} \\begin{bmatrix} 1 \\\\ 1 \\end{bmatrix} = 3 \\begin{bmatrix} 1 \\\\ 1 \\end{bmatrix} $$\n그렇다는 건 요 행렬을 -3 이동시킨 $A’$ 의 영공간의 벡터가 고유벡터라는 건데요,\n$$\\begin{bmatrix} -2 \u0026 2 \\\\ 2 \u0026 -2 \\end{bmatrix} \\mathbf{v} = \\begin{bmatrix} 0 \\\\ 0 \\end{bmatrix} $$\n고유벡터를 찾는 일반화된 방법은 더 어렵지만요, 이 예시에서는 $\\mathbf{v}$ 에 뭐가 들어가야 하는지는 눈으로 봐도 알 수 있네요. $\\begin{bmatrix} 1 \u0026 1 \\end{bmatrix}$ 도 되고, $\\begin{bmatrix} -3.1 \u0026 -3.1 \\end{bmatrix}$ 도 되고, $\\begin{bmatrix} 526 \u0026 526 \\end{bmatrix}$ 도 됩니다! 모든 실수값 $\\alpha$ 에 대해 $\\alpha \\begin{bmatrix} 1 \u0026 1 \\end{bmatrix}$ 가 고유벡터가 될 수 있습니다.\n즉 여기서 우리가 알 수 있는 것은 고유값의 개수는 정해져 있지만 고유벡터는 무한 개가 존재할 수 있다는 것입니다. 벡터의 크기가 아니라 방향이 중요합니다.\n보통 라이브러리 등을 사용해서 고유벡터를 구해달라고 하면 노름이 1인 정규화된 고유벡터를 구해주곤 합니다. 그냥 대표 친구를 하나 알려주는 거죠. 여기서 노름은 벡터의 크기를 뜻하며, 벡터의 모든 원소를 제곱해서 더한 것에 제곱근을 취해준 결과입니다. 일반적인 유클리디언 거리 공식 떠올리시면 됩니다.\n$$ \\Vert \\mathbf{v} \\Vert = \\sqrt{\\sum^n_i v_i^2} $$\n이 값이 1인 걸 단위벡터라고 하는데, 모든 벡터는 노름으로 모든 원소를 나눠줌으로써 단위벡터로 만들 수 있습니다.\n필수 조건과 행렬 대각화 다시 돌아가서, $M \\times M$ 행렬에 대해서는 $M$ 개의 고유값이 존재합니다.\n즉\n$$ \\begin{matrix} A\\mathbf{v_1} = \\lambda_1 \\mathbf{v_1} \\ \\vdots \\ A\\mathbf{v_M} = \\lambda_M \\mathbf{v_M} \\end{matrix} $$\n이 여러 개의 식은 행렬화하여 간단하게 표현할 수 있습니다. 2차원으로 예시를 들면, 어떤 행렬 A에 대해 2개의 고유값과 각각에 해당하는 고유벡터가 있을 때, 이 2개의 고유벡터를 열 단위로 합친 행렬 $V$와 고유값을 대각 원소로 사용하는 행렬 $\\Lambda$를 다음과 같이 적어주는 것입니다.\n$$\\begin{bmatrix} v_{11} \u0026 v_{21} \\\\ v_{12} \u0026 v_{22} \\end{bmatrix} \\begin{bmatrix} \\lambda_1 \u0026 0 \\\\ 0 \u0026 \\lambda_2 \\end{bmatrix} = \\begin{bmatrix} \\lambda_1v_{11} \u0026 \\lambda_2v_{21} \\\\ \\lambda_1v_{12} \u0026 \\lambda_2v_{22} \\end{bmatrix} $$\n그러면 저 쩜쩜쩜( $\\vdots$ ) 을 쓰지 않고 식을 다시 쓸 수 있습니다.\n$$ A V = V \\Lambda $$\n다르게 쓰면 이렇죠.\n$$ A = V\\Lambda V^{-1}$$\n여기서 어떤 정방행렬이 고유값분해될 수 있는가 없는가? 를 판가름하는 중요한 조건이 나옵니다. 이 식이 성립하려면 $V$ 은 역행렬을 가질 수 있어야 하는데요. 역행렬을 가질 수 있는 조건은, 행렬식의 값이 0이 아니어야 한다는 것입니다.\n$$ V^{-1} = \\frac{1}{\\vert V \\vert} \\begin{bmatrix} v_{22} \u0026 -v_{21} \\\\ -v_{12} \u0026 v_{11} \\end{bmatrix} = \\frac{1}{v_{11}v_{22}-v_{21}v_{12}} \\begin{bmatrix} v_{22} \u0026 -v_{21} \\\\ -v_{12} \u0026 v_{11} \\end{bmatrix} $$\n$2 \\times 2$ 행렬의 역행렬 공식. 0으로 나눌 수는 없으니까!\n즉 그 행렬의 열벡터들이 선형 종속이 아닌 경우를 의미합니다. 결론적으로 $A$는 맨 처음 언급한 것처럼 정방행렬일 뿐만 아니라 $M$개의 고유 벡터들이 선형 독립이어야 고유값분해될 수 있습니다.\n아무튼 저렇게 두번째 식처럼 A를 다시 쓰는 것을 멋진 말로 대각화(Diagonalization)라고 부릅니다. 대각화는 여러 가지로 유용한 수법인데요, (행렬의 거듭제곱이나 행렬식 계산을 쉽게 할 수 있다든지) 고유값분해를 이해하는 데 반드시 필요한 내용은 아니므로 이번 글에서는 생략합니다. 다음 페이지에 잘 정리되어 있어 첨부하겠습니다.\n행렬의 고유값과 고유벡터 PCA와 고유값분해가 뭔 상관인지 이해하기 주성분분석(PCA; Principal Component Analysis)이란, 잘 알려진 차원 축소 기법입니다. 차원을 축소할 때 가장 중요한 것은 차원이 작아지는 것의 이점은 충분히 누리면서, 원 데이터의 정보는 최대한 날아가지 않도록 보존하는 것입니다.\n일단 이 축소라는 걸 어떻게 할까요? 우리에게 변수가 10개인, 즉 10개 차원의 데이터가 있고, 이를 1차원으로 줄이고 싶다고 칩시다. PCA의 축소는 간단히 말하면 선형변환입니다. 우리는 10차원의 벡터 1개를 임의로 정해서 (이걸 축이라고 부릅니다) 각 데이터포인트와 이 벡터를 내적해서 선형변환을 할 수 있습니다.\n$$ X’ = z_1x_1 + z_2x_2 + \\cdots + z_{10}x_{10} $$\n$**$ 기존 데이터포인트 $X = x_1, \\cdots, x_{10}$ 는 우리의 축 $\\mathbf{z} = z_1, \\cdots, z_{10}$ 을 통해 새로운 1차원짜리 데이터 $X’$가 된다.\n그림으로 보면 다음과 같이 축을 정해서 투영(projection)시키는 건데요, 10차원은 못 그리니까 2차원에서 1차원으로 줄이는 예시를 봅시다.\n파란색 원이 원래의 데이터고, 까만 x 표시가 z라는 축(선)을 기준으로 1차원으로 투영된 데이터임 (그림 출처)\n중요한 문제는 이 축 벡터 $\\mathbf{z}$를 어떻게 구해야 차원 축소를 잘한 것이냐는 것입니다. 위 그림에서 왼쪽과 오른쪽 중 어떤 게 더 나은 축소인 것 같나요? 원 데이터의 정보가 최대한 날아가지 않도록 하는 게 목적이라는 걸 기억하면, 왼쪽 그림의 까만 점(투영 후 데이터)가 더 몰려 있는 것으로 보아 정보가 더 많이 손실되었다고 볼 수 있습니다. 그러니까 우리가 찾고 싶은 축은 오른쪽 그림처럼 차원 축소한 결과물의 분산이 최대한 커지도록 하는 축입니다.\n$$ \\text{Var}(X\\mathbf{z}) = \\Vert X \\mathbf{z} \\Vert ^2 = \\mathbf{z}^T X^TX\\mathbf{z}$$\n주어진 $X$ 에 대해 위 식을 최대로 하는 $\\mathbf{z}$ 는 뭘까요? 사실 저걸 최대로 만들려면 $\\mathbf{z}$의 크기 자체를 엄청나게 키우면 됩니다. 하지만 그건 또 너무 쉬운 답이죠. 그래서 이 문제에는 단위벡터( $\\mathbf{z}^T\\mathbf{z} = 1$)이라는 추가적인 제약 조건이 붙습니다. 또 $X^TX$ 요 부분을 살펴보면, 이 행렬은 원 데이터의 공분산행렬이라는 걸 알 수 있습니다. 이걸 $C$라 부르겠습니다. 즉 $\\mathbf{z}^T\\mathbf{z} = 1$이면서 $\\mathbf{z}^TC\\mathbf{z}$가 최대인 $\\mathbf{z}$ 를 찾는 문제입니다.\n이 제약 조건 하에서 라그랑주 승수법을 쓰면 다음과 같이 풀 수 있습니다.\n$$ \\begin{matrix} L (\\mathbf{z}, \\lambda) = \\mathbf{z}^T C \\mathbf{z} - \\lambda (\\mathbf{z}^T \\mathbf{z}-1) \\\\ 0 = \\frac{d}{d\\mathbf{z}} (\\mathbf{z}^TC\\mathbf{z} - \\lambda (\\mathbf{z}^T\\mathbf{z}-1)) \\\\ 0 = C\\mathbf{z} - \\lambda\\mathbf{z} \\\\ C\\mathbf{z}= \\lambda\\mathbf{z} \\end{matrix} $$\n결론적으로 우리가 찾는 축은 $X$의 공분산행렬 $C$의 고유벡터임을 알 수 있습니다. 10개의 고유값과 그에 따른 단위벡터인 고유벡터가 나올 텐데요, $C$가 대칭행렬이기 때문에 이 고유벡터들은 모두 직교합니다(orthogonal).\n대칭행렬이 뭐였더라 $C=C^T$ 전치행렬과 본 행렬이 같은, 즉 행렬의 모든 원소를 뒤집어도(대각선을 기준으로 접어도) 똑같은 대칭인 행렬 공분산행렬은 대칭행렬임 $$ \\begin{bmatrix}\\text{Var}(x_1) \u0026 \\text{Cov}(x_1, x_2) \u0026 \\cdots \u0026 \\text{Cov}(x_1, x_{10}) \\\\ \\text{Cov}(x_2, x_1) \u0026 \\text{Var}(x_2) \u0026 \\cdots \u0026 \\text{Cov}(x_2, x_{10}) \\\\ \\vdots \u0026 \\vdots \u0026 \\vdots \u0026 \\vdots \\\\ \\text{Cov}(x_{10}, x_1) \u0026 \\text{Cov}(x_{10}, x_2) \u0026 \\cdots \u0026 \\text{Var}(x_{10}) \\end{bmatrix}$$ 벡터의 직교가 뭐였더라 두 벡터의 내적이 0이면 두 벡터가 직교함 $$ \\mathbf{v}^T \\mathbf{w} = 0$$ 왜 대칭 행렬의 고유벡터는 직교할까? $$\\begin{matrix} \\lambda_1 \\mathbf{z}^T_1 \\mathbf{z}_2 = (C\\mathbf{z}_1)^T \\mathbf{z}_2 = \\mathbf{z}_1^TC^T\\mathbf{z}_2 = \\mathbf{z}_1^TC\\mathbf{z}_2 = \\mathbf{z}^T_1\\lambda_2\\mathbf{z}_2 = \\lambda_2\\mathbf{z}^T_1 \\mathbf{z}_2 \\\\ \\lambda_1\\mathbf{z}^T_1\\mathbf{z}_2 - \\lambda_2 \\mathbf{z}^T_1 \\mathbf{z}_2 = (\\lambda_1 - \\lambda_2) \\mathbf{z}^T_1 \\mathbf{z}_2 = 0 \\end{matrix} $$ 대칭 행렬의 특성인 $C^T = C$ 때문에 C의 서로 다른 고유값 $\\lambda_1$, $\\lambda_2$와 상응하는 고유벡터 $\\mathbf{z}_1$,$\\mathbf{z}_2$ 에 대해 이런 식이 도출되는데 $\\lambda_1$, $\\lambda_2$ 는 서로 다른 값이어서 그 차이가 0이 될 수 없으므로 $\\mathbf{z}_1^T\\mathbf{z}_2 = 0$ 라는 직교의 정의를 얻을 수 있다! 다시 제일 만만한 2차원 그림을 보자. PC1과 PC2가 2개의 직교하는 축이며, PC1이 더 큰 고유값 = 더 많은 분산을 보존한다! (그림 출처)\n다시 돌아와서, 얻은 축들을 고유값이 큰 순서에 따라 내림차순으로 정렬합니다(처음 문제를 풀었던 식을 들여다보면 고유값이 클수록 분산이 더 크게 보존될 거라는 걸 알 수 있습니다). 우리는 1차원으로 축소하고 싶으므로 이 값이 가장 큰 고유벡터를 사용하면 됩니다.\n",
+  "wordCount" : "2216",
+  "inLanguage": "ko",
+  "datePublished": "2023-11-30T17:02:35+09:00",
+  "dateModified": "2023-11-30T17:02:35+09:00",
+  "author":{
+    "@type": "Person",
+    "name": "pizzathief"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://sliceofdata.app/posts/evd-and-pca/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "sliceofdata",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://sliceofdata.app/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://sliceofdata.app/" accesskey="h" title="slice.of.data (Alt + H)">
+                <img src="https://sliceofdata.app/apple-touch-icon.png" alt="" aria-label="logo"
+                    height="35">slice.of.data</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://sliceofdata.app/en/" title="English"
+                            aria-label="English">En</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://sliceofdata.app/archives/" title="posts">
+                    <span>posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://sliceofdata.app/tags/" title="tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://sliceofdata.app/about/" title="about">
+                    <span>about</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://sliceofdata.app/subscribe" title="subscribe">
+                    <span>subscribe</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://pizzathief.pages.dev/" title="notes">
+                    <span>notes</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      수학을 까먹은 사람을 위한 고유값분해와 주성분분석(PCA)
+    </h1>
+    <div class="post-meta"><span title='2023-11-30 17:02:35 +0900 KST'>2023-11-30</span>&nbsp;·&nbsp;11 min&nbsp;·&nbsp;pizzathief&nbsp;|&nbsp;<a href="https://github.com/pizzathiefz/sliceofdata/blob/main/content/posts/evd-and-pca/index.ko.md" rel="noopener noreferrer edit" target="_blank">Suggest Changes</a>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#고유값분해-이해하기">고유값분해 이해하기</a>
+      <ul>
+        <li><a href="#기본-개념">기본 개념</a></li>
+        <li><a href="#하는-법">하는 법</a></li>
+        <li><a href="#필수-조건과-행렬-대각화">필수 조건과 행렬 대각화</a></li>
+      </ul>
+    </li>
+    <li><a href="#pca와-고유값분해가-뭔-상관인지-이해하기">PCA와 고유값분해가 뭔 상관인지 이해하기</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><blockquote>
+<p><a href="https://m.hanbit.co.kr/store/books/book_view.html?p_code=B4279863215">개발자를 위한 실전 선형대수학</a>의 12장을 주로 참고했습니다.</p></blockquote>
+<br>
+<h2 id="고유값분해-이해하기">고유값분해 이해하기<a hidden class="anchor" aria-hidden="true" href="#고유값분해-이해하기">#</a></h2>
+<h3 id="기본-개념">기본 개념<a hidden class="anchor" aria-hidden="true" href="#기본-개념">#</a></h3>
+<p>우선 고유값분해를 이해하려면 당연히 <strong>고유값(eigenvalue)</strong> 와 <strong>고유벡터(eigenvector)</strong> 를 개념적으로 알아야 합니다.
+이 두 가지 개념은 다음과 같은 엄청나게 간단한 식으로 표현됩니다.</p>
+<p>$$ A\mathbf{v} = \lambda \mathbf{v} $$</p>
+<p>$**$ $A$: 행렬, $\mathbf{v}$: 벡터, $\lambda$ : 스칼라(상수)</p>
+<p>이 식은 물론 $A$가 $\lambda$와 같다는 말이 아니고 같은 벡터에 대해 이 행렬이 미치는 영향과 스칼라 값이 미치는 효과가 동일하다는 뜻인데요.
+기하학적으로는(그림으로 보자는 뜻) 행렬이 <strong>벡터를 늘리거나 줄이긴 하지만 회전시키지 않는 경우</strong>를 의미합니다.</p>
+<p>잠깐 기억을 되살려 보면, 벡터에는 방향과 크기가 있죠.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/evd-and-pca/vectors-example1.png#center"
+         alt="&lsquo;방향&rsquo;이 다른 벡터들 (그림 출처)" width="400"/> <figcaption>
+            <p>&lsquo;방향&rsquo;이 다른 벡터들 (<a href="https://www.coranac.com/documents/geomatrix/">그림 출처</a>)</p>
+        </figcaption>
+</figure>
+
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/evd-and-pca/vectors-example2.png#center"
+         alt="2u는 u에다가 상수값을 곱한 것으로 u와 방향은 같으나 &lsquo;크기&rsquo;가 다르다 (그림 출처)" width="400"/> <figcaption>
+            <p>2u는 u에다가 상수값을 곱한 것으로 u와 방향은 같으나 &lsquo;크기&rsquo;가 다르다 (<a href="https://www.coranac.com/documents/geomatrix/">그림 출처</a>)</p>
+        </figcaption>
+</figure>
+
+<p>많은 경우, 벡터에 행렬을 곱하면 다음과 같이 방향이 바뀝니다.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/evd-and-pca/vector-and-matrix-meets-1.png#center"
+         alt="(그림 출처)" width="300"/> <figcaption>
+            <p>(<a href="https://vitalflux.com/why-when-use-eigenvalue-eigenvector/">그림 출처</a>)</p>
+        </figcaption>
+</figure>
+
+<p>근데 어떤 특별한 행렬과 특별한 벡터가 만나면, 신기하게도 방향은 안 바뀌고 크기만 변할 수도 있습니다!</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/evd-and-pca/vector-and-matrix-meets-2.png#center"
+         alt="(그림 출처)" width="490"/> <figcaption>
+            <p>(<a href="https://vitalflux.com/why-when-use-eigenvalue-eigenvector/">그림 출처</a>)</p>
+        </figcaption>
+</figure>
+
+<p>이때 이 벡터가 이 행렬의 고유벡터이며, 벡터가 늘어나거나 줄어드는 양이 고유값입니다.
+예를 들면,</p>
+<p>$$
+\begin{bmatrix}
+1 &amp; 2 \\
+2 &amp; 1
+\end{bmatrix}
+\begin{bmatrix}
+1 \\
+1
+\end{bmatrix}
+= 3
+\begin{bmatrix}
+1 \\
+1
+\end{bmatrix}
+$$</p>
+<ul>
+<li>즉 이 행렬의 고유벡터는 $\begin{bmatrix} 1 &amp; 1 \end{bmatrix}$ 이고 고유값은 3</li>
+</ul>
+<p>여기까지 보고 알 수 있는 것은 고유값과 고유벡터는 특정 행렬에 따라오는 존재라는 것입니다. 특별한 매칭 관계랄까요. 단 1:1 매칭은 아닙니다. 왜인지는 더 아래에서 설명하겠습니다.</p>
+<p>한 가지 더 알 수 있는 것은 <strong>정의 상 고유값과 고유벡터를 얻으려면 행렬 $A$ 가 정방행렬(행과 열의 수가 같은 정사각형 행렬)이어야 한다</strong>는 것입니다. 위 식을 다시 들여다보면 알 수 있는데, 벡터 $\mathbf{v}$ 가 $N$ 차원이라고 쳤을 때 $A$가 $N \times N$ 이어야 $A \mathbf{v}$ 와 $\lambda \mathbf{v}$가 같은 차원이 되지, $A$ 가 $M \times N (M \neq N)$ 이면 $A \mathbf{v}$ 는 $M$ 차원이 되어버려서 애초에 저 식이 성립할 수 없으니까요.</p>
+<br>
+<h3 id="하는-법">하는 법<a hidden class="anchor" aria-hidden="true" href="#하는-법">#</a></h3>
+<p>고유값분해를 하는 방법은 주어진 행렬에 대해 고유값과 고유벡터를 찾는 것입니다. 순서는 고유값이 먼저입니다.</p>
+<p>위 식을 다시 고쳐보겠습니다.</p>
+<p>$$ A\mathbf{v} - \lambda \mathbf{v} = (A- \lambda I) \mathbf{v} =  0 $$</p>
+<p>행렬에서 스칼라를 빼줄 수는 없으니까 $A$랑 사이즈가 같은 단위행렬이라는 애를 불러와서 빼줬습니다. 단위 행렬이 뭐였더라? 대각 원소만 1이고 나머지는 0인 정방행렬입니다. 이 행렬은 어떤 행렬을 곱해도 동일한 행렬이 된다는 점에서 상수 계산의 숫자 1이랑 비슷한 친구입니다. 이렇게 하게 되면 사실상 대각 성분에 스칼라 값만큼을 더하거나 빼주는 것인데, 이걸 행렬 이동이라고도 불러요. 간단한 예시는 이렇습니다. 행렬을 3만큼 이동한 것이죠.</p>
+<p>$$ \begin{bmatrix} 2 &amp; 2 \\ 1 &amp; 3 \end{bmatrix} + 3 \begin{bmatrix} 1 &amp; 0 \\ 0 &amp; 1 \end{bmatrix} = \begin{bmatrix} 5 &amp; 2 \\ 1 &amp; 6 \end{bmatrix} $$</p>
+<p>다시 돌아와서, 이동시킨 $A- \lambda I$ 를 $A&rsquo;$ 라는 새로운 행렬로 생각합시다. 즉 $A &rsquo; \mathbf{v} = 0$  입니다. 이런 일이 벌어지려면 어떤 조건이 필요할까요?
+물론 아주 쉬운 답은 $\mathbf{v}$ 가 영벡터(0으로만 이루어진 벡터)이면 됩니다. 하지만 이 답은 너무 쉬워요. 수학은 이런 답을 뻔하다, 자명하다(trivial)고 하며 의미 있는 답으로 쳐주지 않습니다.
+이 식을 가능하게 하는 자명하지 않은 답은, <strong>벡터 $\mathbf{v}$ 가 영벡터가 아니면서 행렬 $A&rsquo;$의 영공간에 있다</strong> 는 것입니다.</p>
+<p>이 부분을 이해하려면 몇 가지 개념들이 필요합니다.</p>
+<ul>
+<li>벡터의 선형독립</li>
+<li>행렬의 공간, 영공간</li>
+<li>행렬의 계수(rank)</li>
+</ul>
+<p>순서대로 간단히 짚어 보겠습니다.</p>
+<ul>
+<li>
+<p><strong>벡터의 선형독립</strong></p>
+<ul>
+<li>다음과 같이 여러 개의 벡터에 각각 다른 스칼라 값을 곱해서 더하는 것을 선형가중결합이라고 한다.
+<ul>
+<li>$\mathbf{w} = \lambda_1\mathbf{v}_1 + \cdots \lambda_m\mathbf{v}_m$</li>
+</ul>
+</li>
+<li>주어진 벡터 집합 중 한 개의 벡터에 대해, 만약 다른 벡터들을 어떻게든 선형가중결합해서 이 벡터를 만들 수 있다면 이 벡터 집합은 서로 선형종속(linearly dependent)이며, 그렇지 못하면 선형독립(linearly independent)이다.
+<ul>
+<li>예를 들어 ${ \begin{bmatrix} 1 \ 0  \end{bmatrix} ,  \begin{bmatrix} 0 \ 1  \end{bmatrix}, \begin{bmatrix} 1 \ 1  \end{bmatrix} \ }$ 은 선형종속이다. 첫번째랑 두번째를 더하면 세번째가 됨.</li>
+<li>예를 들어 ${ \begin{bmatrix} 1 \ 0  \end{bmatrix} ,  \begin{bmatrix} 1 \ -1  \end{bmatrix}, \begin{bmatrix} 1 \ 1  \end{bmatrix} \ }$ 은 선형독립이다. 다른 두 개에 무슨 짓을 해도 나머지 하나를 만들 수 없음.</li>
+<li>선형종속의 정의를 쓰면 $\lambda_1\mathbf{v}_1 = \lambda_2\mathbf{v}_2 + \cdots \lambda_m\mathbf{v}_m$ 인데 이건 사실 다시 쓰면 $0 = \lambda_1\mathbf{v}_1 + \cdots \lambda_m\mathbf{v}_m$</li>
+<li>물론 모든 람다값이 0이면 다 되지만 역시 자명한 답은 안 쳐준다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>행렬의 공간</strong></p>
+<ul>
+<li>행렬을 열벡터의 집합으로 간주하고(세로로 자른다는 소리), 이 열벡터를 가지고 무한하게 선형가중결합을 한다고 생각하자. 그러면 무한 개의 벡터를 만들 수 있을 텐데, 만들어지는 무한한 집합을 이 행렬의 공간(열공간)이라고 한다.</li>
+<li>$$ C (\begin{bmatrix} 1&amp; 1 \\ 3 &amp; 2  \end{bmatrix}) = \lambda_1   \begin{bmatrix} 1 \\ 3  \end{bmatrix} +  \lambda_2   \begin{bmatrix} 1 \\ 2  \end{bmatrix} , \lambda \in \mathbb{R}$$</li>
+<li>즉 $\lambda_1$ 과 $\lambda_2$에  어떤 실수값이든 넣어서 만들 수 있는 모든 벡터들이 이 행렬의 열공간이다. 예를 들어서 $\lambda_1 = 11$, $\lambda_2=-15$ 이면 우리는  $\begin{bmatrix} -4 &amp; 3 \end{bmatrix}$ 를 얻을 수 있으며, 이 벡터는 이 행렬의 열공간에 포함된다고 할 수 있음. 즉 가중치 $\lambda$ 의 조합 $\mathbf{x} = \begin{bmatrix} 11 &amp; -15 \end{bmatrix}$ 가 존재해서, $A\mathbf{x} = \mathbf{b}$ 가 가능하다면, 벡터 $\mathbf{b}$ 는 행렬 $A$ 의 열공간 안에 포함된다는 것이다.</li>
+<li>그런데 재미있는 사실: 이 행렬의 열공간은 $\mathbb{R}^2$ 이다! 즉 모든 실수값 2개로 이루어진 벡터를 저 2개의 열벡터를 선형결합해서 만들 수 있다.</li>
+<li>물론 모든 행렬의 열공간이 이렇지는 않다.
+<ul>
+<li>$$C (\begin{bmatrix} 2&amp; 4 \\ 1 &amp; 2  \end{bmatrix}) = \lambda_1   \begin{bmatrix} 2 \\ 4  \end{bmatrix} +  \lambda_2   \begin{bmatrix} 1 \\ 2  \end{bmatrix} , \lambda \in \mathbb{R}$$</li>
+<li>이 경우 두 벡터를 아무리 선형결합 시켜도 $\mathbb{R}^2$ 의 무한한 영역을 커버할 수 없는데, 두 개의 열벡터가 선형독립이 아니기 때문임. 이 벡터들로 만들 수 있는 공간은 2차원이 아니라 1차원인 것이다.</li>
+<li><figure class="align-center ">
+    <img loading="lazy" src="/posts/evd-and-pca/column-space.png#center"
+         alt="(그림 출처)_" width="300"/> <figcaption>
+            <p><a href="https://angeloyeo.github.io/2020/11/17/four_fundamental_subspaces.html">(그림 출처)</a>_</p>
+        </figcaption>
+</figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>행렬의 계수(rank)</strong></p>
+<ul>
+<li>열 공간의 차원의 수, 선형독립 집합을 형성할 수 있는 최대 열의 수를 뜻한다.
+<ul>
+<li>즉 위 행렬의 공간 예시 중 첫번째 행렬은 rank가 2고, 두번째 행렬은 rank가 1이다.</li>
+</ul>
+</li>
+<li>가능한 최대값은 행의 수랑 열의 수 중 더 작은 값이며 (즉 $3 \times 4$ 행렬의 가능한 최대 계수는 3임) 열과 행의 계수는 동일하므로 한쪽만 보면 된다.</li>
+<li>물론 행렬에 따라서 최대 계수를 계수로 가질 수도 안 가질 수도 있다.
+<ul>
+<li>위 행렬의 공간 예시 중 두번째 행렬은 $2 \times 2$ 행렬로 최대 계수는 2이지만 실제 계수가 1인 행렬이었다.</li>
+<li>이 행렬처럼 최대 계수를 가지지 않는 행렬은 행렬을 이루고 있는 $N$개의 벡터가 선형독립이 아니라는 뜻이다(선형독립인 애들 개수가 $N$개보다 작다는 뜻이다). 이런 특징을 최대계수보다 모자라 rank-deficient하다고 부르며, 이러한 행렬은 특이(singular) 행렬이라고도 한다. 다른 이름으로는 비가역(non-invertible) 행렬인데, 행렬식 값이 0으로서 역행렬(상수 계산에서 역수와 동일하게 곱해서 단위행렬이 되는 행렬, $AA^{-1}=I$)을 구할 수 없다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p><strong>행렬의 영공간</strong></p>
+<ul>
+<li>영공간은  $A\mathbf{y} = 0$ 이 되는 모든 벡터 $\mathbf{y}$  (이번에도 영벡터는 빼고..!)</li>
+<li>영공간은 비어 있을 수도 있고 비어있지 않을 수도 있다. 영공간이 비어 있지 않으려면, 행렬의 열벡터들이 선형종속이어야 한다. 선형종속의 정의 $0 = \lambda_1\mathbf{v}_1 + \cdots \lambda_m\mathbf{v}_m$ 를 다시 떠올려 보면 당연하다.</li>
+</ul>
+</li>
+</ul>
+<br>
+<p>살짝 멀리 갔다 돌아왔는데요, 우리는 $A&rsquo;$ 의 영공간의 벡터 $\mathbf{v}$를 찾아야 한다는 것을 기억합시다. $A&rsquo;$의 영공간이 비어있지 않으려면, $A&rsquo;$는 선형종속 벡터 집합, 즉 rank-deficient한 singular 행렬이어야 하며, 행렬식의 값은 0입니다. 이게 바로 우리가 고유값을 구하게 해주는 가장 큰 힌트입니다.</p>
+<p>2X2 행렬을 예시로 들면 다음과 같습니다. ($\vert A \vert$ 요건 행렬식의 표기예요)</p>
+<p>$$ \vert A&rsquo; \vert = \vert A - \lambda I \vert = \vert \begin{bmatrix} a &amp; b \\ c &amp; d \end{bmatrix} - \lambda \begin{bmatrix} 1 &amp; 0 \\ 0 &amp; 1 \end{bmatrix} \vert = \vert \begin{bmatrix} a-\lambda &amp; b \\ c &amp; d- \lambda \end{bmatrix} \vert = 0 $$</p>
+<p>행렬식 공식을 대입하면,</p>
+<p>$$ (a-\lambda)(d-\lambda)-bc = \lambda^2 - (a+d)\lambda + (ad-bc) =0$$</p>
+<p>이 이차 방정식을 풀면 2개의 $\lambda$ 값이 나오겠죠. 즉 $2 \times 2$ 행렬에서 우리가 찾는 $\lambda$ 는  2개이며, 이는 행렬 크기가 올라가도 일반화될 수 있습니다. 결론적으로 <strong>$M \times M$ 행렬에 대해서는 $M$ 개의 고유값이 존재합니다</strong>.</p>
+<p>제법 긴 과정을 거쳐 고유값을 구했습니다. 고유벡터는 어떻게 정해질까요?</p>
+<p>맨 처음 예시로 돌아가서, 다음 행렬의 고유값 2개 중 하나는 3이었습니다.</p>
+<p>$$ \begin{bmatrix} 1 &amp; 2 \\ 2 &amp; 1 \end{bmatrix} \begin{bmatrix} 1 \\ 1 \end{bmatrix} = 3 \begin{bmatrix} 1 \\ 1 \end{bmatrix}  $$</p>
+<p>그렇다는 건 요 행렬을 -3 이동시킨 $A&rsquo;$ 의 영공간의  벡터가 고유벡터라는 건데요,</p>
+<p>$$\begin{bmatrix} -2 &amp; 2 \\ 2 &amp; -2 \end{bmatrix} \mathbf{v} = \begin{bmatrix} 0 \\ 0 \end{bmatrix}  $$</p>
+<p>고유벡터를 찾는 일반화된 방법은 더 어렵지만요, 이 예시에서는 $\mathbf{v}$ 에 뭐가 들어가야 하는지는 눈으로 봐도 알 수 있네요. $\begin{bmatrix} 1 &amp; 1 \end{bmatrix}$ 도 되고, $\begin{bmatrix} -3.1 &amp; -3.1 \end{bmatrix}$ 도 되고, $\begin{bmatrix} 526 &amp; 526 \end{bmatrix}$ 도 됩니다!
+모든 실수값 $\alpha$ 에 대해 $\alpha \begin{bmatrix} 1 &amp; 1 \end{bmatrix}$ 가 고유벡터가 될 수 있습니다.</p>
+<p>즉 여기서 우리가 알 수 있는 것은 고유값의 개수는 정해져 있지만 <strong>고유벡터는 무한 개가 존재할 수 있다는 것입니다</strong>. 벡터의 크기가 아니라 방향이 중요합니다.</p>
+<p>보통 라이브러리 등을 사용해서 고유벡터를 구해달라고 하면 노름이 1인 정규화된 고유벡터를 구해주곤 합니다. 그냥 대표 친구를 하나 알려주는 거죠. 여기서 노름은 벡터의 크기를 뜻하며, 벡터의 모든 원소를 제곱해서 더한 것에 제곱근을 취해준 결과입니다. 일반적인 유클리디언 거리 공식 떠올리시면 됩니다.</p>
+<p>$$ \Vert \mathbf{v} \Vert = \sqrt{\sum^n_i v_i^2} $$</p>
+<p>이 값이 1인 걸 단위벡터라고 하는데, 모든 벡터는 노름으로 모든 원소를 나눠줌으로써 단위벡터로 만들 수 있습니다.</p>
+<br>
+<h3 id="필수-조건과-행렬-대각화">필수 조건과 행렬 대각화<a hidden class="anchor" aria-hidden="true" href="#필수-조건과-행렬-대각화">#</a></h3>
+<p>다시 돌아가서, $M \times M$ 행렬에 대해서는 $M$ 개의 고유값이 존재합니다.</p>
+<p>즉</p>
+<p>$$ \begin{matrix} A\mathbf{v_1} = \lambda_1 \mathbf{v_1} \ \vdots \ A\mathbf{v_M} = \lambda_M \mathbf{v_M} \end{matrix} $$</p>
+<p>이 여러 개의 식은 행렬화하여 간단하게 표현할 수 있습니다. 2차원으로 예시를 들면, 어떤 행렬 A에 대해 2개의 고유값과 각각에 해당하는 고유벡터가 있을 때, 이 2개의 고유벡터를 열 단위로 합친 행렬 $V$와 고유값을 대각 원소로 사용하는 행렬 $\Lambda$를 다음과 같이 적어주는 것입니다.</p>
+<p>$$\begin{bmatrix} v_{11} &amp; v_{21} \\ v_{12} &amp; v_{22} \end{bmatrix} \begin{bmatrix} \lambda_1 &amp; 0 \\ 0 &amp; \lambda_2 \end{bmatrix} = \begin{bmatrix} \lambda_1v_{11} &amp; \lambda_2v_{21} \\ \lambda_1v_{12} &amp; \lambda_2v_{22} \end{bmatrix}  $$</p>
+<p>그러면 저 쩜쩜쩜( $\vdots$ ) 을 쓰지 않고 식을 다시 쓸 수 있습니다.</p>
+<p>$$ A V = V \Lambda $$</p>
+<p>다르게 쓰면 이렇죠.</p>
+<p>$$ A = V\Lambda V^{-1}$$</p>
+<p>여기서 어떤 정방행렬이 고유값분해될 수 있는가 없는가? 를 판가름하는 중요한 조건이 나옵니다. 이 식이 성립하려면 $V$ 은 역행렬을 가질 수 있어야 하는데요. 역행렬을 가질 수 있는 조건은, 행렬식의 값이 0이 아니어야 한다는 것입니다.</p>
+<p>$$ V^{-1} = \frac{1}{\vert V \vert} \begin{bmatrix} v_{22} &amp; -v_{21} \\ -v_{12} &amp; v_{11} \end{bmatrix} = \frac{1}{v_{11}v_{22}-v_{21}v_{12}} \begin{bmatrix} v_{22} &amp; -v_{21} \\ -v_{12} &amp; v_{11} \end{bmatrix} $$</p>
+<p><em>$2 \times 2$ 행렬의 역행렬 공식. 0으로 나눌 수는 없으니까!</em></p>
+<p>즉 그 행렬의 열벡터들이 선형 종속이 아닌 경우를 의미합니다. <strong>결론적으로 $A$는 맨 처음 언급한 것처럼 정방행렬일 뿐만 아니라 $M$개의 고유 벡터들이 선형 독립이어야 고유값분해될 수 있습니다</strong>.</p>
+<p>아무튼 저렇게 두번째 식처럼 A를 다시 쓰는 것을 멋진 말로 대각화(<strong>Diagonalization</strong>)라고 부릅니다. 대각화는 여러 가지로 유용한 수법인데요, (행렬의 거듭제곱이나 행렬식 계산을 쉽게 할 수 있다든지) 고유값분해를 이해하는 데 반드시 필요한 내용은 아니므로 이번 글에서는 생략합니다. 다음 페이지에 잘 정리되어 있어 첨부하겠습니다.</p>
+<ul>
+<li><a href="https://velog.io/@lighthouse97/%ED%96%89%EB%A0%AC%EC%9D%98-%EA%B3%A0%EC%9C%A0%EA%B0%92%EA%B3%BC-%EA%B3%A0%EC%9C%A0%EB%B2%A1%ED%84%B0">행렬의 고유값과 고유벡터</a></li>
+</ul>
+<br>
+<h2 id="pca와-고유값분해가-뭔-상관인지-이해하기">PCA와 고유값분해가 뭔 상관인지 이해하기<a hidden class="anchor" aria-hidden="true" href="#pca와-고유값분해가-뭔-상관인지-이해하기">#</a></h2>
+<p>주성분분석(PCA; Principal Component Analysis)이란, 잘 알려진 차원 축소 기법입니다. 차원을 축소할 때 가장 중요한 것은 차원이 작아지는 것의 이점은 충분히 누리면서, <strong>원 데이터의 정보는 최대한 날아가지 않도록</strong> 보존하는 것입니다.</p>
+<p>일단 이 축소라는 걸 어떻게 할까요? 우리에게 변수가 10개인, 즉 10개 차원의 데이터가 있고, 이를 1차원으로 줄이고 싶다고 칩시다. PCA의 축소는 간단히 말하면 선형변환입니다. 우리는 10차원의 벡터 1개를 임의로 정해서 (이걸 축이라고 부릅니다) 각 데이터포인트와 이 벡터를 내적해서 선형변환을 할 수 있습니다.</p>
+<p>$$ X&rsquo; = z_1x_1 + z_2x_2 + \cdots + z_{10}x_{10}  $$</p>
+<p>$**$ 기존 데이터포인트 $X = x_1, \cdots, x_{10}$ 는 우리의 축 $\mathbf{z} = z_1, \cdots, z_{10}$ 을 통해 새로운 1차원짜리 데이터 $X&rsquo;$가 된다.</p>
+<p>그림으로 보면 다음과 같이 축을 정해서 투영(projection)시키는 건데요, 10차원은 못 그리니까 2차원에서 1차원으로 줄이는 예시를 봅시다.</p>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/evd-and-pca/pca.png#center"
+         alt="파란색 원이 원래의 데이터고, 까만 x 표시가 z라는 축(선)을 기준으로 1차원으로 투영된 데이터임 (그림 출처)" width="480"/> <figcaption>
+            <p>파란색 원이 원래의 데이터고, 까만 x 표시가 z라는 축(선)을 기준으로 1차원으로 투영된 데이터임 <a href="https://bookdown.org/tpinto_home/Unsupervised-learning/principal-components-analysis.html">(그림 출처)</a></p>
+        </figcaption>
+</figure>
+
+<p>중요한 문제는 이 축 벡터 $\mathbf{z}$를 어떻게 구해야 차원 축소를 잘한 것이냐는 것입니다. 위 그림에서 왼쪽과 오른쪽 중 어떤 게 더 나은 축소인 것 같나요? 원 데이터의 정보가 최대한 날아가지 않도록 하는 게 목적이라는 걸 기억하면, 왼쪽 그림의 까만 점(투영 후 데이터)가 더 몰려 있는 것으로 보아 정보가 더 많이 손실되었다고 볼 수 있습니다. 그러니까 우리가 찾고 싶은 축은 오른쪽 그림처럼 차원 축소한 결과물의 <strong>분산이 최대한 커지도록</strong> 하는 축입니다.</p>
+<p>$$ \text{Var}(X\mathbf{z}) = \Vert X \mathbf{z} \Vert ^2 = \mathbf{z}^T X^TX\mathbf{z}$$</p>
+<p>주어진 $X$ 에 대해 위 식을 최대로 하는 $\mathbf{z}$ 는 뭘까요? 사실 저걸 최대로 만들려면 $\mathbf{z}$의 크기 자체를 엄청나게 키우면 됩니다. 하지만 그건 또 너무 쉬운 답이죠. 그래서 이 문제에는 단위벡터( $\mathbf{z}^T\mathbf{z} = 1$)이라는 추가적인 제약 조건이 붙습니다. 또 $X^TX$ 요 부분을 살펴보면, 이 행렬은 원 데이터의 공분산행렬이라는 걸 알 수 있습니다. 이걸 $C$라 부르겠습니다. 즉 $\mathbf{z}^T\mathbf{z} = 1$이면서 $\mathbf{z}^TC\mathbf{z}$가 최대인 $\mathbf{z}$ 를 찾는 문제입니다.</p>
+<p>이 제약 조건 하에서 라그랑주 승수법을 쓰면 다음과 같이 풀 수 있습니다.</p>
+<p>$$ \begin{matrix} L (\mathbf{z}, \lambda) = \mathbf{z}^T C \mathbf{z} - \lambda (\mathbf{z}^T \mathbf{z}-1) \\
+0 = \frac{d}{d\mathbf{z}} (\mathbf{z}^TC\mathbf{z} - \lambda (\mathbf{z}^T\mathbf{z}-1)) \\
+0 = C\mathbf{z} - \lambda\mathbf{z} \\
+C\mathbf{z}= \lambda\mathbf{z}
+\end{matrix}
+$$</p>
+<p>결론적으로 <strong>우리가 찾는 축은 $X$의 공분산행렬 $C$의 고유벡터</strong>임을 알 수 있습니다. 10개의 고유값과 그에 따른 단위벡터인 고유벡터가 나올 텐데요, $C$가 대칭행렬이기 때문에 이 고유벡터들은 모두 직교합니다(orthogonal).</p>
+<br>
+<ul>
+<li><strong>대칭행렬이 뭐였더라</strong>
+<ul>
+<li>$C=C^T$ 전치행렬과 본 행렬이 같은, 즉 행렬의 모든 원소를 뒤집어도(대각선을 기준으로 접어도) 똑같은 대칭인 행렬</li>
+<li>공분산행렬은 대칭행렬임
+<ul>
+<li>$$ \begin{bmatrix}\text{Var}(x_1) &amp; \text{Cov}(x_1, x_2) &amp; \cdots &amp; \text{Cov}(x_1, x_{10}) \\ \text{Cov}(x_2, x_1) &amp; \text{Var}(x_2) &amp; \cdots &amp; \text{Cov}(x_2, x_{10}) \\ \vdots &amp; \vdots &amp; \vdots &amp; \vdots \\ \text{Cov}(x_{10}, x_1) &amp; \text{Cov}(x_{10}, x_2) &amp; \cdots &amp;  \text{Var}(x_{10})   \end{bmatrix}$$</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>벡터의 직교가 뭐였더라</strong>
+<ul>
+<li>두 벡터의 내적이 0이면 두 벡터가 직교함</li>
+<li>$$ \mathbf{v}^T \mathbf{w} = 0$$</li>
+</ul>
+</li>
+<li><strong>왜 대칭 행렬의 고유벡터는 직교할까?</strong>
+<ul>
+<li>$$\begin{matrix}
+\lambda_1 \mathbf{z}^T_1 \mathbf{z}_2 = (C\mathbf{z}_1)^T \mathbf{z}_2 = \mathbf{z}_1^TC^T\mathbf{z}_2 = \mathbf{z}_1^TC\mathbf{z}_2 = \mathbf{z}^T_1\lambda_2\mathbf{z}_2 = \lambda_2\mathbf{z}^T_1 \mathbf{z}_2 \\
+\lambda_1\mathbf{z}^T_1\mathbf{z}_2 - \lambda_2 \mathbf{z}^T_1 \mathbf{z}_2 = (\lambda_1 - \lambda_2) \mathbf{z}^T_1 \mathbf{z}_2 = 0
+\end{matrix}
+$$</li>
+<li>대칭 행렬의 특성인 $C^T = C$  때문에 C의 서로 다른 고유값 $\lambda_1$, $\lambda_2$와 상응하는 고유벡터 $\mathbf{z}_1$,$\mathbf{z}_2$ 에 대해 이런 식이 도출되는데</li>
+<li>$\lambda_1$, $\lambda_2$ 는 서로 다른 값이어서 그 차이가 0이 될 수 없으므로 $\mathbf{z}_1^T\mathbf{z}_2 = 0$ 라는 직교의 정의를 얻을 수 있다!</li>
+</ul>
+</li>
+</ul>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/evd-and-pca/pca-2.png#center"
+         alt="다시 제일 만만한 2차원 그림을 보자. PC1과 PC2가 2개의 직교하는 축이며, PC1이 더 큰 고유값 = 더 많은 분산을 보존한다! (그림 출처)" width="480"/> <figcaption>
+            <p>다시 제일 만만한 2차원 그림을 보자. PC1과 PC2가 2개의 직교하는 축이며, PC1이 더 큰 고유값 = 더 많은 분산을 보존한다! <a href="https://wikidocs.net/214112">(그림 출처)</a></p>
+        </figcaption>
+</figure>
+
+<p>다시 돌아와서, 얻은 축들을 고유값이 큰 순서에 따라 내림차순으로 정렬합니다(처음 문제를 풀었던 식을 들여다보면 고유값이 클수록 분산이 더 크게 보존될 거라는 걸 알 수 있습니다). 우리는 1차원으로 축소하고 싶으므로 이 값이 가장 큰 고유벡터를 사용하면 됩니다.</p>
+<br>
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://sliceofdata.app/tags/linear-algebra/">Linear-Algebra</a></li>
+    </ul>
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 수학을 까먹은 사람을 위한 고유값분해와 주성분분석(PCA) on x"
+            href="https://x.com/intent/tweet/?text=%ec%88%98%ed%95%99%ec%9d%84%20%ea%b9%8c%eb%a8%b9%ec%9d%80%20%ec%82%ac%eb%9e%8c%ec%9d%84%20%ec%9c%84%ed%95%9c%20%ea%b3%a0%ec%9c%a0%ea%b0%92%eb%b6%84%ed%95%b4%ec%99%80%20%ec%a3%bc%ec%84%b1%eb%b6%84%eb%b6%84%ec%84%9d%28PCA%29&amp;url=https%3a%2f%2fsliceofdata.app%2fposts%2fevd-and-pca%2f&amp;hashtags=linear-algebra">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share 수학을 까먹은 사람을 위한 고유값분해와 주성분분석(PCA) on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fsliceofdata.app%2fposts%2fevd-and-pca%2f&amp;title=%ec%88%98%ed%95%99%ec%9d%84%20%ea%b9%8c%eb%a8%b9%ec%9d%80%20%ec%82%ac%eb%9e%8c%ec%9d%84%20%ec%9c%84%ed%95%9c%20%ea%b3%a0%ec%9c%a0%ea%b0%92%eb%b6%84%ed%95%b4%ec%99%80%20%ec%a3%bc%ec%84%b1%eb%b6%84%eb%b6%84%ec%84%9d%28PCA%29&amp;summary=%ec%88%98%ed%95%99%ec%9d%84%20%ea%b9%8c%eb%a8%b9%ec%9d%80%20%ec%82%ac%eb%9e%8c%ec%9d%84%20%ec%9c%84%ed%95%9c%20%ea%b3%a0%ec%9c%a0%ea%b0%92%eb%b6%84%ed%95%b4%ec%99%80%20%ec%a3%bc%ec%84%b1%eb%b6%84%eb%b6%84%ec%84%9d%28PCA%29&amp;source=https%3a%2f%2fsliceofdata.app%2fposts%2fevd-and-pca%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+<div class="container_disqus">
+    <script src="https://giscus.app/client.js"
+        data-repo="pizzathiefz/sliceofdata"
+        data-repo-id="R_kgDOPsr6oQ"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOPsr6oc4CvOfW"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme=""
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+    </script>
+</div>
+<script>
+    
+    function getCurrentTheme() {
+        
+        let storedTheme = localStorage.getItem('pref-theme');
+        if (storedTheme) {
+            return storedTheme;
+        }
+        
+        
+        if (document.body.classList.contains('dark')) {
+            return 'dark';
+        }
+        
+        
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+        
+        return 'light';
+    }
+    
+    
+    function setGiscusTheme() {
+        let currentTheme = getCurrentTheme();
+        let giscusTheme = currentTheme === 'dark' ? 'noborder_dark' : 'noborder_light';
+        
+        
+        let giscusScript = document.querySelector("div.container_disqus > script");
+        if (giscusScript) {
+            giscusScript.setAttribute('data-theme', giscusTheme);
+        }
+        
+        return giscusTheme;
+    }
+    
+    
+    setGiscusTheme();
+    
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        let themeToggle = document.querySelector('#theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                setTimeout(() => {
+                    let newTheme = getCurrentTheme();
+                    let newGiscusTheme = newTheme === 'dark' ? 'noborder_dark' : 'noborder_light';
+                    
+                    let giscusFrame = document.querySelector('iframe.giscus-frame');
+                    if (giscusFrame) {
+                        giscusFrame.contentWindow.postMessage({
+                            giscus: {
+                                setConfig: {
+                                    theme: newGiscusTheme
+                                }
+                            }
+                        }, 'https://giscus.app');
+                    }
+                }, 100);
+            });
+        }
+    });
+</script>
+
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://sliceofdata.app/">sliceofdata</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>

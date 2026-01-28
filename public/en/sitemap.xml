@@ -2,182 +2,182 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>http://localhost:1313/en/posts/vec2vec/</loc>
+    <loc>https://sliceofdata.app/en/posts/vec2vec/</loc>
     <lastmod>2025-05-26T20:38:11+09:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/posts/vec2vec/"
+                href="https://sliceofdata.app/posts/vec2vec/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/posts/vec2vec/"
+                href="https://sliceofdata.app/en/posts/vec2vec/"
                 />
   </url><url>
-    <loc>http://localhost:1313/en/tags/ai-ml/</loc>
+    <loc>https://sliceofdata.app/en/posts/solid-principles-for-ml/</loc>
+    <lastmod>2025-02-14T17:24:18+09:00</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.5</priority>
+    <xhtml:link
+                rel="alternate"
+                hreflang="ko-KR"
+                href="https://sliceofdata.app/posts/solid-principles-for-ml/"
+                />
+    <xhtml:link
+                rel="alternate"
+                hreflang="en-US"
+                href="https://sliceofdata.app/en/posts/solid-principles-for-ml/"
+                />
+  </url><url>
+    <loc>https://sliceofdata.app/en/tags/ai-ml/</loc>
     <lastmod>2025-05-26T20:38:11+09:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/tags/ai-ml/"
+                href="https://sliceofdata.app/tags/ai-ml/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/tags/ai-ml/"
+                href="https://sliceofdata.app/en/tags/ai-ml/"
                 />
   </url><url>
-    <loc>http://localhost:1313/en/categories/</loc>
+    <loc>https://sliceofdata.app/en/categories/</loc>
     <lastmod>2025-05-26T20:38:11+09:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/categories/"
+                href="https://sliceofdata.app/categories/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/categories/"
+                href="https://sliceofdata.app/en/categories/"
                 />
   </url><url>
-    <loc>http://localhost:1313/en/categories/data/</loc>
+    <loc>https://sliceofdata.app/en/categories/data/</loc>
     <lastmod>2025-05-26T20:38:11+09:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/categories/data/"
+                href="https://sliceofdata.app/categories/data/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/categories/data/"
+                href="https://sliceofdata.app/en/categories/data/"
                 />
   </url><url>
-    <loc>http://localhost:1313/en/posts/</loc>
+    <loc>https://sliceofdata.app/en/posts/</loc>
     <lastmod>2025-05-26T20:38:11+09:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/posts/"
+                href="https://sliceofdata.app/posts/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/posts/"
+                href="https://sliceofdata.app/en/posts/"
                 />
   </url><url>
-    <loc>http://localhost:1313/en/</loc>
+    <loc>https://sliceofdata.app/en/</loc>
     <lastmod>2025-05-26T20:38:11+09:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/"
+                href="https://sliceofdata.app/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/"
+                href="https://sliceofdata.app/en/"
                 />
   </url><url>
-    <loc>http://localhost:1313/en/tags/</loc>
+    <loc>https://sliceofdata.app/en/tags/</loc>
     <lastmod>2025-05-26T20:38:11+09:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/tags/"
+                href="https://sliceofdata.app/tags/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/tags/"
+                href="https://sliceofdata.app/en/tags/"
                 />
   </url><url>
-    <loc>http://localhost:1313/en/about/</loc>
+    <loc>https://sliceofdata.app/en/about/</loc>
     <lastmod>2025-01-09T00:00:00+09:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/about/"
+                href="https://sliceofdata.app/about/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/about/"
+                href="https://sliceofdata.app/en/about/"
                 />
   </url><url>
-    <loc>http://localhost:1313/en/subscribe/</loc>
+    <loc>https://sliceofdata.app/en/subscribe/</loc>
     <lastmod>2025-01-09T00:00:00+09:00</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/subscribe/"
+                href="https://sliceofdata.app/subscribe/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/subscribe/"
+                href="https://sliceofdata.app/en/subscribe/"
                 />
   </url><url>
-    <loc>http://localhost:1313/en/posts/2024-2025/</loc>
-    <lastmod>2024-12-25T11:50:17+09:00</lastmod>
+    <loc>https://sliceofdata.app/en/archives/</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/posts/2024-2025/"
+                href="https://sliceofdata.app/archives/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/posts/2024-2025/"
+                href="https://sliceofdata.app/en/archives/"
                 />
   </url><url>
-    <loc>http://localhost:1313/en/archives/</loc>
+    <loc>https://sliceofdata.app/en/search/</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
     <xhtml:link
                 rel="alternate"
                 hreflang="ko-KR"
-                href="http://localhost:1313/archives/"
+                href="https://sliceofdata.app/search/"
                 />
     <xhtml:link
                 rel="alternate"
                 hreflang="en-US"
-                href="http://localhost:1313/en/archives/"
-                />
-  </url><url>
-    <loc>http://localhost:1313/en/search/</loc>
-    <changefreq>daily</changefreq>
-    <priority>0.5</priority>
-    <xhtml:link
-                rel="alternate"
-                hreflang="ko-KR"
-                href="http://localhost:1313/search/"
-                />
-    <xhtml:link
-                rel="alternate"
-                hreflang="en-US"
-                href="http://localhost:1313/en/search/"
+                href="https://sliceofdata.app/en/search/"
                 />
   </url>
 </urlset>

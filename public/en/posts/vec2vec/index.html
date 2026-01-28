@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en" dir="auto">
 
-<head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script><meta charset="utf-8">
+<head><meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <meta name="robots" content="index, follow">
@@ -9,17 +9,17 @@
 <meta name="keywords" content="vec2vec, embedding">
 <meta name="description" content="A brief summary of Harnessing the Universal Geometry of Embeddings (2025)">
 <meta name="author" content="pizzathief">
-<link rel="canonical" href="http://localhost:1313/en/posts/vec2vec/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.eaef19ee2d2f4c308d73356802d387acc94c5aa535b42542c1b045f262f97b2f.css" integrity="sha256-6u8Z7i0vTDCNczVoAtOHrMlMWqU1tCVCwbBF8mL5ey8=" rel="preload stylesheet" as="style">
-<link rel="icon" href="http://localhost:1313/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="http://localhost:1313/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="http://localhost:1313/favicon-32x32.png">
-<link rel="apple-touch-icon" href="http://localhost:1313/%3Clink%20/%20abs%20url%3E">
-<link rel="mask-icon" href="http://localhost:1313/%3Clink%20/%20abs%20url%3E">
+<link rel="canonical" href="https://sliceofdata.app/en/posts/vec2vec/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.27cad2a1c5348b9448235a32de472a54bfb4b517f58e15427dc5a1a01bf486da.css" integrity="sha256-J8rSocU0i5RII1oy3kcqVL&#43;0tRf1jhVCfcWhoBv0hto=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://sliceofdata.app/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://sliceofdata.app/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://sliceofdata.app/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://sliceofdata.app/%3Clink%20/%20abs%20url%3E">
+<link rel="mask-icon" href="https://sliceofdata.app/%3Clink%20/%20abs%20url%3E">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="ko" href="http://localhost:1313/posts/vec2vec/">
-<link rel="alternate" hreflang="en" href="http://localhost:1313/en/posts/vec2vec/">
+<link rel="alternate" hreflang="ko" href="https://sliceofdata.app/posts/vec2vec/">
+<link rel="alternate" hreflang="en" href="https://sliceofdata.app/en/posts/vec2vec/">
 <noscript>
     <style>
         #theme-toggle,
@@ -68,7 +68,7 @@
   ],
   throwOnError: false
 });"></script>
-<meta property="og:url" content="http://localhost:1313/en/posts/vec2vec/">
+<meta property="og:url" content="https://sliceofdata.app/en/posts/vec2vec/">
   <meta property="og:site_name" content="sliceofdata">
   <meta property="og:title" content="vec2vec: Bridging Embeddings from Different Spaces">
   <meta property="og:description" content="A brief summary of Harnessing the Universal Geometry of Embeddings (2025)">
@@ -78,9 +78,7 @@
     <meta property="article:published_time" content="2025-05-26T20:38:11+09:00">
     <meta property="article:modified_time" content="2025-05-26T20:38:11+09:00">
     <meta property="article:tag" content="AI-ML">
-      <meta property="og:image" content="http://localhost:1313/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:image" content="http://localhost:1313/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E">
+<meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="vec2vec: Bridging Embeddings from Different Spaces">
 <meta name="twitter:description" content="A brief summary of Harnessing the Universal Geometry of Embeddings (2025)">
 
@@ -94,13 +92,13 @@
       "@type": "ListItem",
       "position":  1 ,
       "name": "Posts",
-      "item": "http://localhost:1313/en/posts/"
+      "item": "https://sliceofdata.app/en/posts/"
     }, 
     {
       "@type": "ListItem",
       "position":  2 ,
       "name": "vec2vec: Bridging Embeddings from Different Spaces",
-      "item": "http://localhost:1313/en/posts/vec2vec/"
+      "item": "https://sliceofdata.app/en/posts/vec2vec/"
     }
   ]
 }
@@ -118,7 +116,7 @@
   "articleBody": "In deep learning, embeddings have been central for quite some time. Since models ultimately work with numbers, the first step is always to turn raw data—whether it’s an image or text—into a compact, dense vector that captures its underlying meaning. These embeddings are what make it possible, from the earliest neural networks to today’s LLMs, to measure similarity and perform meaning-driven computations.\nimage source\nThere’s a phrase that often comes up when talking about embeddings: “The embeddings aren’t in the same space,” or “They’re not aligned.” What this means is that embeddings trained by different models live in different vector spaces. For example, even if we take the exact same word, like dog, the vector produced by Model A and the vector produced by Model B will almost certainly be different. Because of that, you can’t simply take Model A’s dog vector and Model B’s cat vector, measure their cosine similarity, and then draw conclusions about their relationship. The two sets of embeddings don’t share the same semantic framework—almost like two people speaking entirely different languages. That’s why the general rule of thumb is: embeddings from different spaces shouldn’t be directly compared or mixed together without some alignment process.\n\bThe Platonic Representation Hypothesis The Platonic Representation Hypothesis offers an intriguing perspective on this topic. It proposes that when trained on data of sufficient scale, representation models—regardless of their differing architectures—will ultimately converge toward learning the same underlying representations.\nthe essence and the shadow\nIt sounds a little out of place to mention Plato here, but there’s a reason. That’s because of his well-known Theory of Forms (or Ideas). The idea is that there exists an unchanging essence—the “Form”—while what we perceive in the real world is just an imperfect depiction of it, like prisoners in a dark cave seeing only the shadows of objects cast on the wall.\nYou can think of Z in the figure as representing that underlying reality (the essential features). Images and text are just two different ways of describing it. Models trained on images or text are, in effect, observing projections of this reality Z and extracting information from those projections.\nThe core claim of the paper is that since there’s always a single underlying truth (an essence, or statistical property) behind the data, the bigger the dataset and model, and the more capable the model becomes at downstream tasks, the more different embeddings will tend to converge toward the same representation. As indirect evidence, the authors also present alignment metrics showing this convergence across embeddings trained in very different ways.\nSo why does this convergence happen—not just “because the essence is the same,” but more concretely? The paper points to three main reasons:\nTask Generality: As datasets grow larger and tasks become more general (and harder), the constraints increase. That means the space of valid solutions—the kinds of representations that can actually satisfy those constraints—shrinks. In other words, no matter where you start, you’ll be funneled toward roughly the same target space. Model Capacity: Bigger models are better at finding optimal solutions. With enough capacity, a capable model is more likely to converge toward that shared representation. Simplicity Bias: Even with the same inputs and outputs, models could in theory learn very different internal representations. But deep networks are inherently biased toward simpler fits. That makes them more likely to settle into the overlapping “simple” solution space, rather than diverging into more complex alternatives. vec2vec The paper Harnessing the Universal Geometry of Embeddings takes the Platonic representation idea a step further. It shows that two embeddings trained by completely different models can actually be aligned — without knowing the encoders and without any paired supervision—purely in an unsupervised way. In other words, it demonstrates a kind of universal “embedding translator” that works across models. They call this approach vec2vec.\nArchitecture The structure of vec2vec is shown in the diagram above: it’s broken into three components—an input adapter (A), an output adapter (B), and a shared backbone network (T). The goal is to connect embeddings from two different models. Imagine we have embeddings from Model 1 and Model 2, but we don’t know the encoder of one side. The key assumption is that each embedding can be mapped into some universal latent representation (the “essential” representation in Platonic terms).\nInput Adapter (A): Maps embeddings from each individual space into the universal latent representation. Shared Backbone Network (T): Operates inside the latent space to refine and align embeddings so they line up across sources/domains. Output Adapter (B): Maps the universal latent representation back into the embedding space of each model. Technically, they implement this with an MLP using residual connections, layer normalization, and SiLU nonlinearities. Combining A, T, and B yields four possible functions (∘ is function composition):\nTransformation functions F1 = B2 ∘ T ∘ A1: Map from Model 1’s space to Model 2’s space F2 = B1 ∘ T ∘ A2: Map from Model 2’s space to Model 1’s space Reconstruction functions R1 = B1 ∘ T ∘ A1: Take Model 1’s embedding, go through latent space, and reconstruct it in Model 1’s space R2 = B2 ∘ T ∘ A2: Same, but for Model 2 Now, why is T needed at all—couldn’t A and B just handle the mapping? The point is that A merely aligns each model’s embeddings into a shared latent space, but that by itself doesn’t guarantee the embeddings from different domains will sit nicely together. T acts as a universal MLP inside the latent space, enforcing that embeddings from multiple sources (models, domains) are properly aligned and comparable at a deeper, shared level.\nTraining The goal of vec2vec is to make embeddings—trained in different ways on the same text—converge toward nearly identical representations in a shared universal latent space. To achieve this, the model is trained with several complementary objectives (loss functions):\nReconstruction Loss: An embedding that passes through the latent space and back to its original space should reconstruct faithfully. Cycle Consistency Loss: An embedding that travels from its original space → latent space → another space → latent space → back to the original should still come back intact. Vector Space Preservation Loss: The pairwise distances between transformed embeddings should be close to the pairwise distances before transformation, preserving the relative geometry of the space. Adversarial Loss: As in a standard GAN setup, the transformed embeddings (via F and R as generators) are judged by a discriminator, encouraging their distribution to match the target space distribution. The logic behind the first two losses is this: even if embeddings bounce around between two spaces and through the latent representation, their values should remain stable if the A–T–B adapters are doing their job correctly. It’s like me saying something in Korean to a translator, that being rendered into French, then repeated back by a French speaker into the translator, and finally delivered back to me. The sentence I receive at the end should still be the one I originally spoke.\nAs for the GAN loss, ablation studies show that removing it significantly degrades performance. This suggests it plays a critical role in the process of generating new vectors during the mapping into latent space.\nEvaluation Put another way, the goal of vec2vec translation is: given a source embedding $u_i = M_1(d_i)$ (where we don’t know what model $M_1$ actually is), generate a translated vector $F(u_i)$ that is as close as possible to the target embedding $v_i = M_2(d_i)$ of the same document under a different model.\nThe evaluation metrics are:\nMean Cosine Similarity: How similar $F(u_i)$ is to the true target embedding $v_i$. Ideal value = 1.0. Top-1 Accuracy: The proportion of cases where $F(u_i)$ correctly identifies $v_i$ as the closest embedding (by cosine similarity) among the candidate set $M_2(d_j)$. Ideal value = 1.0. Mean Rank: The average rank position of the true target embedding $v_i$ when comparing $F(u_i)$ against the candidate set $M_2(d_j)$. Ideal value = 1st. In the experiments, vec2vec was trained on the Natural Questions (NQ) dataset. It not only performed well on in-distribution evaluation (using the same dataset) but also generalized effectively to completely different domains—like tweets and medical records—showing strong robustness.\nEmbeddings aren’t immune to security risks Within industry practice, embeddings are often considered less sensitive than raw customer data. For instance, a record like “Customer A’s name is OOO, she’s a 28-year-old woman living in Seoul, and she purchased products A, B, and C…” is obviously highly sensitive personal information. Everyone agrees that if such data leaks, it’s a major problem.\nBy contrast, if you train a model and extract an embedding that represents a customer’s purchase behavior, what you see is just something like (0.324, -0.4253, 0.988, … across256 dimensions). At first glance, it feels impossible for anyone who steals this to know what it actually means. That’s why many assume embeddings don’t need the same degree of protection.\nBut in the final section of the vec2vec paper, the authors show that even if you only know the modality and language of embeddings trained by an unknown model, vec2vec can be used to recover nontrivial amounts of information from them. In other words, embeddings aren’t as opaque or “safe” as they look—they can leak meaningful signals if not properly secured.\nHere’s how the email experiment worked: they took email text, passed it through an unknown model $M_1$ to get embeddings, then used vec2vec to convert those embeddings into the space of a known model $M_2$. From there, they attempted zero-shot inversion—reconstructing the original email text from the transformed embeddings. Finally, they fed both the original and reconstructed emails into GPT-4o, asking it a simple yes/no question: “Was information from the original email leaked?”\nThe results were striking. For certain model pairs, up to 80% of the document’s content could be recovered from the transformed embeddings. The reconstructions weren’t perfect, but they still contained sensitive details: names, dates, promotions, financial data, service outages, even lunch orders. This shows two things:\nvec2vec can map between embedding spaces effectively, not just preserving geometric structure but also retaining semantic content. The assumption that embeddings are “just hundreds of meaningless numbers” is risky—because with the right tools, those numbers can expose far more information than expected. ",
   "wordCount" : "1699",
   "inLanguage": "en",
-  "image": "http://localhost:1313/%3Clink%20or%20path%20of%20image%20for%20opengraph,%20twitter-cards%3E","datePublished": "2025-05-26T20:38:11+09:00",
+  "datePublished": "2025-05-26T20:38:11+09:00",
   "dateModified": "2025-05-26T20:38:11+09:00",
   "author":{
     "@type": "Person",
@@ -126,14 +124,14 @@
   },
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "http://localhost:1313/en/posts/vec2vec/"
+    "@id": "https://sliceofdata.app/en/posts/vec2vec/"
   },
   "publisher": {
     "@type": "Organization",
     "name": "sliceofdata",
     "logo": {
       "@type": "ImageObject",
-      "url": "http://localhost:1313/favicon.ico"
+      "url": "https://sliceofdata.app/favicon.ico"
     }
   }
 }
@@ -155,8 +153,8 @@
 <header class="header">
     <nav class="nav">
         <div class="logo">
-            <a href="http://localhost:1313/en/" accesskey="h" title="slice.of.data (Alt + H)">
-                <img src="http://localhost:1313/apple-touch-icon.png" alt="" aria-label="logo"
+            <a href="https://sliceofdata.app/en/" accesskey="h" title="slice.of.data (Alt + H)">
+                <img src="https://sliceofdata.app/apple-touch-icon.png" alt="" aria-label="logo"
                     height="35">slice.of.data</a>
             <div class="logo-switches">
                 <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
@@ -181,7 +179,7 @@
                 </button>
                 <ul class="lang-switch"><li>|</li>
                     <li>
-                        <a href="http://localhost:1313/" title="한국어"
+                        <a href="https://sliceofdata.app/" title="한국어"
                             aria-label="한국어">Ko</a>
                     </li>
                 </ul>
@@ -189,22 +187,22 @@
         </div>
         <ul id="menu">
             <li>
-                <a href="http://localhost:1313/en/archives/" title="posts">
+                <a href="https://sliceofdata.app/en/archives/" title="posts">
                     <span>posts</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/en/tags/" title="tags">
+                <a href="https://sliceofdata.app/en/tags/" title="tags">
                     <span>tags</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/en/about/" title="about">
+                <a href="https://sliceofdata.app/en/about/" title="about">
                     <span>about</span>
                 </a>
             </li>
             <li>
-                <a href="http://localhost:1313/en/subscribe" title="subscribe">
+                <a href="https://sliceofdata.app/en/subscribe" title="subscribe">
                     <span>subscribe</span>
                 </a>
             </li>
@@ -236,7 +234,7 @@
     <div class="post-meta"><span title='2025-05-26 20:38:11 +0900 KST'>2025-05-26</span>&nbsp;·&nbsp;8 min&nbsp;·&nbsp;pizzathief&nbsp;|&nbsp;Translations:
 <ul class="i18n_list">
     <li>
-        <a href="http://localhost:1313/posts/vec2vec/">Ko</a>
+        <a href="https://sliceofdata.app/posts/vec2vec/">Ko</a>
     </li>
 </ul>&nbsp;|&nbsp;<a href="https://github.com/pizzathiefz/sliceofdata/blob/main/content/posts/vec2vec/index.en.md" rel="noopener noreferrer edit" target="_blank">Suggest Changes</a>
 
@@ -371,13 +369,13 @@ This shows two things:</p>
 
   <footer class="post-footer">
     <ul class="post-tags">
-      <li><a href="http://localhost:1313/en/tags/ai-ml/">AI-ML</a></li>
+      <li><a href="https://sliceofdata.app/en/tags/ai-ml/">AI-ML</a></li>
     </ul>
 
 <ul class="share-buttons">
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share vec2vec: Bridging Embeddings from Different Spaces on x"
-            href="https://x.com/intent/tweet/?text=vec2vec%3a%20Bridging%20Embeddings%20from%20Different%20Spaces&amp;url=http%3a%2f%2flocalhost%3a1313%2fen%2fposts%2fvec2vec%2f&amp;hashtags=AI-ML">
+            href="https://x.com/intent/tweet/?text=vec2vec%3a%20Bridging%20Embeddings%20from%20Different%20Spaces&amp;url=https%3a%2f%2fsliceofdata.app%2fen%2fposts%2fvec2vec%2f&amp;hashtags=AI-ML">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
@@ -386,7 +384,7 @@ This shows two things:</p>
     </li>
     <li>
         <a target="_blank" rel="noopener noreferrer" aria-label="share vec2vec: Bridging Embeddings from Different Spaces on linkedin"
-            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=http%3a%2f%2flocalhost%3a1313%2fen%2fposts%2fvec2vec%2f&amp;title=vec2vec%3a%20Bridging%20Embeddings%20from%20Different%20Spaces&amp;summary=vec2vec%3a%20Bridging%20Embeddings%20from%20Different%20Spaces&amp;source=http%3a%2f%2flocalhost%3a1313%2fen%2fposts%2fvec2vec%2f">
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fsliceofdata.app%2fen%2fposts%2fvec2vec%2f&amp;title=vec2vec%3a%20Bridging%20Embeddings%20from%20Different%20Spaces&amp;summary=vec2vec%3a%20Bridging%20Embeddings%20from%20Different%20Spaces&amp;source=https%3a%2f%2fsliceofdata.app%2fen%2fposts%2fvec2vec%2f">
             <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
                 <path
                     d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
@@ -481,7 +479,7 @@ This shows two things:</p>
     </main>
     
 <footer class="footer">
-        <span>&copy; 2025 <a href="http://localhost:1313/en/">sliceofdata</a></span> · 
+        <span>&copy; 2026 <a href="https://sliceofdata.app/en/">sliceofdata</a></span> · 
 
     <span>
         Powered by

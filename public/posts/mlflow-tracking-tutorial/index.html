@@ -1,0 +1,1275 @@
+<!DOCTYPE html>
+<html lang="ko" dir="auto">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>MLFlow로 모델 실험 트래킹 | sliceofdata</title>
+<meta name="keywords" content="mlflow">
+<meta name="description" content="진짜 막 해보면서 쓴 따끈따끈한 튜토리얼">
+<meta name="author" content="pizzathief">
+<link rel="canonical" href="https://sliceofdata.app/posts/mlflow-tracking-tutorial/">
+<link crossorigin="anonymous" href="/assets/css/stylesheet.27cad2a1c5348b9448235a32de472a54bfb4b517f58e15427dc5a1a01bf486da.css" integrity="sha256-J8rSocU0i5RII1oy3kcqVL&#43;0tRf1jhVCfcWhoBv0hto=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://sliceofdata.app/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://sliceofdata.app/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://sliceofdata.app/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://sliceofdata.app/%3Clink%20/%20abs%20url%3E">
+<link rel="mask-icon" href="https://sliceofdata.app/%3Clink%20/%20abs%20url%3E">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="ko" href="https://sliceofdata.app/posts/mlflow-tracking-tutorial/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+    <style>
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --theme: rgb(29, 30, 32);
+                --entry: rgb(46, 46, 51);
+                --primary: rgb(218, 218, 219);
+                --secondary: rgb(155, 156, 157);
+                --tertiary: rgb(65, 66, 68);
+                --content: rgb(196, 196, 197);
+                --code-block-bg: rgb(46, 46, 51);
+                --code-bg: rgb(55, 56, 62);
+                --border: rgb(51, 51, 51);
+            }
+
+            .list {
+                background: var(--theme);
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-track {
+                background: 0 0;
+            }
+
+            .list:not(.dark)::-webkit-scrollbar-thumb {
+                border-color: var(--theme);
+            }
+        }
+
+    </style>
+</noscript>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="renderMathInElement(document.body, {
+  delimiters: [
+    {left: '$$', right: '$$', display: true},
+    {left: '$', right: '$', display: false},
+    {left: '\\(', right: '\\)', display: false},
+    {left: '\\[', right: '\\]', display: true}
+  ],
+  throwOnError: false
+});"></script>
+<meta property="og:url" content="https://sliceofdata.app/posts/mlflow-tracking-tutorial/">
+  <meta property="og:site_name" content="sliceofdata">
+  <meta property="og:title" content="MLFlow로 모델 실험 트래킹">
+  <meta property="og:description" content="진짜 막 해보면서 쓴 따끈따끈한 튜토리얼">
+  <meta property="og:locale" content="ko-KR">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2022-07-10T17:04:47+09:00">
+    <meta property="article:modified_time" content="2022-07-10T17:04:47+09:00">
+    <meta property="article:tag" content="Mlflow">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="MLFlow로 모델 실험 트래킹">
+<meta name="twitter:description" content="진짜 막 해보면서 쓴 따끈따끈한 튜토리얼">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://sliceofdata.app/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "MLFlow로 모델 실험 트래킹",
+      "item": "https://sliceofdata.app/posts/mlflow-tracking-tutorial/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "MLFlow로 모델 실험 트래킹",
+  "name": "MLFlow로 모델 실험 트래킹",
+  "description": "진짜 막 해보면서 쓴 따끈따끈한 튜토리얼",
+  "keywords": [
+    "mlflow"
+  ],
+  "articleBody": "들어가기 전에 이 글을 보고 얻을 수 있는 정보는:\nMLflow 로 ML 실험을 기록하고 싶은데 어떻게 하는지 간단하게 알고 싶다/따라하고 싶다 Pyspark로도 쓰고 싶다 (+ Pandas UDF) 같은 실험을 그룹별로 나눠서 진행하고 싶다 이 글에서 사용한 것은:\nDatabricks 커뮤니티 버전 무료이고 쉽게 써볼 수 있어서이고, 빠르게 따라할 수 있는 Tracking 튜토리얼이 이 글의 목표이기 때문입니다. 커뮤니티 버전의 경우 모델 레지스트리나 배포는 안 됩니다(돈 내야 합니다). seaborn에 내장된 펭귄 데이터셋 요즘은 Penguin is the new iris 라고 하더군요. 저는 펭귄을 좋아하기 때문에 아주 반갑습니다. 아무래도 꽃보단 펭귄이죠 🐧 1 2 3 import seaborn as sns penguins = sns.load_dataset('penguins') penguins.head(3) 펭귄의 서식지/종/부리/날개/몸무게/성별 정보를 포함하고 있음 불러올 거 불러오고 대애충 처리 1 2 3 4 5 6 7 8 9 10 11 12 13 import matplotlib.pyplot as plt import pandas as pd import mlflow from sklearn.linear_model import LogisticRegression from sklearn.model_selection import train_test_split from sklearn.preprocessing import StandardScaler from sklearn.preprocessing import LabelEncoder from sklearn.metrics import roc_auc_score, plot_roc_curve, confusion_matrix penguins = penguins.dropna(axis=0, how = 'any') le = LabelEncoder() penguins['species_encoded']= le.fit_transform(penguins['species']) penguins['island_encoded']= le.fit_transform(penguins['island']) penguins['sex_encoded']= le.fit_transform(penguins['sex']) MLflow Tracking 기본 ⛳ 나머지 정보들로 수컷인지 암컷인지 예측\n학습/테스트 데이터셋 생성 1 2 3 4 5 6 7 features=['bill_length_mm', 'bill_depth_mm','flipper_length_mm', 'body_mass_g','island_encoded', 'species_encoded'] X = penguins[features] y = penguins['sex_encoded'] x_train, x_test, y_train, y_test = train_test_split(X, y, test_size = 0.2) sc = StandardScaler() scaled_x_train = sc.fit_transform(x_train) scaled_x_test = sc.transform(x_test) 첫번째로 3가지를 로깅해볼 겁니다. 모델의 평가 지표 → mlflow.log_metric 학습 정확도, 평가 정확도, AUC 테스트 결과와 관련된 플랏(이미지) → mlflow.log_artifact ROC 플랏과 컨퓨전 매트릭스 히트맵 모델 자체 → mlflow.log_artifact 따라서 다음과 같이 학습 및 평가 함수를 구성합니다. 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 def train(model, x_train, y_train): model = model.fit(x_train, y_train) train_acc = model.score(x_train, y_train) mlflow.log_metric(\"train_acc\", train_acc) print(f\"Train Accuracy: {train_acc:.3%}\") def evaluate(model, x_test, y_test): eval_acc = model.score(x_test, y_test) preds = model.predict(x_test) auc_score = roc_auc_score(y_test, preds, multi_class='ovr') mlflow.log_metric(\"eval_acc\", eval_acc) mlflow.log_metric(\"auc_score\", auc_score) print(f\"Auc Score: {auc_score:.3%}\") print(f\"Eval Accuracy: {eval_acc:.3%}\") roc_plot = plot_roc_curve(model, x_test, y_test, name = 'ROC Curve') plt.savefig(\"roc_plot.png\") plt.show() plt.clf() conf_matrix = confusion_matrix(y_test, preds) ax = sns.heatmap(conf_matrix, annot=True, fmt='g') plt.title('Confusion Matrix') plt.savefig('conf_matrix.png') mlflow.log_artifact(\"roc_plot.png\") mlflow.log_artifact(\"conf_matrix.png\") 이제 실제 모델을 훈련/평가해보는데, 기본적으로 하나의 Experiment 안에서 여러 번 run을 돌릴 수 있는 구조라고 보면 됩니다. 따라서 mlflow.set_experiment 로 하나의 실험이다 라고 세팅해준 다음 mlflow.start_run 으로 이번 실행을 시작합니다. with 문 안에서 학습과 평가가 이루어지면 됩니다! 1 2 3 4 5 6 7 8 model = LogisticRegression() mlflow.set_experiment(\"/Users/your_id/penguin_logistic_regression\") with mlflow.start_run(): train(model, scaled_x_train, y_train) evaluate(model, scaled_x_test, y_test) mlflow.sklearn.log_model(model, \"logistic_regression\") print(\"Model run: \", mlflow.active_run().info.run_uuid) mlflow.end_run() 저장된 걸 확인하고 모델 불러오기 자 저장한 건 어디서 보나요? Databricks를 사용한다면 3가지 방법으로 저장된 실험 결과 ui에 접근할 수 있습니다.\n맨 좌측에 Experiments 탭\n내가 실험 세팅 때 지정한 경로의 (코드상 Users/your_id/ ~ ) 디렉토리에\nrun을 실행한 노트북 셀 하단에 링크도 생겨 있음 (사실 이게 제일 쉬워요.)\n그러면 우리는 이런 화면들을 만나게 됩니다.\n실험의 전체 실행들을 볼 수 있고\n특정 실행의 정보를 볼 수 있고\n우리가 저장한 Metrics 3개를 확인할 수 있습니다.\nArtifacts에는 모델과 플랏도 잘 저장된 것 같습니다.\n저장한 모델은 어떻게 불러올까요?\nmlflow.sklearn.load_model()을 쓰면 간단하게 저장된 모델을 불러와서 다시 사용할 수 있는데요. 모델 경로를 따로 저장해두지 않았다면 저 위의 화면에서 모델을 누른 다음 Full Path를 베껴오면 됩니다. 플랏을 불러올 때도 마찬가지고요. 1 2 loaded_model = mlflow.sklearn.load_model(\"dbfs:/databricks/mlflow-tracking/3683903273715082/18e2bcc166cf4e259fb45944295208a3/artifacts/logistic_regression\") loaded_model.score(scaled_x_test, y_test) 점수를 출력해보면, 아까 실행할 때와 동일한 점수를 확인해볼 수 있습니다. 파라미터 서치 ⛳ 나머지 정보들로 몸무게 예측, 근데 파라미터를 그리드 서치 해서 최적의 모델을 찾고 싶다.\n다시 XY 만들기, 필요한 거 불러오기 1 2 3 4 5 6 7 8 from sklearn.linear_model import LinearRegression, Ridge, Lasso from sklearn.metrics import mean_squared_error from sklearn.model_selection import GridSearchCV features=['bill_length_mm', 'bill_depth_mm','flipper_length_mm','sex_encoded','species_encoded','island_encoded'] X = penguins[features].values y = penguins['body_mass_g'].values MLflow로 metrics와 artifacts 뿐 아니라 모델 파라미터도 기록할 수 있습니다. 간단하게 파라미터 그리드서치를 해보겠습니다. 대상은 릿지 회귀의 alpha 값입니다. 사실 아까처럼 명시적으로 mlflow.log_parameter() 해줄 수도 있는데요. 이번엔 하나하나 명시해주지 않아도 보다 간단하게 많은 정보를 기록해주는 sklearn.autolog() 를 써보겠습니다. 1 2 3 4 5 6 7 8 9 10 11 mlflow.sklearn.autolog() parameters = {'alpha':[0.05, 0.1, 0.5, 1, 2, 5]} model = Ridge() ridge_reg = GridSearchCV(model, parameters, scoring='neg_mean_squared_error',cv=5) mlflow.set_experiment(\"/Users/your_id/penguin_ridge_regression\") with mlflow.start_run() as run: ridge_reg.fit(X, y) mlflow.end_run() 이렇게 한번의 실행에 제가 지정한 파라미터 그리드만큼의 학습이 이루어진 것을 확인할 수 있습니다. autolog 기능으로 저장할 메트릭, 파라미터를 따로 지정하지 않아도 알아서 이렇게 기록해줍니다.\n최종적으로는 best estimator 모델이 저장됩니다. cv results도 따로 확인할 수 있고요.\nPyspark ver. ⛳ 나머지 정보들로 아델리인지 젠투인지 턱끈인지 예측, 근데 pyspark 로 하고 싶다.\n우선 스파크 DF로 변경하고 필요한 것들을 불러옵니다. 1 2 3 4 from pyspark.ml.feature import VectorAssembler from pyspark.ml.classification import LogisticRegression penguins_sdf = spark.createDataFrame(penguins) VectorAssembler로 피쳐들을 모아주는 부분 빼고 나머지는 사실 이전과 거의 똑같습니다. 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 features = ['bill_length_mm', 'bill_depth_mm','flipper_length_mm', 'body_mass_g','island_encoded', 'sex_encoded'] va = VectorAssembler(inputCols = features, outputCol = 'features') data = penguins_sdf.select(F.col('species_encoded').alias('label'), *feature_list) trainData, testData = data.randomSplit([0.8, 0.2]) trainData = va.transform(trainData) testData = va.transform(testData) def train(model, train_data): model = model.fit(train_data) trainingSummary = model.summary mlflow.log_metric(\"train_acc\", trainingSummary.accuracy) print(\"Training Accuracy: \", trainingSummary.accuracy) return model def evaluate(model, test_data): evaluationSummary = model.evaluate(test_data) mlflow.log_metric(\"eval_acc\", evaluationSummary.accuracy) print(\"Evaluation Accuracy: \", evaluationSummary.accuracy) lr = LogisticRegression(featuresCol = 'features', labelCol = 'label', maxIter = 10) mlflow.set_experiment('/Users/your_id/penguin_logistic_regression_pyspark') with mlflow.start_run(): lr = train(lr, trainData) evaluate(lr, testData) mlflow.spark.log_model(lr, \"logistic_regression_pyspark\") mlflow.end_run() 올?\n모델 로깅 결과 sparkml 모델이 잘 저장된 걸 볼 수 있습니다. 같은 실험인데 그룹별로 나눠서 할래 ⛳ 라벨을 쓰지 않고 클러스터링을 할 건데 파라미터를 실험해보고 싶다. 근데 데이터에 나오는 섬이 3개인데 섬마다 딱 맞는 파라미터가 다를 것 같아서 섬 별로 나눠서 하고 싶다.\n(TMI) 사실 이게 제가 MLflow를 써서 해보고 싶었던 태스크와 직접적으로 연관이 있는 찐 찐 목적입니다. 일단 어떻게 할 건지 설명은 이렇습니다. 클러스터링도 해도 돼? : 사실 처음에 남의 코드를 복붙하고 싶은 강렬한 희망사항이 있었는데 안타깝게도 클러스터링 mlflow 치면 아무것도 안 나옵니다. 하지만 안 될 건 딱히 없는 게 커스텀 메트릭도 얼마든지 로깅할 수 있고 클러스터링도 평가지표들이 많기 때문입니다. 내가 쓰고 싶은 알고리즘이 sparkml에 없는데 어떡해? : 그럼 그냥 UDF 쓰고 그 안에서 mlflow run 하면 됩니다. 그룹별로 파라미터 실험은? : groupBy 로 pandas UDF을 쓰면서 mlflow run을 하는데, nested run 을 하면 됩니다. 즉 하나의 섬 (예를 들면 Biscoe 섬)에서의 실행이 parent run이 되고, 파라미터값이 0.1일때의 run이 child run이 되도록 합니다. 말이 길었으므로 코드로 보여드리면 (하지만 코드가 더 김) Pandas UDF를 작성한다. 이 안에서는 펭귄이 서식하는 섬 별로 클러스터링(DBSCAN)을 수행하는데 이때 MLflow run 안에서 주어진 파라미터 (eps 값) 순서대로 수행하면서 로깅한다. 여러가지 커스텀 지표를 로깅한다. sklearn이 제공하는 클러스터링 평가 지표들과 S-Dbw 평가지표는 아니지만 만들어진 클러스터의 개수와 노이즈가 아닌 클러스터로 분류된 데이터의 개수도 궁금하니까 로깅한다. 각 실험의 결과를 담은 스파크 데이터프레임을 리턴하도록 한다. 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 from pyspark.sql.functions import pandas_udf, PandasUDFType from sklearn.cluster import DBSCAN from sklearn.metrics import silhouette_score, calinski_harabasz_score, davies_bouldin_score from s_dbw import S_Dbw return_schema = T.StructType([ T.StructField('island', T.StringType()), T.StructField('eps', T.FloatType()), T.StructField('silhouette', T.FloatType()), T.StructField('calinski-harabasz', T.FloatType()), T.StructField('davies-bouldin', T.FloatType()), T.StructField('s-dbw', T.FloatType()), T.StructField('n_clusters', T.IntegerType()), T.StructField('n_clustered_records', T.IntegerType()), T.StructField('model_path', T.StringType()) ]) def clustering(pdf: pd.DataFrame) -\u003e pd.DataFrame: island = pdf['island'].iloc[0] run_id = pdf['run_id'].iloc[0] feature_list = ['bill_length_mm', 'bill_depth_mm','flipper_length_mm', 'body_mass_g'] X = pdf[feature_list].values scaler = StandardScaler() X_scaled = scaler.fit_transform(X) n_clusters_list = [] n_clustered_records_list = [] slh_list = [] island_list = [] model_path_list = [] for eps_val in eps_list: island_list.append(island) with mlflow.start_run(run_id=run_id): with mlflow.start_run(run_name=str(island)+'-eps'+str(eps_val), nested=True) as run: mlflow.log_param(\"eps\", eps_val) model = DBSCAN(eps=eps_val, min_samples=3) model.fit(X_scaled) labels = model.labels_ num_labels = len(set(labels[labels\u003e=0])) if num_labels -1 \u003e= 1 : clustered_label = labels[labels\u003e=0] clustered_data = X[np.where(labels\u003e=0)[0]] clustered_data_cnt = len(clustered_data) #scores slh = silhouette_score(clustered_data, clustered_label) ch = calinski_harabasz_score(clustered_data, clustered_label) db = davies_bouldin_score(clustered_data, clustered_label) s_dbw = S_Dbw(X_scaled, labels, alg_noise='filter') else: slh = -1 ch = -1 db = -1 s_dbw = -1 clustered_data_cnt = 0 mlflow.sklearn.log_model(model, str(island)+str('-')+str(eps_val)) mlflow.log_metric(\"silhouette\", slh) mlflow.log_metric(\"calinski-harabasz\", ch) mlflow.log_metric(\"davies-bouldin\", db) mlflow.log_metric(\"s-dbw\", s_dbw) mlflow.log_metric(\"n_clusters\", num_labels) mlflow.log_metric(\"n_clustered_records\", clustered_data_cnt) artifact_uri = f\"runs:/{run.info.run_id}/{island}\" + str(eps_val) model_path_list.append(artifact_uri) n_clustered_records_list.append(clustered_data_cnt) n_clusters_list.append(num_labels) slh_list.append(slh) ch_list.append(ch) db_list.append(db) sdbw_list.append(s_dbw) returnDF = pd.DataFrame({'island':island_list, 'eps':eps_list, 'silhouette': slh_list, 'calinski-harabasz':ch_list, 'davies-bouldin': db_list, 's-dbw':sdbw_list, 'n_clusters':n_clusters_list, 'n_clustered_records':n_clusters_list, 'model_path':model_path_list}) return returnDF 메인 부분은 간단합니다. 리턴된 데이터프레임을 통해 ui로 보지 않아도 실험 결과들과 모델 경로를 확인할 수 있습니다. 1 2 3 4 5 6 7 8 9 with mlflow.start_run(run_name=\"섬 별 클러스터링\") as run: run_id = run.info.run_uuid eps_list = [0.1, 0.2, 0.3, 0.5, 0.7, 0.9, 1.1, 1.3, 1.5] modelDF = (penguins_sdf .withColumn(\"run_id\", F.lit(run_id)) .groupby(\"island\").applyInPandas(clustering, schema = return_schema) ) display(modelDF) 물론 Experiments 탭에서도 이전과 똑같이 확인할 수 있고요.\n어떤 평가지표를 사용하느냐에 따라 다르지만, 만약 s-dbw가 낮은 걸 고르겠다면 Biscoe에서의 eps값과 Dream에서의 eps 값은 다르게 설정되어야 할 것 같습니다.\n같은 섬에서 파라미터 값에 따른 평가지표 값을 비교해볼 수도 있습니다. 데이터브릭스의 기본적인 플랏 기능을 사용해봤습니다.\n1 display(modelDF.filter(F.col('island')=='Dream').orderBy('eps')) 참고한 책과 글 MLFlow를 활용한 MLOps (사족: 몇달전에 충동구매한 책인데 묵혀두고 있다가 이번에 급하게 참고하기는 나쁘지 않았으나 두께에 비해 내용이 엄청 풍부하진 않음. 그냥 구글링해서 나오는 문서들이 나을 수도) Manage and Scale Machine Learning Models for IoT Devices ",
+  "wordCount" : "1494",
+  "inLanguage": "ko",
+  "datePublished": "2022-07-10T17:04:47+09:00",
+  "dateModified": "2022-07-10T17:04:47+09:00",
+  "author":{
+    "@type": "Person",
+    "name": "pizzathief"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://sliceofdata.app/posts/mlflow-tracking-tutorial/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "sliceofdata",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://sliceofdata.app/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+
+<body class="" id="top">
+<script>
+    if (localStorage.getItem("pref-theme") === "dark") {
+        document.body.classList.add('dark');
+    } else if (localStorage.getItem("pref-theme") === "light") {
+        document.body.classList.remove('dark')
+    } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.body.classList.add('dark');
+    }
+
+</script>
+
+<header class="header">
+    <nav class="nav">
+        <div class="logo">
+            <a href="https://sliceofdata.app/" accesskey="h" title="slice.of.data (Alt + H)">
+                <img src="https://sliceofdata.app/apple-touch-icon.png" alt="" aria-label="logo"
+                    height="35">slice.of.data</a>
+            <div class="logo-switches">
+                <button id="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg id="moon" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg id="sun" xmlns="http://www.w3.org/2000/svg" width="24" height="18" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+                <ul class="lang-switch"><li>|</li>
+                    <li>
+                        <a href="https://sliceofdata.app/en/" title="English"
+                            aria-label="English">En</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <ul id="menu">
+            <li>
+                <a href="https://sliceofdata.app/archives/" title="posts">
+                    <span>posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://sliceofdata.app/tags/" title="tags">
+                    <span>tags</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://sliceofdata.app/about/" title="about">
+                    <span>about</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://sliceofdata.app/subscribe" title="subscribe">
+                    <span>subscribe</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://pizzathief.pages.dev/" title="notes">
+                    <span>notes</span>&nbsp;
+                    <svg fill="none" shape-rendering="geometricPrecision" stroke="currentColor" stroke-linecap="round"
+                        stroke-linejoin="round" stroke-width="2.5" viewBox="0 0 24 24" height="12" width="12">
+                        <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"></path>
+                        <path d="M15 3h6v6"></path>
+                        <path d="M10 14L21 3"></path>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      MLFlow로 모델 실험 트래킹
+    </h1>
+    <div class="post-meta"><span title='2022-07-10 17:04:47 +0900 KST'>2022-07-10</span>&nbsp;·&nbsp;8 min&nbsp;·&nbsp;pizzathief&nbsp;|&nbsp;<a href="https://github.com/pizzathiefz/sliceofdata/blob/main/content/posts/mlflow-tracking-tutorial/index.ko.md" rel="noopener noreferrer edit" target="_blank">Suggest Changes</a>
+
+</div>
+  </header> <div class="toc">
+    <details >
+        <summary accesskey="c" title="(Alt + C)">
+            <span class="details">Table of Contents</span>
+        </summary>
+
+        <div class="inner"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#들어가기-전에">들어가기 전에</a></li>
+    <li><a href="#mlflow-tracking-기본">MLflow Tracking 기본</a>
+      <ul>
+        <li><a href="#저장된-걸-확인하고-모델-불러오기">저장된 걸 확인하고 모델 불러오기</a></li>
+      </ul>
+    </li>
+    <li><a href="#파라미터-서치">파라미터 서치</a></li>
+    <li><a href="#pyspark-ver">Pyspark ver.</a></li>
+    <li><a href="#같은-실험인데-그룹별로-나눠서-할래">같은 실험인데 그룹별로 나눠서 할래</a></li>
+    <li><a href="#참고한-책과-글">참고한 책과 글</a></li>
+  </ul>
+</nav>
+        </div>
+    </details>
+</div>
+
+  <div class="post-content"><h2 id="들어가기-전에">들어가기 전에<a hidden class="anchor" aria-hidden="true" href="#들어가기-전에">#</a></h2>
+<p>이 글을 보고 얻을 수 있는 정보는:</p>
+<ul>
+<li>MLflow 로 ML 실험을 기록하고 싶은데 어떻게 하는지 간단하게 알고 싶다/따라하고 싶다
+<ul>
+<li>Pyspark로도 쓰고 싶다 (+ Pandas UDF)</li>
+<li>같은 실험을 그룹별로 나눠서 진행하고 싶다</li>
+</ul>
+</li>
+</ul>
+<p>이 글에서 사용한 것은:</p>
+<ul>
+<li><strong>Databricks 커뮤니티 버전</strong>
+<ul>
+<li>무료이고 쉽게 써볼 수 있어서이고, 빠르게 따라할 수 있는 Tracking 튜토리얼이 이 글의 목표이기 때문입니다. 커뮤니티 버전의 경우 모델 레지스트리나 배포는 안 됩니다(돈 내야 합니다).</li>
+</ul>
+</li>
+<li><strong>seaborn에 내장된 펭귄 데이터셋</strong>
+<ul>
+<li>요즘은 Penguin is the new iris 라고 하더군요. 저는 펭귄을 좋아하기 때문에 아주 반갑습니다. 아무래도 꽃보단 펭귄이죠 🐧</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">3
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">import</span> <span style="color:#8fbcbb">seaborn</span> <span style="color:#81a1c1;font-weight:bold">as</span> <span style="color:#8fbcbb">sns</span>
+</span></span><span style="display:flex;"><span>penguins <span style="color:#81a1c1">=</span> sns<span style="color:#81a1c1">.</span>load_dataset<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;penguins&#39;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>penguins<span style="color:#81a1c1">.</span>head<span style="color:#eceff4">(</span><span style="color:#b48ead">3</span><span style="color:#eceff4">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/1.png#center" width="600"/> 
+</figure>
+
+<ul>
+<li>펭귄의 서식지/종/부리/날개/몸무게/성별 정보를 포함하고 있음</li>
+<li>불러올 거 불러오고 대애충 처리</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">13
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">import</span> <span style="color:#8fbcbb">matplotlib.pyplot</span> <span style="color:#81a1c1;font-weight:bold">as</span> <span style="color:#8fbcbb">plt</span>
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">import</span> <span style="color:#8fbcbb">pandas</span> <span style="color:#81a1c1;font-weight:bold">as</span> <span style="color:#8fbcbb">pd</span>
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">import</span> <span style="color:#8fbcbb">mlflow</span>
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">sklearn.linear_model</span> <span style="color:#81a1c1;font-weight:bold">import</span> LogisticRegression
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">sklearn.model_selection</span> <span style="color:#81a1c1;font-weight:bold">import</span> train_test_split
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">sklearn.preprocessing</span> <span style="color:#81a1c1;font-weight:bold">import</span> StandardScaler
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">sklearn.preprocessing</span> <span style="color:#81a1c1;font-weight:bold">import</span> LabelEncoder
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">sklearn.metrics</span> <span style="color:#81a1c1;font-weight:bold">import</span> roc_auc_score<span style="color:#eceff4">,</span> plot_roc_curve<span style="color:#eceff4">,</span> confusion_matrix
+</span></span><span style="display:flex;"><span>penguins <span style="color:#81a1c1">=</span> penguins<span style="color:#81a1c1">.</span>dropna<span style="color:#eceff4">(</span>axis<span style="color:#81a1c1">=</span><span style="color:#b48ead">0</span><span style="color:#eceff4">,</span> how <span style="color:#81a1c1">=</span> <span style="color:#a3be8c">&#39;any&#39;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>le <span style="color:#81a1c1">=</span> LabelEncoder<span style="color:#eceff4">()</span>
+</span></span><span style="display:flex;"><span>penguins<span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;species_encoded&#39;</span><span style="color:#eceff4">]</span><span style="color:#81a1c1">=</span> le<span style="color:#81a1c1">.</span>fit_transform<span style="color:#eceff4">(</span>penguins<span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;species&#39;</span><span style="color:#eceff4">])</span>
+</span></span><span style="display:flex;"><span>penguins<span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;island_encoded&#39;</span><span style="color:#eceff4">]</span><span style="color:#81a1c1">=</span> le<span style="color:#81a1c1">.</span>fit_transform<span style="color:#eceff4">(</span>penguins<span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;island&#39;</span><span style="color:#eceff4">])</span>
+</span></span><span style="display:flex;"><span>penguins<span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;sex_encoded&#39;</span><span style="color:#eceff4">]</span><span style="color:#81a1c1">=</span> le<span style="color:#81a1c1">.</span>fit_transform<span style="color:#eceff4">(</span>penguins<span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;sex&#39;</span><span style="color:#eceff4">])</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><br>
+<h2 id="mlflow-tracking-기본">MLflow Tracking 기본<a hidden class="anchor" aria-hidden="true" href="#mlflow-tracking-기본">#</a></h2>
+<blockquote>
+<p>⛳ <strong>나머지 정보들로 수컷인지 암컷인지 예측</strong></p></blockquote>
+<ul>
+<li>학습/테스트 데이터셋 생성</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">7
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>features<span style="color:#81a1c1">=</span><span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;bill_length_mm&#39;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;bill_depth_mm&#39;</span><span style="color:#eceff4">,</span><span style="color:#a3be8c">&#39;flipper_length_mm&#39;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;body_mass_g&#39;</span><span style="color:#eceff4">,</span><span style="color:#a3be8c">&#39;island_encoded&#39;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;species_encoded&#39;</span><span style="color:#eceff4">]</span>
+</span></span><span style="display:flex;"><span>X <span style="color:#81a1c1">=</span> penguins<span style="color:#eceff4">[</span>features<span style="color:#eceff4">]</span>
+</span></span><span style="display:flex;"><span>y <span style="color:#81a1c1">=</span> penguins<span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;sex_encoded&#39;</span><span style="color:#eceff4">]</span>
+</span></span><span style="display:flex;"><span>x_train<span style="color:#eceff4">,</span> x_test<span style="color:#eceff4">,</span> y_train<span style="color:#eceff4">,</span> y_test <span style="color:#81a1c1">=</span> train_test_split<span style="color:#eceff4">(</span>X<span style="color:#eceff4">,</span> y<span style="color:#eceff4">,</span> test_size <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0.2</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>sc <span style="color:#81a1c1">=</span> StandardScaler<span style="color:#eceff4">()</span>
+</span></span><span style="display:flex;"><span>scaled_x_train <span style="color:#81a1c1">=</span> sc<span style="color:#81a1c1">.</span>fit_transform<span style="color:#eceff4">(</span>x_train<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>scaled_x_test <span style="color:#81a1c1">=</span> sc<span style="color:#81a1c1">.</span>transform<span style="color:#eceff4">(</span>x_test<span style="color:#eceff4">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>첫번째로 3가지를 로깅해볼 겁니다.
+<ol>
+<li>모델의 평가 지표 → <code>mlflow.log_metric</code>
+<ul>
+<li>학습 정확도, 평가 정확도, AUC</li>
+</ul>
+</li>
+<li>테스트 결과와 관련된 플랏(이미지) → <code>mlflow.log_artifact</code>
+<ul>
+<li>ROC 플랏과 컨퓨전 매트릭스 히트맵</li>
+</ul>
+</li>
+<li>모델 자체 → <code>mlflow.log_artifact</code></li>
+</ol>
+</li>
+<li>따라서 다음과 같이 학습 및 평가 함수를 구성합니다.</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">28
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">def</span> <span style="color:#88c0d0">train</span><span style="color:#eceff4">(</span>model<span style="color:#eceff4">,</span> x_train<span style="color:#eceff4">,</span> y_train<span style="color:#eceff4">):</span>
+</span></span><span style="display:flex;"><span>  model <span style="color:#81a1c1">=</span> model<span style="color:#81a1c1">.</span>fit<span style="color:#eceff4">(</span>x_train<span style="color:#eceff4">,</span> y_train<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  train_acc <span style="color:#81a1c1">=</span> model<span style="color:#81a1c1">.</span>score<span style="color:#eceff4">(</span>x_train<span style="color:#eceff4">,</span> y_train<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  mlflow<span style="color:#81a1c1">.</span>log_metric<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;train_acc&#34;</span><span style="color:#eceff4">,</span> train_acc<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1">print</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">f</span><span style="color:#a3be8c">&#34;Train Accuracy: </span><span style="color:#a3be8c">{</span>train_acc<span style="color:#a3be8c">:</span><span style="color:#a3be8c">.3%</span><span style="color:#a3be8c">}</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">def</span> <span style="color:#88c0d0">evaluate</span><span style="color:#eceff4">(</span>model<span style="color:#eceff4">,</span> x_test<span style="color:#eceff4">,</span> y_test<span style="color:#eceff4">):</span>
+</span></span><span style="display:flex;"><span>  eval_acc <span style="color:#81a1c1">=</span> model<span style="color:#81a1c1">.</span>score<span style="color:#eceff4">(</span>x_test<span style="color:#eceff4">,</span> y_test<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  preds <span style="color:#81a1c1">=</span> model<span style="color:#81a1c1">.</span>predict<span style="color:#eceff4">(</span>x_test<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  auc_score <span style="color:#81a1c1">=</span> roc_auc_score<span style="color:#eceff4">(</span>y_test<span style="color:#eceff4">,</span> preds<span style="color:#eceff4">,</span> multi_class<span style="color:#81a1c1">=</span><span style="color:#a3be8c">&#39;ovr&#39;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  mlflow<span style="color:#81a1c1">.</span>log_metric<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;eval_acc&#34;</span><span style="color:#eceff4">,</span> eval_acc<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  mlflow<span style="color:#81a1c1">.</span>log_metric<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;auc_score&#34;</span><span style="color:#eceff4">,</span> auc_score<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1">print</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">f</span><span style="color:#a3be8c">&#34;Auc Score: </span><span style="color:#a3be8c">{</span>auc_score<span style="color:#a3be8c">:</span><span style="color:#a3be8c">.3%</span><span style="color:#a3be8c">}</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1">print</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">f</span><span style="color:#a3be8c">&#34;Eval Accuracy: </span><span style="color:#a3be8c">{</span>eval_acc<span style="color:#a3be8c">:</span><span style="color:#a3be8c">.3%</span><span style="color:#a3be8c">}</span><span style="color:#a3be8c">&#34;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  roc_plot <span style="color:#81a1c1">=</span> plot_roc_curve<span style="color:#eceff4">(</span>model<span style="color:#eceff4">,</span> x_test<span style="color:#eceff4">,</span> y_test<span style="color:#eceff4">,</span> name <span style="color:#81a1c1">=</span> <span style="color:#a3be8c">&#39;ROC Curve&#39;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  plt<span style="color:#81a1c1">.</span>savefig<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;roc_plot.png&#34;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  plt<span style="color:#81a1c1">.</span>show<span style="color:#eceff4">()</span>
+</span></span><span style="display:flex;"><span>  plt<span style="color:#81a1c1">.</span>clf<span style="color:#eceff4">()</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  conf_matrix <span style="color:#81a1c1">=</span> confusion_matrix<span style="color:#eceff4">(</span>y_test<span style="color:#eceff4">,</span> preds<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  ax <span style="color:#81a1c1">=</span> sns<span style="color:#81a1c1">.</span>heatmap<span style="color:#eceff4">(</span>conf_matrix<span style="color:#eceff4">,</span> annot<span style="color:#81a1c1">=</span><span style="color:#81a1c1;font-weight:bold">True</span><span style="color:#eceff4">,</span> fmt<span style="color:#81a1c1">=</span><span style="color:#a3be8c">&#39;g&#39;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  plt<span style="color:#81a1c1">.</span>title<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;Confusion Matrix&#39;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  plt<span style="color:#81a1c1">.</span>savefig<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;conf_matrix.png&#39;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  mlflow<span style="color:#81a1c1">.</span>log_artifact<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;roc_plot.png&#34;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  mlflow<span style="color:#81a1c1">.</span>log_artifact<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;conf_matrix.png&#34;</span><span style="color:#eceff4">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>이제 실제 모델을 훈련/평가해보는데, 기본적으로 하나의 Experiment 안에서 여러 번 run을 돌릴 수 있는 구조라고 보면 됩니다. 따라서  <code>mlflow.set_experiment</code> 로 하나의 실험이다 라고 세팅해준 다음 <code>mlflow.start_run</code> 으로 이번 실행을 시작합니다. with 문 안에서 학습과 평가가 이루어지면 됩니다!</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>model <span style="color:#81a1c1">=</span> LogisticRegression<span style="color:#eceff4">()</span>
+</span></span><span style="display:flex;"><span>mlflow<span style="color:#81a1c1">.</span>set_experiment<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;/Users/your_id/penguin_logistic_regression&#34;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">with</span> mlflow<span style="color:#81a1c1">.</span>start_run<span style="color:#eceff4">():</span>
+</span></span><span style="display:flex;"><span>  train<span style="color:#eceff4">(</span>model<span style="color:#eceff4">,</span> scaled_x_train<span style="color:#eceff4">,</span> y_train<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  evaluate<span style="color:#eceff4">(</span>model<span style="color:#eceff4">,</span> scaled_x_test<span style="color:#eceff4">,</span> y_test<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  mlflow<span style="color:#81a1c1">.</span>sklearn<span style="color:#81a1c1">.</span>log_model<span style="color:#eceff4">(</span>model<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34;logistic_regression&#34;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1">print</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;Model run: &#34;</span><span style="color:#eceff4">,</span> mlflow<span style="color:#81a1c1">.</span>active_run<span style="color:#eceff4">()</span><span style="color:#81a1c1">.</span>info<span style="color:#81a1c1">.</span>run_uuid<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>mlflow<span style="color:#81a1c1">.</span>end_run<span style="color:#eceff4">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/2.png#center" width="450"/> 
+</figure>
+
+<br>
+<h3 id="저장된-걸-확인하고-모델-불러오기">저장된 걸 확인하고 모델 불러오기<a hidden class="anchor" aria-hidden="true" href="#저장된-걸-확인하고-모델-불러오기">#</a></h3>
+<ul>
+<li>
+<p>자 저장한 건 어디서 보나요? Databricks를 사용한다면 3가지 방법으로 저장된 실험 결과 ui에 접근할 수 있습니다.</p>
+<ul>
+<li>
+<p>맨 좌측에 Experiments 탭</p>
+<ul>
+<li><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/3.png#center" width="300"/> 
+</figure>
+</li>
+</ul>
+</li>
+<li>
+<p>내가 실험 세팅 때 지정한 경로의 (코드상 <code>Users/your_id/</code> ~ ) 디렉토리에</p>
+<ul>
+<li><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/4.png#center" width="300"/> 
+</figure>
+</li>
+</ul>
+</li>
+<li>
+<p>run을 실행한 노트북 셀 하단에 링크도 생겨 있음 (사실 이게 제일 쉬워요.)</p>
+<ul>
+<li><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/5.png#center" width="400"/> 
+</figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>그러면 우리는 이런 화면들을 만나게 됩니다.</p>
+<ul>
+<li>
+<p>실험의 전체 실행들을 볼 수 있고</p>
+<ul>
+<li><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/6.png#center" width="600"/> 
+</figure>
+</li>
+</ul>
+</li>
+<li>
+<p>특정 실행의 정보를 볼 수 있고</p>
+<ul>
+<li>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/7.png#center" width="500"/> 
+</figure>
+
+</li>
+<li>
+<p>우리가 저장한 Metrics 3개를 확인할 수 있습니다.</p>
+</li>
+<li>
+<p>Artifacts에는 모델과 플랏도 잘 저장된 것 같습니다.</p>
+<ul>
+<li><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/8.png#center" width="600"/> 
+</figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>저장한 모델은 어떻게 불러올까요?</p>
+<ul>
+<li><code>mlflow.sklearn.load_model()</code>을 쓰면 간단하게 저장된 모델을 불러와서 다시 사용할 수 있는데요. 모델 경로를 따로 저장해두지 않았다면 저 위의 화면에서  모델을 누른 다음 Full Path를 베껴오면 됩니다. 플랏을 불러올 때도  마찬가지고요.</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">2
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>loaded_model <span style="color:#81a1c1">=</span> mlflow<span style="color:#81a1c1">.</span>sklearn<span style="color:#81a1c1">.</span>load_model<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;dbfs:/databricks/mlflow-tracking/3683903273715082/18e2bcc166cf4e259fb45944295208a3/artifacts/logistic_regression&#34;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>loaded_model<span style="color:#81a1c1">.</span>score<span style="color:#eceff4">(</span>scaled_x_test<span style="color:#eceff4">,</span> y_test<span style="color:#eceff4">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure class="align-center ">
+     <img loading="lazy" src="/posts/mlflow-tracking-tutorial/9.png#center" width="220"/> 
+ </figure>
+
+<ul>
+<li>점수를 출력해보면, 아까 실행할 때와 동일한 점수를 확인해볼 수 있습니다.</li>
+</ul>
+<br>
+<h2 id="파라미터-서치">파라미터 서치<a hidden class="anchor" aria-hidden="true" href="#파라미터-서치">#</a></h2>
+<blockquote>
+<p>⛳ <strong>나머지 정보들로 몸무게 예측, 근데 파라미터를 그리드 서치 해서 최적의 모델을 찾고 싶다.</strong></p></blockquote>
+<ul>
+<li>다시 XY 만들기, 필요한 거 불러오기</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">8
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">sklearn.linear_model</span> <span style="color:#81a1c1;font-weight:bold">import</span> LinearRegression<span style="color:#eceff4">,</span> Ridge<span style="color:#eceff4">,</span> Lasso
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">sklearn.metrics</span> <span style="color:#81a1c1;font-weight:bold">import</span> mean_squared_error
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">sklearn.model_selection</span> <span style="color:#81a1c1;font-weight:bold">import</span> GridSearchCV
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>features<span style="color:#81a1c1">=</span><span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;bill_length_mm&#39;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;bill_depth_mm&#39;</span><span style="color:#eceff4">,</span><span style="color:#a3be8c">&#39;flipper_length_mm&#39;</span><span style="color:#eceff4">,</span><span style="color:#a3be8c">&#39;sex_encoded&#39;</span><span style="color:#eceff4">,</span><span style="color:#a3be8c">&#39;species_encoded&#39;</span><span style="color:#eceff4">,</span><span style="color:#a3be8c">&#39;island_encoded&#39;</span><span style="color:#eceff4">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>X <span style="color:#81a1c1">=</span> penguins<span style="color:#eceff4">[</span>features<span style="color:#eceff4">]</span><span style="color:#81a1c1">.</span>values
+</span></span><span style="display:flex;"><span>y <span style="color:#81a1c1">=</span> penguins<span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;body_mass_g&#39;</span><span style="color:#eceff4">]</span><span style="color:#81a1c1">.</span>values
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>MLflow로 metrics와 artifacts 뿐 아니라 모델 파라미터도 기록할 수 있습니다. 간단하게 파라미터 그리드서치를 해보겠습니다. 대상은 릿지 회귀의 alpha 값입니다.
+<ul>
+<li>사실 아까처럼 명시적으로  <code>mlflow.log_parameter()</code> 해줄 수도 있는데요. 이번엔 하나하나 명시해주지 않아도 보다 간단하게 많은 정보를 기록해주는 <code>sklearn.autolog()</code> 를 써보겠습니다.</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">11
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>mlflow<span style="color:#81a1c1">.</span>sklearn<span style="color:#81a1c1">.</span>autolog<span style="color:#eceff4">()</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>parameters <span style="color:#81a1c1">=</span> <span style="color:#eceff4">{</span><span style="color:#a3be8c">&#39;alpha&#39;</span><span style="color:#eceff4">:[</span><span style="color:#b48ead">0.05</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">0.1</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">0.5</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">1</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">2</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">5</span><span style="color:#eceff4">]}</span>
+</span></span><span style="display:flex;"><span>model <span style="color:#81a1c1">=</span> Ridge<span style="color:#eceff4">()</span>
+</span></span><span style="display:flex;"><span>ridge_reg <span style="color:#81a1c1">=</span> GridSearchCV<span style="color:#eceff4">(</span>model<span style="color:#eceff4">,</span> parameters<span style="color:#eceff4">,</span> scoring<span style="color:#81a1c1">=</span><span style="color:#a3be8c">&#39;neg_mean_squared_error&#39;</span><span style="color:#eceff4">,</span>cv<span style="color:#81a1c1">=</span><span style="color:#b48ead">5</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>mlflow<span style="color:#81a1c1">.</span>set_experiment<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;/Users/your_id/penguin_ridge_regression&#34;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">with</span> mlflow<span style="color:#81a1c1">.</span>start_run<span style="color:#eceff4">()</span> <span style="color:#81a1c1;font-weight:bold">as</span> run<span style="color:#eceff4">:</span>
+</span></span><span style="display:flex;"><span>  ridge_reg<span style="color:#81a1c1">.</span>fit<span style="color:#eceff4">(</span>X<span style="color:#eceff4">,</span> y<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>mlflow<span style="color:#81a1c1">.</span>end_run<span style="color:#eceff4">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>이렇게 한번의 실행에 제가 지정한 파라미터 그리드만큼의 학습이 이루어진 것을 확인할 수 있습니다.
+<ul>
+<li>
+<figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/10.png#center" width="700"/> 
+</figure>
+
+</li>
+<li>
+<p>autolog 기능으로 저장할 메트릭, 파라미터를 따로 지정하지 않아도 알아서 이렇게 기록해줍니다.</p>
+<ul>
+<li><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/11.png#center" width="300"/> 
+</figure>
+</li>
+</ul>
+</li>
+<li>
+<p>최종적으로는 best estimator 모델이 저장됩니다. cv results도 따로 확인할 수 있고요.</p>
+<ul>
+<li><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/12.png#center" width="700"/> 
+</figure>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<br>
+<h2 id="pyspark-ver">Pyspark ver.<a hidden class="anchor" aria-hidden="true" href="#pyspark-ver">#</a></h2>
+<blockquote>
+<p>⛳ <strong>나머지 정보들로 아델리인지 젠투인지 턱끈인지 예측, 근데 pyspark 로 하고 싶다.</strong></p></blockquote>
+<ul>
+<li>우선 스파크 DF로 변경하고 필요한 것들을 불러옵니다.</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">4
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">pyspark.ml.feature</span> <span style="color:#81a1c1;font-weight:bold">import</span> VectorAssembler
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">pyspark.ml.classification</span> <span style="color:#81a1c1;font-weight:bold">import</span> LogisticRegression
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>penguins_sdf <span style="color:#81a1c1">=</span> spark<span style="color:#81a1c1">.</span>createDataFrame<span style="color:#eceff4">(</span>penguins<span style="color:#eceff4">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><code>VectorAssembler</code>로 피쳐들을 모아주는 부분 빼고 나머지는 사실 이전과 거의 똑같습니다.</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">28
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>features <span style="color:#81a1c1">=</span> <span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;bill_length_mm&#39;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;bill_depth_mm&#39;</span><span style="color:#eceff4">,</span><span style="color:#a3be8c">&#39;flipper_length_mm&#39;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;body_mass_g&#39;</span><span style="color:#eceff4">,</span><span style="color:#a3be8c">&#39;island_encoded&#39;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;sex_encoded&#39;</span><span style="color:#eceff4">]</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>va <span style="color:#81a1c1">=</span> VectorAssembler<span style="color:#eceff4">(</span>inputCols <span style="color:#81a1c1">=</span> features<span style="color:#eceff4">,</span> outputCol <span style="color:#81a1c1">=</span> <span style="color:#a3be8c">&#39;features&#39;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>data <span style="color:#81a1c1">=</span> penguins_sdf<span style="color:#81a1c1">.</span>select<span style="color:#eceff4">(</span>F<span style="color:#81a1c1">.</span>col<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;species_encoded&#39;</span><span style="color:#eceff4">)</span><span style="color:#81a1c1">.</span>alias<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;label&#39;</span><span style="color:#eceff4">),</span> <span style="color:#81a1c1">*</span>feature_list<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>trainData<span style="color:#eceff4">,</span> testData <span style="color:#81a1c1">=</span> data<span style="color:#81a1c1">.</span>randomSplit<span style="color:#eceff4">([</span><span style="color:#b48ead">0.8</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">0.2</span><span style="color:#eceff4">])</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>trainData <span style="color:#81a1c1">=</span> va<span style="color:#81a1c1">.</span>transform<span style="color:#eceff4">(</span>trainData<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>testData <span style="color:#81a1c1">=</span> va<span style="color:#81a1c1">.</span>transform<span style="color:#eceff4">(</span>testData<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">def</span> <span style="color:#88c0d0">train</span><span style="color:#eceff4">(</span>model<span style="color:#eceff4">,</span> train_data<span style="color:#eceff4">):</span>
+</span></span><span style="display:flex;"><span>  model <span style="color:#81a1c1">=</span> model<span style="color:#81a1c1">.</span>fit<span style="color:#eceff4">(</span>train_data<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  trainingSummary <span style="color:#81a1c1">=</span> model<span style="color:#81a1c1">.</span>summary
+</span></span><span style="display:flex;"><span>  mlflow<span style="color:#81a1c1">.</span>log_metric<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;train_acc&#34;</span><span style="color:#eceff4">,</span> trainingSummary<span style="color:#81a1c1">.</span>accuracy<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1">print</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;Training Accuracy: &#34;</span><span style="color:#eceff4">,</span> trainingSummary<span style="color:#81a1c1">.</span>accuracy<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1;font-weight:bold">return</span> model
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">def</span> <span style="color:#88c0d0">evaluate</span><span style="color:#eceff4">(</span>model<span style="color:#eceff4">,</span> test_data<span style="color:#eceff4">):</span>
+</span></span><span style="display:flex;"><span>  evaluationSummary <span style="color:#81a1c1">=</span> model<span style="color:#81a1c1">.</span>evaluate<span style="color:#eceff4">(</span>test_data<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  mlflow<span style="color:#81a1c1">.</span>log_metric<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;eval_acc&#34;</span><span style="color:#eceff4">,</span> evaluationSummary<span style="color:#81a1c1">.</span>accuracy<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1">print</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;Evaluation Accuracy: &#34;</span><span style="color:#eceff4">,</span> evaluationSummary<span style="color:#81a1c1">.</span>accuracy<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>lr <span style="color:#81a1c1">=</span> LogisticRegression<span style="color:#eceff4">(</span>featuresCol <span style="color:#81a1c1">=</span> <span style="color:#a3be8c">&#39;features&#39;</span><span style="color:#eceff4">,</span> labelCol <span style="color:#81a1c1">=</span> <span style="color:#a3be8c">&#39;label&#39;</span><span style="color:#eceff4">,</span> maxIter <span style="color:#81a1c1">=</span> <span style="color:#b48ead">10</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>mlflow<span style="color:#81a1c1">.</span>set_experiment<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;/Users/your_id/penguin_logistic_regression_pyspark&#39;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">with</span> mlflow<span style="color:#81a1c1">.</span>start_run<span style="color:#eceff4">():</span>
+</span></span><span style="display:flex;"><span>  lr <span style="color:#81a1c1">=</span> train<span style="color:#eceff4">(</span>lr<span style="color:#eceff4">,</span> trainData<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  evaluate<span style="color:#eceff4">(</span>lr<span style="color:#eceff4">,</span> testData<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>  mlflow<span style="color:#81a1c1">.</span>spark<span style="color:#81a1c1">.</span>log_model<span style="color:#eceff4">(</span>lr<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#34;logistic_regression_pyspark&#34;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>mlflow<span style="color:#81a1c1">.</span>end_run<span style="color:#eceff4">()</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/13.png#center"
+         alt="올?" width="300"/> <figcaption>
+            <p>올?</p>
+        </figcaption>
+</figure>
+
+<ul>
+<li>모델 로깅 결과 sparkml 모델이 잘 저장된 걸 볼 수 있습니다.
+<ul>
+<li><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/14.png#center" width="300"/> 
+</figure>
+</li>
+</ul>
+</li>
+</ul>
+<br>
+<h2 id="같은-실험인데-그룹별로-나눠서-할래">같은 실험인데 그룹별로 나눠서 할래<a hidden class="anchor" aria-hidden="true" href="#같은-실험인데-그룹별로-나눠서-할래">#</a></h2>
+<blockquote>
+<p><strong>⛳ 라벨을 쓰지 않고 클러스터링을 할 건데 파라미터를 실험해보고 싶다. 근데 데이터에 나오는 섬이 3개인데 섬마다 딱 맞는 파라미터가 다를 것 같아서 섬 별로 나눠서 하고 싶다.</strong></p></blockquote>
+<ul>
+<li>(TMI) 사실 이게 제가 MLflow를 써서 해보고 싶었던 태스크와 직접적으로 연관이 있는 찐 찐 목적입니다.</li>
+<li>일단 어떻게 할 건지 설명은 이렇습니다.
+<ul>
+<li><strong>클러스터링도 해도 돼?</strong> : 사실 처음에 남의 코드를 복붙하고 싶은 강렬한 희망사항이 있었는데 안타깝게도 클러스터링 mlflow 치면 아무것도 안 나옵니다. 하지만 안 될 건 딱히 없는 게 커스텀 메트릭도 얼마든지 로깅할 수 있고 클러스터링도 평가지표들이 많기 때문입니다.</li>
+<li><strong>내가 쓰고 싶은 알고리즘이 sparkml에 없는데 어떡해?</strong> : 그럼 그냥 UDF 쓰고 그 안에서 mlflow run 하면 됩니다.</li>
+<li><strong>그룹별로 파라미터 실험은?</strong> : groupBy 로 pandas UDF을 쓰면서 mlflow run을 하는데, nested run 을 하면 됩니다. 즉 하나의 섬 (예를 들면 Biscoe 섬)에서의 실행이 parent run이 되고, 파라미터값이 0.1일때의 run이 child run이 되도록 합니다.</li>
+</ul>
+</li>
+<li>말이 길었으므로 코드로 보여드리면 (하지만 코드가 더 김)
+<ul>
+<li>Pandas UDF를 작성한다.
+<ul>
+<li>이 안에서는 펭귄이 서식하는 섬 별로 클러스터링(DBSCAN)을 수행하는데 이때
+<ul>
+<li>MLflow run 안에서
+<ul>
+<li>주어진 파라미터 (eps 값) 순서대로 수행하면서 로깅한다.</li>
+<li>여러가지 커스텀 지표를 로깅한다.
+<ul>
+<li><a href="https://scikit-learn.org/stable/modules/clustering.html#clustering-evaluation">sklearn이 제공하는 클러스터링 평가 지표들</a>과 <a href="https://pypi.org/project/s-dbw/">S-Dbw</a></li>
+<li>평가지표는 아니지만 만들어진 클러스터의 개수와 노이즈가 아닌 클러스터로 분류된 데이터의 개수도 궁금하니까 로깅한다.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>각 실험의 결과를 담은 스파크 데이터프레임을 리턴하도록 한다.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74"> 9
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">10
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">11
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">12
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">13
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">14
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">15
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">16
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">17
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">18
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">19
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">20
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">21
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">22
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">23
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">24
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">25
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">26
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">27
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">28
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">29
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">30
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">31
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">32
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">33
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">34
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">35
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">36
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">37
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">38
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">39
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">40
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">41
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">42
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">43
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">44
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">45
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">46
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">47
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">48
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">49
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">50
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">51
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">52
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">53
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">54
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">55
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">56
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">57
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">58
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">59
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">60
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">61
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">62
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">63
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">64
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">65
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">66
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">67
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">68
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">69
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">70
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">71
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">72
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">73
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">74
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">75
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">76
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">77
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">78
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">79
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">80
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">81
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">82
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">83
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">pyspark.sql.functions</span> <span style="color:#81a1c1;font-weight:bold">import</span> pandas_udf<span style="color:#eceff4">,</span> PandasUDFType
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">sklearn.cluster</span> <span style="color:#81a1c1;font-weight:bold">import</span> DBSCAN
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">sklearn.metrics</span> <span style="color:#81a1c1;font-weight:bold">import</span> silhouette_score<span style="color:#eceff4">,</span> calinski_harabasz_score<span style="color:#eceff4">,</span> davies_bouldin_score
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">from</span> <span style="color:#8fbcbb">s_dbw</span> <span style="color:#81a1c1;font-weight:bold">import</span> S_Dbw
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>return_schema <span style="color:#81a1c1">=</span> T<span style="color:#81a1c1">.</span>StructType<span style="color:#eceff4">([</span>
+</span></span><span style="display:flex;"><span>  T<span style="color:#81a1c1">.</span>StructField<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;island&#39;</span><span style="color:#eceff4">,</span> T<span style="color:#81a1c1">.</span>StringType<span style="color:#eceff4">()),</span> 
+</span></span><span style="display:flex;"><span>  T<span style="color:#81a1c1">.</span>StructField<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;eps&#39;</span><span style="color:#eceff4">,</span> T<span style="color:#81a1c1">.</span>FloatType<span style="color:#eceff4">()),</span>
+</span></span><span style="display:flex;"><span>  T<span style="color:#81a1c1">.</span>StructField<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;silhouette&#39;</span><span style="color:#eceff4">,</span> T<span style="color:#81a1c1">.</span>FloatType<span style="color:#eceff4">()),</span>
+</span></span><span style="display:flex;"><span>  T<span style="color:#81a1c1">.</span>StructField<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;calinski-harabasz&#39;</span><span style="color:#eceff4">,</span> T<span style="color:#81a1c1">.</span>FloatType<span style="color:#eceff4">()),</span>
+</span></span><span style="display:flex;"><span>  T<span style="color:#81a1c1">.</span>StructField<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;davies-bouldin&#39;</span><span style="color:#eceff4">,</span> T<span style="color:#81a1c1">.</span>FloatType<span style="color:#eceff4">()),</span>
+</span></span><span style="display:flex;"><span>  T<span style="color:#81a1c1">.</span>StructField<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;s-dbw&#39;</span><span style="color:#eceff4">,</span> T<span style="color:#81a1c1">.</span>FloatType<span style="color:#eceff4">()),</span>
+</span></span><span style="display:flex;"><span>  T<span style="color:#81a1c1">.</span>StructField<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;n_clusters&#39;</span><span style="color:#eceff4">,</span> T<span style="color:#81a1c1">.</span>IntegerType<span style="color:#eceff4">()),</span>
+</span></span><span style="display:flex;"><span>  T<span style="color:#81a1c1">.</span>StructField<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;n_clustered_records&#39;</span><span style="color:#eceff4">,</span> T<span style="color:#81a1c1">.</span>IntegerType<span style="color:#eceff4">()),</span>
+</span></span><span style="display:flex;"><span>  T<span style="color:#81a1c1">.</span>StructField<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;model_path&#39;</span><span style="color:#eceff4">,</span> T<span style="color:#81a1c1">.</span>StringType<span style="color:#eceff4">())</span>
+</span></span><span style="display:flex;"><span><span style="color:#eceff4">])</span>
+</span></span><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">def</span> <span style="color:#88c0d0">clustering</span><span style="color:#eceff4">(</span>pdf<span style="color:#eceff4">:</span> pd<span style="color:#81a1c1">.</span>DataFrame<span style="color:#eceff4">)</span> <span style="color:#81a1c1">-&gt;</span> pd<span style="color:#81a1c1">.</span>DataFrame<span style="color:#eceff4">:</span>
+</span></span><span style="display:flex;"><span>  island <span style="color:#81a1c1">=</span> pdf<span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;island&#39;</span><span style="color:#eceff4">]</span><span style="color:#81a1c1">.</span>iloc<span style="color:#eceff4">[</span><span style="color:#b48ead">0</span><span style="color:#eceff4">]</span>
+</span></span><span style="display:flex;"><span>  run_id <span style="color:#81a1c1">=</span> pdf<span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;run_id&#39;</span><span style="color:#eceff4">]</span><span style="color:#81a1c1">.</span>iloc<span style="color:#eceff4">[</span><span style="color:#b48ead">0</span><span style="color:#eceff4">]</span> 
+</span></span><span style="display:flex;"><span>  feature_list <span style="color:#81a1c1">=</span> <span style="color:#eceff4">[</span><span style="color:#a3be8c">&#39;bill_length_mm&#39;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;bill_depth_mm&#39;</span><span style="color:#eceff4">,</span><span style="color:#a3be8c">&#39;flipper_length_mm&#39;</span><span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;body_mass_g&#39;</span><span style="color:#eceff4">]</span>
+</span></span><span style="display:flex;"><span>  X <span style="color:#81a1c1">=</span> pdf<span style="color:#eceff4">[</span>feature_list<span style="color:#eceff4">]</span><span style="color:#81a1c1">.</span>values
+</span></span><span style="display:flex;"><span>  scaler <span style="color:#81a1c1">=</span> StandardScaler<span style="color:#eceff4">()</span>
+</span></span><span style="display:flex;"><span>  X_scaled <span style="color:#81a1c1">=</span> scaler<span style="color:#81a1c1">.</span>fit_transform<span style="color:#eceff4">(</span>X<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>  n_clusters_list <span style="color:#81a1c1">=</span> <span style="color:#eceff4">[]</span>
+</span></span><span style="display:flex;"><span>  n_clustered_records_list <span style="color:#81a1c1">=</span> <span style="color:#eceff4">[]</span>
+</span></span><span style="display:flex;"><span>  slh_list <span style="color:#81a1c1">=</span> <span style="color:#eceff4">[]</span>
+</span></span><span style="display:flex;"><span>  island_list <span style="color:#81a1c1">=</span> <span style="color:#eceff4">[]</span>
+</span></span><span style="display:flex;"><span>  model_path_list <span style="color:#81a1c1">=</span> <span style="color:#eceff4">[]</span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1;font-weight:bold">for</span> eps_val <span style="color:#81a1c1;font-weight:bold">in</span> eps_list<span style="color:#eceff4">:</span>
+</span></span><span style="display:flex;"><span>	island_list<span style="color:#81a1c1">.</span>append<span style="color:#eceff4">(</span>island<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>	
+</span></span><span style="display:flex;"><span>	<span style="color:#81a1c1;font-weight:bold">with</span> mlflow<span style="color:#81a1c1">.</span>start_run<span style="color:#eceff4">(</span>run_id<span style="color:#81a1c1">=</span>run_id<span style="color:#eceff4">):</span>
+</span></span><span style="display:flex;"><span>	  <span style="color:#81a1c1;font-weight:bold">with</span> mlflow<span style="color:#81a1c1">.</span>start_run<span style="color:#eceff4">(</span>run_name<span style="color:#81a1c1">=</span><span style="color:#81a1c1">str</span><span style="color:#eceff4">(</span>island<span style="color:#eceff4">)</span><span style="color:#81a1c1">+</span><span style="color:#a3be8c">&#39;-eps&#39;</span><span style="color:#81a1c1">+</span><span style="color:#81a1c1">str</span><span style="color:#eceff4">(</span>eps_val<span style="color:#eceff4">),</span> nested<span style="color:#81a1c1">=</span><span style="color:#81a1c1;font-weight:bold">True</span><span style="color:#eceff4">)</span> <span style="color:#81a1c1;font-weight:bold">as</span> run<span style="color:#eceff4">:</span>
+</span></span><span style="display:flex;"><span>		mlflow<span style="color:#81a1c1">.</span>log_param<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;eps&#34;</span><span style="color:#eceff4">,</span> eps_val<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		model <span style="color:#81a1c1">=</span> DBSCAN<span style="color:#eceff4">(</span>eps<span style="color:#81a1c1">=</span>eps_val<span style="color:#eceff4">,</span> min_samples<span style="color:#81a1c1">=</span><span style="color:#b48ead">3</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		model<span style="color:#81a1c1">.</span>fit<span style="color:#eceff4">(</span>X_scaled<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		labels <span style="color:#81a1c1">=</span> model<span style="color:#81a1c1">.</span>labels_
+</span></span><span style="display:flex;"><span>		num_labels <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">len</span><span style="color:#eceff4">(</span><span style="color:#81a1c1">set</span><span style="color:#eceff4">(</span>labels<span style="color:#eceff4">[</span>labels<span style="color:#81a1c1">&gt;=</span><span style="color:#b48ead">0</span><span style="color:#eceff4">]))</span>
+</span></span><span style="display:flex;"><span>	  
+</span></span><span style="display:flex;"><span>		<span style="color:#81a1c1;font-weight:bold">if</span> num_labels <span style="color:#81a1c1">-</span><span style="color:#b48ead">1</span> <span style="color:#81a1c1">&gt;=</span> <span style="color:#b48ead">1</span> <span style="color:#eceff4">:</span>
+</span></span><span style="display:flex;"><span>		  clustered_label <span style="color:#81a1c1">=</span> labels<span style="color:#eceff4">[</span>labels<span style="color:#81a1c1">&gt;=</span><span style="color:#b48ead">0</span><span style="color:#eceff4">]</span>
+</span></span><span style="display:flex;"><span>		  clustered_data <span style="color:#81a1c1">=</span> X<span style="color:#eceff4">[</span>np<span style="color:#81a1c1">.</span>where<span style="color:#eceff4">(</span>labels<span style="color:#81a1c1">&gt;=</span><span style="color:#b48ead">0</span><span style="color:#eceff4">)[</span><span style="color:#b48ead">0</span><span style="color:#eceff4">]]</span>
+</span></span><span style="display:flex;"><span>		  clustered_data_cnt <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">len</span><span style="color:#eceff4">(</span>clustered_data<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		  
+</span></span><span style="display:flex;"><span>		  <span style="color:#616e87;font-style:italic">#scores</span>
+</span></span><span style="display:flex;"><span>		  slh <span style="color:#81a1c1">=</span> silhouette_score<span style="color:#eceff4">(</span>clustered_data<span style="color:#eceff4">,</span> clustered_label<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		  ch <span style="color:#81a1c1">=</span> calinski_harabasz_score<span style="color:#eceff4">(</span>clustered_data<span style="color:#eceff4">,</span> clustered_label<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		  db <span style="color:#81a1c1">=</span> davies_bouldin_score<span style="color:#eceff4">(</span>clustered_data<span style="color:#eceff4">,</span> clustered_label<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		  s_dbw <span style="color:#81a1c1">=</span> S_Dbw<span style="color:#eceff4">(</span>X_scaled<span style="color:#eceff4">,</span> labels<span style="color:#eceff4">,</span> alg_noise<span style="color:#81a1c1">=</span><span style="color:#a3be8c">&#39;filter&#39;</span><span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		  
+</span></span><span style="display:flex;"><span>		  
+</span></span><span style="display:flex;"><span>		<span style="color:#81a1c1;font-weight:bold">else</span><span style="color:#eceff4">:</span>
+</span></span><span style="display:flex;"><span>		  slh <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">-</span><span style="color:#b48ead">1</span>
+</span></span><span style="display:flex;"><span>		  ch <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">-</span><span style="color:#b48ead">1</span>
+</span></span><span style="display:flex;"><span>		  db <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">-</span><span style="color:#b48ead">1</span>
+</span></span><span style="display:flex;"><span>		  s_dbw <span style="color:#81a1c1">=</span> <span style="color:#81a1c1">-</span><span style="color:#b48ead">1</span>
+</span></span><span style="display:flex;"><span>		  clustered_data_cnt <span style="color:#81a1c1">=</span> <span style="color:#b48ead">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>		mlflow<span style="color:#81a1c1">.</span>sklearn<span style="color:#81a1c1">.</span>log_model<span style="color:#eceff4">(</span>model<span style="color:#eceff4">,</span> <span style="color:#81a1c1">str</span><span style="color:#eceff4">(</span>island<span style="color:#eceff4">)</span><span style="color:#81a1c1">+</span><span style="color:#81a1c1">str</span><span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;-&#39;</span><span style="color:#eceff4">)</span><span style="color:#81a1c1">+</span><span style="color:#81a1c1">str</span><span style="color:#eceff4">(</span>eps_val<span style="color:#eceff4">))</span>
+</span></span><span style="display:flex;"><span>		mlflow<span style="color:#81a1c1">.</span>log_metric<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;silhouette&#34;</span><span style="color:#eceff4">,</span> slh<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		mlflow<span style="color:#81a1c1">.</span>log_metric<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;calinski-harabasz&#34;</span><span style="color:#eceff4">,</span> ch<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		mlflow<span style="color:#81a1c1">.</span>log_metric<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;davies-bouldin&#34;</span><span style="color:#eceff4">,</span> db<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		mlflow<span style="color:#81a1c1">.</span>log_metric<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;s-dbw&#34;</span><span style="color:#eceff4">,</span> s_dbw<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		mlflow<span style="color:#81a1c1">.</span>log_metric<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;n_clusters&#34;</span><span style="color:#eceff4">,</span> num_labels<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		mlflow<span style="color:#81a1c1">.</span>log_metric<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;n_clustered_records&#34;</span><span style="color:#eceff4">,</span> clustered_data_cnt<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		
+</span></span><span style="display:flex;"><span>		artifact_uri <span style="color:#81a1c1">=</span> <span style="color:#a3be8c">f</span><span style="color:#a3be8c">&#34;runs:/</span><span style="color:#a3be8c">{</span>run<span style="color:#81a1c1">.</span>info<span style="color:#81a1c1">.</span>run_id<span style="color:#a3be8c">}</span><span style="color:#a3be8c">/</span><span style="color:#a3be8c">{</span>island<span style="color:#a3be8c">}</span><span style="color:#a3be8c">&#34;</span> <span style="color:#81a1c1">+</span> <span style="color:#81a1c1">str</span><span style="color:#eceff4">(</span>eps_val<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		
+</span></span><span style="display:flex;"><span>		model_path_list<span style="color:#81a1c1">.</span>append<span style="color:#eceff4">(</span>artifact_uri<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		n_clustered_records_list<span style="color:#81a1c1">.</span>append<span style="color:#eceff4">(</span>clustered_data_cnt<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		n_clusters_list<span style="color:#81a1c1">.</span>append<span style="color:#eceff4">(</span>num_labels<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		
+</span></span><span style="display:flex;"><span>		slh_list<span style="color:#81a1c1">.</span>append<span style="color:#eceff4">(</span>slh<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		ch_list<span style="color:#81a1c1">.</span>append<span style="color:#eceff4">(</span>ch<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		db_list<span style="color:#81a1c1">.</span>append<span style="color:#eceff4">(</span>db<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		sdbw_list<span style="color:#81a1c1">.</span>append<span style="color:#eceff4">(</span>s_dbw<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>		
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>  returnDF <span style="color:#81a1c1">=</span> pd<span style="color:#81a1c1">.</span>DataFrame<span style="color:#eceff4">({</span><span style="color:#a3be8c">&#39;island&#39;</span><span style="color:#eceff4">:</span>island_list<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;eps&#39;</span><span style="color:#eceff4">:</span>eps_list<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;silhouette&#39;</span><span style="color:#eceff4">:</span> slh_list<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;calinski-harabasz&#39;</span><span style="color:#eceff4">:</span>ch_list<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;davies-bouldin&#39;</span><span style="color:#eceff4">:</span> db_list<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;s-dbw&#39;</span><span style="color:#eceff4">:</span>sdbw_list<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;n_clusters&#39;</span><span style="color:#eceff4">:</span>n_clusters_list<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;n_clustered_records&#39;</span><span style="color:#eceff4">:</span>n_clusters_list<span style="color:#eceff4">,</span> <span style="color:#a3be8c">&#39;model_path&#39;</span><span style="color:#eceff4">:</span>model_path_list<span style="color:#eceff4">})</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#81a1c1;font-weight:bold">return</span> returnDF
+</span></span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>메인 부분은 간단합니다. 리턴된 데이터프레임을 통해  ui로 보지 않아도 실험 결과들과 모델 경로를 확인할 수 있습니다.</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">1
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">2
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">3
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">4
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">5
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">6
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">7
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">8
+</span><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">9
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span><span style="color:#81a1c1;font-weight:bold">with</span> mlflow<span style="color:#81a1c1">.</span>start_run<span style="color:#eceff4">(</span>run_name<span style="color:#81a1c1">=</span><span style="color:#a3be8c">&#34;섬 별 클러스터링&#34;</span><span style="color:#eceff4">)</span> <span style="color:#81a1c1;font-weight:bold">as</span> run<span style="color:#eceff4">:</span>
+</span></span><span style="display:flex;"><span>  run_id <span style="color:#81a1c1">=</span> run<span style="color:#81a1c1">.</span>info<span style="color:#81a1c1">.</span>run_uuid
+</span></span><span style="display:flex;"><span>  eps_list <span style="color:#81a1c1">=</span> <span style="color:#eceff4">[</span><span style="color:#b48ead">0.1</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">0.2</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">0.3</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">0.5</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">0.7</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">0.9</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">1.1</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">1.3</span><span style="color:#eceff4">,</span> <span style="color:#b48ead">1.5</span><span style="color:#eceff4">]</span>
+</span></span><span style="display:flex;"><span>  modelDF <span style="color:#81a1c1">=</span> <span style="color:#eceff4">(</span>penguins_sdf
+</span></span><span style="display:flex;"><span>			 <span style="color:#81a1c1">.</span>withColumn<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;run_id&#34;</span><span style="color:#eceff4">,</span> F<span style="color:#81a1c1">.</span>lit<span style="color:#eceff4">(</span>run_id<span style="color:#eceff4">))</span>
+</span></span><span style="display:flex;"><span>			 <span style="color:#81a1c1">.</span>groupby<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#34;island&#34;</span><span style="color:#eceff4">)</span><span style="color:#81a1c1">.</span>applyInPandas<span style="color:#eceff4">(</span>clustering<span style="color:#eceff4">,</span> schema <span style="color:#81a1c1">=</span> return_schema<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>			<span style="color:#eceff4">)</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>display<span style="color:#eceff4">(</span>modelDF<span style="color:#eceff4">)</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/15.png#center" width="700"/> 
+</figure>
+
+<ul>
+<li>
+<p>물론 Experiments 탭에서도 이전과 똑같이 확인할 수 있고요.</p>
+<ul>
+<li><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/16.png#center" width="700"/> 
+</figure>
+</li>
+</ul>
+</li>
+<li>
+<p>어떤 평가지표를 사용하느냐에 따라 다르지만, 만약 s-dbw가 낮은 걸 고르겠다면 Biscoe에서의 eps값과 Dream에서의 eps 값은 다르게 설정되어야 할 것 같습니다.</p>
+</li>
+<li>
+<p>같은 섬에서 파라미터 값에 따른 평가지표 값을 비교해볼 수도 있습니다. 데이터브릭스의 기본적인 플랏 기능을 사용해봤습니다.</p>
+</li>
+</ul>
+<div class="highlight"><div style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;">
+<table style="border-spacing:0;padding:0;margin:0;border:0;"><tr><td style="vertical-align:top;padding:0;margin:0;border:0;">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code><span style="white-space:pre;-webkit-user-select:none;user-select:none;margin-right:0.4em;padding:0 0.4em 0 0.4em;color:#6c6f74">1
+</span></code></pre></td>
+<td style="vertical-align:top;padding:0;margin:0;border:0;;width:100%">
+<pre tabindex="0" style="color:#d8dee9;background-color:#2e3440;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-python" data-lang="python"><span style="display:flex;"><span>display<span style="color:#eceff4">(</span>modelDF<span style="color:#81a1c1">.</span>filter<span style="color:#eceff4">(</span>F<span style="color:#81a1c1">.</span>col<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;island&#39;</span><span style="color:#eceff4">)</span><span style="color:#81a1c1">==</span><span style="color:#a3be8c">&#39;Dream&#39;</span><span style="color:#eceff4">)</span><span style="color:#81a1c1">.</span>orderBy<span style="color:#eceff4">(</span><span style="color:#a3be8c">&#39;eps&#39;</span><span style="color:#eceff4">))</span>
+</span></span></code></pre></td></tr></table>
+</div>
+</div><p><figure class="align-center ">
+    <img loading="lazy" src="/posts/mlflow-tracking-tutorial/17.png#center" width="500"/> 
+</figure>
+
+<br></p>
+<br>
+<h2 id="참고한-책과-글">참고한 책과 글<a hidden class="anchor" aria-hidden="true" href="#참고한-책과-글">#</a></h2>
+<ul>
+<li><a href="https://www.acornpub.co.kr/book/mlops-mlflow">MLFlow를 활용한 MLOps</a>
+<ul>
+<li>(사족: 몇달전에 충동구매한 책인데 묵혀두고 있다가 이번에 급하게 참고하기는 나쁘지 않았으나 두께에 비해 내용이 엄청 풍부하진 않음. 그냥 구글링해서 나오는 문서들이 나을 수도)</li>
+</ul>
+</li>
+<li><a href="https://databricks.com/blog/2020/05/19/manage-and-scale-machine-learning-models-for-iot-devices.html">Manage and Scale Machine Learning Models for IoT Devices</a></li>
+</ul>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+      <li><a href="https://sliceofdata.app/tags/mlflow/">Mlflow</a></li>
+    </ul>
+
+<ul class="share-buttons">
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MLFlow로 모델 실험 트래킹 on x"
+            href="https://x.com/intent/tweet/?text=MLFlow%eb%a1%9c%20%eb%aa%a8%eb%8d%b8%20%ec%8b%a4%ed%97%98%20%ed%8a%b8%eb%9e%98%ed%82%b9&amp;url=https%3a%2f%2fsliceofdata.app%2fposts%2fmlflow-tracking-tutorial%2f&amp;hashtags=mlflow">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M512 62.554 L 512 449.446 C 512 483.97 483.97 512 449.446 512 L 62.554 512 C 28.03 512 0 483.97 0 449.446 L 0 62.554 C 0 28.03 28.029 0 62.554 0 L 449.446 0 C 483.971 0 512 28.03 512 62.554 Z M 269.951 190.75 L 182.567 75.216 L 56 75.216 L 207.216 272.95 L 63.9 436.783 L 125.266 436.783 L 235.9 310.383 L 332.567 436.783 L 456 436.783 L 298.367 228.367 L 432.367 75.216 L 371.033 75.216 Z M 127.633 110 L 164.101 110 L 383.481 400.065 L 349.5 400.065 Z" />
+            </svg>
+        </a>
+    </li>
+    <li>
+        <a target="_blank" rel="noopener noreferrer" aria-label="share MLFlow로 모델 실험 트래킹 on linkedin"
+            href="https://www.linkedin.com/shareArticle?mini=true&amp;url=https%3a%2f%2fsliceofdata.app%2fposts%2fmlflow-tracking-tutorial%2f&amp;title=MLFlow%eb%a1%9c%20%eb%aa%a8%eb%8d%b8%20%ec%8b%a4%ed%97%98%20%ed%8a%b8%eb%9e%98%ed%82%b9&amp;summary=MLFlow%eb%a1%9c%20%eb%aa%a8%eb%8d%b8%20%ec%8b%a4%ed%97%98%20%ed%8a%b8%eb%9e%98%ed%82%b9&amp;source=https%3a%2f%2fsliceofdata.app%2fposts%2fmlflow-tracking-tutorial%2f">
+            <svg version="1.1" viewBox="0 0 512 512" xml:space="preserve" height="30px" width="30px" fill="currentColor">
+                <path
+                    d="M449.446,0c34.525,0 62.554,28.03 62.554,62.554l0,386.892c0,34.524 -28.03,62.554 -62.554,62.554l-386.892,0c-34.524,0 -62.554,-28.03 -62.554,-62.554l0,-386.892c0,-34.524 28.029,-62.554 62.554,-62.554l386.892,0Zm-288.985,423.278l0,-225.717l-75.04,0l0,225.717l75.04,0Zm270.539,0l0,-129.439c0,-69.333 -37.018,-101.586 -86.381,-101.586c-39.804,0 -57.634,21.891 -67.617,37.266l0,-31.958l-75.021,0c0.995,21.181 0,225.717 0,225.717l75.02,0l0,-126.056c0,-6.748 0.486,-13.492 2.474,-18.315c5.414,-13.475 17.767,-27.434 38.494,-27.434c27.135,0 38.007,20.707 38.007,51.037l0,120.768l75.024,0Zm-307.552,-334.556c-25.674,0 -42.448,16.879 -42.448,39.002c0,21.658 16.264,39.002 41.455,39.002l0.484,0c26.165,0 42.452,-17.344 42.452,-39.002c-0.485,-22.092 -16.241,-38.954 -41.943,-39.002Z" />
+            </svg>
+        </a>
+    </li>
+</ul>
+
+  </footer>
+<div class="container_disqus">
+    <script src="https://giscus.app/client.js"
+        data-repo="pizzathiefz/sliceofdata"
+        data-repo-id="R_kgDOPsr6oQ"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOPsr6oc4CvOfW"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="top"
+        data-theme=""
+        data-lang="en"
+        crossorigin="anonymous"
+        async>
+    </script>
+</div>
+<script>
+    
+    function getCurrentTheme() {
+        
+        let storedTheme = localStorage.getItem('pref-theme');
+        if (storedTheme) {
+            return storedTheme;
+        }
+        
+        
+        if (document.body.classList.contains('dark')) {
+            return 'dark';
+        }
+        
+        
+        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            return 'dark';
+        }
+        
+        return 'light';
+    }
+    
+    
+    function setGiscusTheme() {
+        let currentTheme = getCurrentTheme();
+        let giscusTheme = currentTheme === 'dark' ? 'noborder_dark' : 'noborder_light';
+        
+        
+        let giscusScript = document.querySelector("div.container_disqus > script");
+        if (giscusScript) {
+            giscusScript.setAttribute('data-theme', giscusTheme);
+        }
+        
+        return giscusTheme;
+    }
+    
+    
+    setGiscusTheme();
+    
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        let themeToggle = document.querySelector('#theme-toggle');
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                setTimeout(() => {
+                    let newTheme = getCurrentTheme();
+                    let newGiscusTheme = newTheme === 'dark' ? 'noborder_dark' : 'noborder_light';
+                    
+                    let giscusFrame = document.querySelector('iframe.giscus-frame');
+                    if (giscusFrame) {
+                        giscusFrame.contentWindow.postMessage({
+                            giscus: {
+                                setConfig: {
+                                    theme: newGiscusTheme
+                                }
+                            }
+                        }, 'https://giscus.app');
+                    }
+                }, 100);
+            });
+        }
+    });
+</script>
+
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://sliceofdata.app/">sliceofdata</a></span> · 
+
+    <span>
+        Powered by
+        <a href="https://gohugo.io/" rel="noopener noreferrer" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" aria-label="go to top" title="Go to Top (Alt + G)" class="top-link" id="top-link" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 6" fill="currentColor">
+        <path d="M12 6H0l6-6z" />
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu')
+    if (menu) {
+        menu.scrollLeft = localStorage.getItem("menu-scroll-position");
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var mybutton = document.getElementById("top-link");
+    window.onscroll = function () {
+        if (document.body.scrollTop > 800 || document.documentElement.scrollTop > 800) {
+            mybutton.style.visibility = "visible";
+            mybutton.style.opacity = "1";
+        } else {
+            mybutton.style.visibility = "hidden";
+            mybutton.style.opacity = "0";
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        if (document.body.className.includes("dark")) {
+            document.body.classList.remove('dark');
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            document.body.classList.add('dark');
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
