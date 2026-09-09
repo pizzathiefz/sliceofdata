@@ -1,0 +1,231 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("posts", ({ data }) => data.publish))
+  .sort((a, b) => b.data.created.valueOf() - a.data.created.valueOf())
+  .slice(0, 5);
+
+const notes = (await getCollection("notes", ({ data }) => data.publish))
+  .sort((a, b) => b.data.created.valueOf() - a.data.created.valueOf())
+  .slice(0, 5);
+---
+
+<Layout title="home">
+  <div class="hero">
+    <svg
+      class="logo"
+      width="26"
+      height="26"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M4 4 L20 4 L12 21 Z" />
+      <path d="M4 4 Q12 8 20 4" />
+      <circle cx="10.5" cy="10" r="1" fill="currentColor" stroke="none" />
+      <circle cx="14" cy="12.5" r="1" fill="currentColor" stroke="none" />
+      <circle cx="10.5" cy="15" r="1" fill="currentColor" stroke="none" />
+    </svg>
+    <h1>slice.of.data</h1>
+  </div>
+  <p class="tagline">Half data, half everything else. Served one slice at a time.</p>
+
+  <div class="social">
+    <a href="https://github.com/pizzathiefz" aria-label="GitHub" target="_blank" rel="noopener">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+      </svg>
+    </a>
+    <a
+      href="https://www.linkedin.com/in/youngshin-son/"
+      aria-label="LinkedIn"
+      target="_blank"
+      rel="noopener"
+    >
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+        <rect x="2" y="9" width="4" height="12" />
+        <circle cx="4" cy="4" r="2" />
+      </svg>
+    </a>
+    <a href="mailto:pizzathief0@gmail.com" aria-label="Email">
+      <svg
+        width="18"
+        height="18"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="2" y="4" width="20" height="16" rx="2" />
+        <polyline points="22,6 12,13 2,6" />
+      </svg>
+    </a>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="split">
+    <div class="col">
+      <div class="box">
+        <ul class="rows">
+          {
+            posts.map((post) => (
+              <li class="row">
+                <a class="row-title" href={`/posts/${post.id}`}>
+                  {post.data.title}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <a class="more-link" href="/posts">
+        모든 posts →
+      </a>
+    </div>
+
+    <div class="col">
+      <div class="box">
+        <ul class="rows">
+          {
+            notes.map((note) => (
+              <li class="row">
+                <a class="row-title" href={`/notes/${note.id}`}>
+                  {note.data.title}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+      <a class="more-link" href="/notes">
+        모든 notes →
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .hero {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+  .logo {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .hero h1 {
+    margin: 0;
+  }
+  .tagline {
+    margin: 0.5rem 0 0;
+    font-family: var(--font-mono);
+    font-style: italic;
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .social {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+  }
+  .social a {
+    color: var(--muted);
+    line-height: 0;
+  }
+  .social a:hover {
+    color: var(--fg);
+  }
+
+  .divider {
+    width: 50%;
+    height: 0;
+    margin: 2.25rem auto;
+    border-top: 2px dotted var(--muted);
+    opacity: 0.6;
+  }
+
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 1.5rem;
+    align-items: stretch;
+  }
+  .col {
+    display: flex;
+    flex-direction: column;
+  }
+  .box {
+    flex: 1;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--chip-bg);
+    padding: 1rem 1.4rem;
+  }
+
+  ul.rows {
+    list-style: disc;
+    padding-left: 1.1rem;
+  }
+  ul.rows li.row {
+    display: list-item;
+    padding: 0.12rem 0;
+    border-bottom: none;
+  }
+  ul.rows li.row:first-child {
+    border-top: none;
+  }
+  ul.rows .row-title {
+    display: inline;
+    font-size: 0.82rem;
+    line-height: 1.3;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  .more-link {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-decoration: none;
+  }
+  .more-link:hover {
+    color: var(--fg);
+  }
+
+  @media (max-width: 600px) {
+    .split {
+      grid-template-columns: 1fr;
+      row-gap: 1.25rem;
+    }
+  }
+
+</style>

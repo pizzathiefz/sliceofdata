@@ -1,0 +1,36 @@
+# build output
+dist/
+# generated types
+.astro/
+
+# content synced from the vault repo at dev/build time (see scripts/sync-vault.mjs) —
+# the vault repo is the source of truth, not this repo
+src/content/films/
+src/content/books/
+src/content/notes/
+src/content/posts/
+public/films/
+public/books/
+public/notes/
+public/posts/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+.claude/

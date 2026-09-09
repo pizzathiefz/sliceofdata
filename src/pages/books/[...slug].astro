@@ -1,0 +1,42 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const books = await getCollection("books");
+  return books.map((book) => ({
+    params: { slug: book.id },
+    props: { book },
+  }));
+}
+
+const { book } = Astro.props;
+const { Content } = await render(book);
+
+const metaParts = [
+  book.data.author,
+  book.data.publisher,
+  book.data.yearOfPublication,
+  book.data.originalTitle,
+].filter((v) => v != null && v !== "");
+
+const bookYear = book.data.created.getFullYear();
+---
+
+<Layout title={book.data.title}>
+  <a class="back" href={`/books#${bookYear}`}>← books</a>
+  <h1>{book.data.title}</h1>
+  {metaParts.length > 0 && <p class="book-meta">{metaParts.join(" · ")}</p>}
+  <article>
+    <Content />
+  </article>
+</Layout>
+
+<style>
+  .book-meta {
+    text-align: right;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 0.4rem 0 2rem;
+  }
+</style>

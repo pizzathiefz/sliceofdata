@@ -1,0 +1,40 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const notes = await getCollection("notes");
+  return notes.map((note) => ({
+    params: { slug: note.id },
+    props: { note },
+  }));
+}
+
+const { note } = Astro.props;
+const { Content } = await render(note);
+
+const titleMatch = note.data.title.match(/^(.*?)(\s@.+)$/);
+const titleMain = titleMatch ? titleMatch[1] : note.data.title;
+const titleSuffix = titleMatch ? titleMatch[2] : null;
+---
+
+<Layout title={note.data.title}>
+  <a class="back" href="/notes">← notes</a>
+  <h1>
+    {titleMain}
+    {titleSuffix && <span class="title-suffix">{titleSuffix}</span>}
+  </h1>
+  <p class="meta">
+    {note.data.created.toISOString().slice(0, 10)}
+    {note.data.tags.length > 0 && <span> · {note.data.tags.join(", ")}</span>}
+  </p>
+  <article>
+    <Content />
+  </article>
+</Layout>
+
+<style>
+  .title-suffix {
+    color: var(--muted);
+  }
+</style>

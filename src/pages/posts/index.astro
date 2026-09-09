@@ -1,0 +1,102 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("posts", ({ data }) => data.publish)).sort(
+  (a, b) => b.data.created.valueOf() - a.data.created.valueOf()
+);
+---
+
+<Layout title="posts">
+  <h1>posts</h1>
+  <ul class="rows">
+    {
+      posts.map((post) => (
+        <li class="row">
+          <a class="row-title" href={`/posts/${post.id}`}>
+            {post.data.title}
+          </a>
+          <time class="row-meta">{post.data.created.toISOString().slice(0, 10)}</time>
+        </li>
+      ))
+    }
+  </ul>
+  <button class="load-more"><span class="more-text">more</span></button>
+</Layout>
+
+<style>
+  ul.rows li.row {
+    display: block;
+    padding: 0.5rem 0;
+  }
+  ul.rows li.row[hidden] {
+    display: none;
+  }
+  ul.rows .row-title {
+    display: inline;
+    font-size: 0.85rem;
+    line-height: 1.05;
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+  }
+  ul.rows .row-meta {
+    display: inline;
+    margin-left: 0.6em;
+    padding: 0.05em 0.35em;
+    font-size: 0.75rem;
+    background-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 35%,
+      var(--tab-highlight) 35%,
+      var(--tab-highlight) 80%,
+      transparent 80%
+    );
+    background-repeat: no-repeat;
+  }
+  .load-more {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fit-content;
+    margin: 1.5rem auto 0;
+    padding: 0.22rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    color: var(--fg);
+    cursor: pointer;
+  }
+  .load-more:hover {
+    border-color: var(--fg);
+  }
+  .load-more[hidden] {
+    display: none;
+  }
+</style>
+
+<script>
+  const PAGE_SIZE = 15;
+  const rows = Array.from(document.querySelectorAll<HTMLLIElement>(".row"));
+  const btn = document.querySelector<HTMLButtonElement>(".load-more")!;
+  let visible = PAGE_SIZE;
+
+  function render() {
+    rows.forEach((row, i) => {
+      row.hidden = i >= visible;
+    });
+    btn.hidden = visible >= rows.length;
+  }
+
+  btn.addEventListener("click", () => {
+    visible += PAGE_SIZE;
+    render();
+  });
+
+  render();
+</script>
