@@ -20,11 +20,14 @@ const PREVIEW_CAP = 2000;
 function previewText(body: string) {
   const clean = body
     .replace(/^#+\s*/gm, "")
-    .replace(/🔖/g, "")
     .replace(/\*\*/g, "")
-    .replace(/^\s*-{3,}\s*$/gm, " ✦ ")
+    .replace(/^\s*-{3,}\s*$/gm, "✦")
+    .replace(/[🔖💬]/g, "✦")
     .replace(/\s+/g, " ")
-    .trim();
+    .replace(/✦(?:\s*✦)+/g, "✦")
+    .trim()
+    .replace(/^✦\s*/, "")
+    .replace(/\s*✦$/, "");
   return clean.slice(0, PREVIEW_CAP);
 }
 ---
