@@ -1,0 +1,466 @@
+---
+interface Props {
+  path: string;
+}
+const { path } = Astro.props;
+---
+
+<section class="comments" data-path={path}>
+  <hr class="comments-divider" />
+  <h2>
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
+    </svg>
+    Comments
+  </h2>
+  <ul class="comment-list" id="comment-list"></ul>
+
+  <form class="comment-form" id="comment-form">
+    <div class="comment-fields">
+      <input
+        type="text"
+        name="name"
+        class="comment-input comment-name-input"
+        placeholder="Name"
+        maxlength="50"
+        required
+      />
+      <textarea name="body" class="comment-input" placeholder="Leave a comment" maxlength="2000" required
+      ></textarea>
+    </div>
+    <div class="hp-field" aria-hidden="true">
+      <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+    </div>
+    <div class="comment-actions">
+      <p class="comment-status" id="comment-status"></p>
+      <button type="submit" class="comment-submit">Post</button>
+    </div>
+  </form>
+</section>
+
+<style>
+  .comments {
+    margin-top: 5.5rem;
+  }
+  .comments h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .comments-divider {
+    width: 3rem;
+    margin: 0 auto 2.5rem;
+    border: none;
+    border-top: 1px solid var(--muted);
+  }
+  .comment-list {
+    list-style: none;
+    margin: 0 0 1.5rem;
+    padding: 0;
+  }
+  /* comment rows (and reply rows/forms) are built client-side (see <script>
+     below), so these selectors must be :global — Astro's scoping attribute
+     never reaches elements created at runtime via the DOM API */
+  :global(.comment-row) {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    column-gap: 1.5rem;
+    align-items: start;
+    padding: 0.9rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  :global(.comment-row:first-child) {
+    border-top: 1px solid var(--border);
+  }
+  :global(.comment-left) {
+    min-width: 0;
+  }
+  :global(.comment-name) {
+    display: inline-block;
+    font-weight: 600;
+    font-size: 0.92rem;
+    line-height: 1.35;
+    background-repeat: no-repeat;
+    background-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 62%,
+      var(--tab-highlight) 62%,
+      var(--tab-highlight) 90%,
+      transparent 90%
+    );
+  }
+  :global(.comment-date) {
+    margin-top: 0.3rem;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+  :global(.comment-right) {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  :global(.comment-box) {
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    background-color: var(--chip-bg);
+    padding: 0.55rem 0.75rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  :global(.reply-toggle) {
+    align-self: flex-start;
+  }
+  :global(.reply-list) {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  :global(.reply-list:not(:empty)) {
+    margin-top: 0.25rem;
+    padding-left: 1.1rem;
+    border-left: 2px solid var(--border);
+    gap: 0.75rem;
+  }
+  :global(.reply-row) {
+    display: grid;
+    grid-template-columns: 6rem 1fr;
+    column-gap: 1rem;
+    align-items: start;
+  }
+  :global(.reply-row .comment-name) {
+    font-size: 0.85rem;
+  }
+  :global(.reply-row .comment-box) {
+    font-size: 0.82rem;
+    padding: 0.45rem 0.65rem;
+  }
+  :global(.reply-form) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+    padding-left: 1.1rem;
+    border-left: 2px solid var(--border);
+  }
+  :global(.reply-form[hidden]) {
+    display: none;
+  }
+
+  .comment-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .comment-fields {
+    display: grid;
+    grid-template-columns: 8rem 1fr;
+    column-gap: 1.5rem;
+    align-items: start;
+  }
+  :global(.comment-input) {
+    width: 100%;
+    font-family: var(--font-sans);
+    font-size: 0.85rem;
+    color: var(--fg);
+    background-color: var(--chip-bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 0.55rem 0.7rem;
+  }
+  :global(.comment-input)::placeholder {
+    color: var(--muted);
+  }
+  :global(.comment-input):focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  :global(.comment-input.is-default) {
+    color: var(--muted);
+    border-style: dashed;
+  }
+  :global(textarea.comment-input) {
+    min-height: 4.5rem;
+    resize: vertical;
+  }
+  :global(textarea.comment-input)::placeholder {
+    font-style: italic;
+  }
+  :global(.comment-actions) {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+  }
+  :global(.comment-submit) {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 0;
+    padding: 0.2rem 0.7rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--fg);
+    cursor: pointer;
+  }
+  :global(.comment-submit:hover) {
+    border-color: var(--fg);
+  }
+  :global(.comment-submit:disabled) {
+    opacity: 0.6;
+    cursor: default;
+  }
+  :global(.comment-status) {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  :global(.hp-field) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 600px) {
+    :global(.comment-row) {
+      grid-template-columns: 1fr;
+      row-gap: 0.5rem;
+    }
+    :global(.reply-row) {
+      grid-template-columns: 1fr;
+      row-gap: 0.4rem;
+    }
+    .comment-fields {
+      grid-template-columns: 1fr;
+      row-gap: 0.5rem;
+    }
+    .comment-name-input {
+      width: 12rem;
+    }
+  }
+</style>
+
+<script>
+  interface CommentRecord {
+    id: number;
+    parent_id: number | null;
+    name: string;
+    body: string;
+    created_at: string;
+  }
+
+  function escapeHtml(value: string) {
+    return value.replace(
+      /[&<>"']/g,
+      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!,
+    );
+  }
+
+  function formatDate(iso: string) {
+    return iso.replace('T', ' ').slice(0, 16);
+  }
+
+  const section = document.querySelector<HTMLElement>('.comments');
+  if (section) {
+    const path = section.dataset.path!;
+    const list = section.querySelector<HTMLUListElement>('#comment-list')!;
+    const topForm = section.querySelector<HTMLFormElement>('#comment-form')!;
+
+    let defaultName = '';
+
+    function applyDefaultName(formEl: HTMLFormElement) {
+      if (!defaultName) return;
+      const input = formEl.querySelector<HTMLInputElement>('[name=name]');
+      if (!input || input.value) return;
+      input.value = defaultName;
+      input.classList.add('is-default');
+      input.addEventListener('focus', () => {
+        if (input.classList.contains('is-default')) input.select();
+      });
+      input.addEventListener('input', () => input.classList.remove('is-default'), { once: true });
+    }
+
+    async function loadGuestName() {
+      try {
+        const res = await fetch('/api/guest-name');
+        if (!res.ok) return;
+        const data = await res.json();
+        if (typeof data.name === 'string') defaultName = data.name;
+      } catch {
+        // silently ignore — falls back to an empty, editable field
+      }
+    }
+
+    function buildReplyRow(r: CommentRecord) {
+      const li = document.createElement('li');
+      li.className = 'reply-row';
+      li.innerHTML = `
+        <div class="comment-left">
+          <div class="comment-name">${escapeHtml(r.name)}</div>
+          <div class="comment-date">${formatDate(r.created_at)}</div>
+        </div>
+        <div class="comment-box">${escapeHtml(r.body)}</div>
+      `;
+      return li;
+    }
+
+    function buildReplyForm(parentId: number) {
+      const form = document.createElement('form');
+      form.className = 'reply-form';
+      form.hidden = true;
+      form.dataset.parentId = String(parentId);
+      form.innerHTML = `
+        <input type="text" name="name" class="comment-input" placeholder="Name" maxlength="50" required />
+        <textarea name="body" class="comment-input" placeholder="Write a reply" maxlength="2000" required></textarea>
+        <div class="hp-field" aria-hidden="true">
+          <label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+        </div>
+        <div class="comment-actions">
+          <p class="comment-status"></p>
+          <button type="submit" class="comment-submit">Post</button>
+        </div>
+      `;
+      applyDefaultName(form);
+      return form;
+    }
+
+    function buildTopLevelRow(c: CommentRecord, replies: CommentRecord[]) {
+      const li = document.createElement('li');
+      li.className = 'comment-row';
+
+      const left = document.createElement('div');
+      left.className = 'comment-left';
+      left.innerHTML = `
+        <div class="comment-name">${escapeHtml(c.name)}</div>
+        <div class="comment-date">${formatDate(c.created_at)}</div>
+      `;
+
+      const right = document.createElement('div');
+      right.className = 'comment-right';
+      right.innerHTML = `<div class="comment-box">${escapeHtml(c.body)}</div>`;
+
+      const replyToggle = document.createElement('button');
+      replyToggle.type = 'button';
+      replyToggle.className = 'reply-toggle comment-submit';
+      replyToggle.textContent = 'Reply';
+
+      const replyList = document.createElement('ul');
+      replyList.className = 'reply-list';
+      for (const r of replies) replyList.appendChild(buildReplyRow(r));
+
+      right.append(replyToggle, replyList, buildReplyForm(c.id));
+      li.append(left, right);
+      return li;
+    }
+
+    function renderComments(comments: CommentRecord[]) {
+      list.innerHTML = '';
+
+      const repliesByParent = new Map<number, CommentRecord[]>();
+      for (const c of comments) {
+        if (c.parent_id == null) continue;
+        const arr = repliesByParent.get(c.parent_id) ?? [];
+        arr.push(c);
+        repliesByParent.set(c.parent_id, arr);
+      }
+
+      for (const c of comments) {
+        if (c.parent_id != null) continue;
+        list.appendChild(buildTopLevelRow(c, repliesByParent.get(c.id) ?? []));
+      }
+    }
+
+    async function loadComments() {
+      try {
+        const res = await fetch(`/api/comments?path=${encodeURIComponent(path)}`);
+        if (!res.ok) return;
+        const data = await res.json();
+        renderComments(data.comments ?? []);
+      } catch {
+        // silently ignore — comments are non-critical
+      }
+    }
+
+    async function submitComment(formEl: HTMLFormElement, parentId: number | null) {
+      const formData = new FormData(formEl);
+      const name = String(formData.get('name') ?? '').trim();
+      const body = String(formData.get('body') ?? '').trim();
+      const website = String(formData.get('website') ?? '');
+
+      if (!name || !body) return;
+
+      const button = formEl.querySelector<HTMLButtonElement>('.comment-submit')!;
+      const status = formEl.querySelector<HTMLElement>('.comment-status')!;
+      button.disabled = true;
+      status.textContent = '';
+
+      try {
+        const res = await fetch('/api/comments', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ path, name, body, website, parentId }),
+        });
+
+        if (res.status === 429) {
+          status.textContent = 'Please wait a moment and try again.';
+        } else if (!res.ok) {
+          status.textContent = 'Could not post your comment.';
+        } else {
+          formEl.reset();
+          await loadComments();
+        }
+      } catch {
+        status.textContent = 'Could not post your comment.';
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    topForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      submitComment(topForm, null);
+    });
+
+    list.addEventListener('click', (e) => {
+      const toggle = (e.target as HTMLElement).closest<HTMLButtonElement>('.reply-toggle');
+      if (!toggle) return;
+      const replyForm = toggle.closest<HTMLElement>('.comment-right')!.querySelector<HTMLFormElement>('.reply-form')!;
+      replyForm.hidden = !replyForm.hidden;
+      if (!replyForm.hidden) replyForm.querySelector<HTMLInputElement>('input')?.focus();
+    });
+
+    list.addEventListener('submit', (e) => {
+      const replyForm = e.target as HTMLFormElement;
+      if (!replyForm.classList.contains('reply-form')) return;
+      e.preventDefault();
+      submitComment(replyForm, Number(replyForm.dataset.parentId));
+    });
+
+    (async () => {
+      await loadGuestName();
+      applyDefaultName(topForm);
+      await loadComments();
+    })();
+  }
+</script>

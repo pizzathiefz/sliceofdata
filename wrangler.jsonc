@@ -4,5 +4,18 @@
   "assets": {
     "directory": "./dist",
     "not_found_handling": "404-page"
-  }
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "sliceofdata-comments",
+      "database_id": "3721ce18-1607-4934-81c3-3d5ebb5f7e87"
+    }
+  ],
+  "send_email": [
+    {
+      "name": "SEND_EMAIL",
+      "destination_address": "pizzathief0@gmail.com"
+    }
+  ]
 }
