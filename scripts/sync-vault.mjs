@@ -86,6 +86,25 @@ function readPublishedCollection(folder) {
   return entries.sort((a, b) => new Date(b.fm.created) - new Date(a.fm.created));
 }
 
+// Wiki notes (vault/content/wiki) are short glossary/definition entries with
+// no page of their own on the site — they only ever appear inlined via a
+// ![[Title]] embed in another note, so index them by title for that lookup.
+function readWikiNotes() {
+  const dir = path.join(VAULT, "wiki");
+  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md") && f !== "_index.md");
+
+  const map = new Map();
+  for (const file of files) {
+    const raw = fs.readFileSync(path.join(dir, file), "utf-8");
+    const parsed = parseFrontmatter(raw);
+    if (!parsed) continue;
+    const { fm, body } = parsed;
+    const title = fm.title ?? path.basename(file, ".md");
+    map.set(title, { body, file, title });
+  }
+  return map;
+}
+
 function slugify(str) {
   const slug = str
     .toLowerCase()
@@ -115,6 +134,8 @@ function normalizeMathBlocks(body) {
   return body.replace(/^([ \t]*)\$\$(.+)\$\$[ \t]*$/gm, "$1$$$$\n$1$2\n$1$$$$");
 }
 
+const IMAGE_EXT_RE = /\.(png|jpe?g|gif|svg|webp)$/i;
+
 // Resolves ![[filename|width]] image embeds: copies the referenced asset from
 // the vault's assets/ folder into public/<kind>/<slug>/, and rewrites the
 // embed into a raw <img> tag (Astro's markdown pipeline passes raw HTML
@@ -124,13 +145,20 @@ function normalizeMathBlocks(body) {
 // use a short English slug as their filename while keeping the attachment
 // folder under the original (often Korean) title — and some notes have had
 // their title edited without renaming the file, leaving the folder matching
-// only the filename. Try both and use whichever one actually has the file.
-function resolveImages(body, kind, slug, title, file) {
-  const candidateDirs = [...new Set([title, path.basename(file, ".md")])].map((name) =>
-    path.join(VAULT_ROOT, "assets", name)
-  );
+// only the filename. `names` is the ordered list of candidate folder names
+// to try — normally just [title, filename], but a note being inlined via
+// ![[..]] also carries the host note's own names, since Obsidian resolves
+// ![[img]] by a vault-wide filename search and an image referenced from an
+// embedded note is often actually sitting in the folder of whichever note
+// first pasted it.
+//
+// Only embeds with an image extension are touched here — a bare ![[Title]]
+// embed (no extension) is a note transclusion, handled by resolveEmbeds.
+function resolveImages(body, kind, slug, names) {
+  const candidateDirs = [...new Set(names)].map((name) => path.join(VAULT_ROOT, "assets", name));
   const publicDir = path.join("public", kind, slug);
   const withImages = body.replace(/!\[\[([^|\]]+)(?:\|(\d+))?\]\]/g, (whole, filename, width) => {
+    if (!IMAGE_EXT_RE.test(filename.trim())) return whole;
     // the embed text is sometimes a bare filename and sometimes a full
     // "assets/<title>/..." path (Obsidian writes either depending on vault
     // settings) — assets always live flat under their folder, so only the
@@ -149,6 +177,69 @@ function resolveImages(body, kind, slug, title, file) {
   // (no blank line = same block in CommonMark) — force a blank line after so
   // a caption paragraph right below it still parses as markdown.
   return withImages.replace(/(<img[^>]*\/>)\n(?!\n)/g, "$1\n\n");
+}
+
+// Extracts one section (a heading and everything under it, up to the next
+// heading of the same or shallower level) out of a body of markdown, by
+// exact heading-text match. Returns null if no heading matches.
+function extractSection(body, heading) {
+  const lines = body.split("\n");
+  const headingRe = /^(#{1,6})\s+(.*)$/;
+  let startIdx = -1;
+  let level = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(headingRe);
+    if (m && m[2].trim() === heading) {
+      startIdx = i;
+      level = m[1].length;
+      break;
+    }
+  }
+  if (startIdx === -1) return null;
+  let endIdx = lines.length;
+  for (let i = startIdx + 1; i < lines.length; i++) {
+    const m = lines[i].match(headingRe);
+    if (m && m[1].length <= level) {
+      endIdx = i;
+      break;
+    }
+  }
+  return lines.slice(startIdx, endIdx).join("\n").trim();
+}
+
+// Resolves ![[Title]] / ![[Title#Heading]] note-transclusion embeds by
+// inlining the target's own content in place — the closest equivalent to
+// Obsidian's live transclusion, since the site has no per-block embed
+// rendering of its own. Works for a title from any collection (the vault's
+// wiki/ glossary notes as well as published books/notes/posts): a #Heading
+// suffix extracts just that section, otherwise the whole body is inlined.
+// The target's own images are resolved against the host page's kind/slug,
+// falling back to the host note's own asset folder for any image the
+// target's folder doesn't have (Obsidian resolves ![[img]] by a vault-wide
+// filename search, so an image referenced from an embedded note is often
+// actually sitting in whichever note first pasted it). Anything that
+// doesn't match a known title falls back to plain display text.
+function resolveEmbeds(body, kind, slug, hostNames, depth = 0) {
+  if (depth > 5) return body;
+  return body.replace(/!\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (whole, target, alias) => {
+    if (IMAGE_EXT_RE.test(target.trim())) return whole;
+    const hashIdx = target.indexOf("#");
+    const key = (hashIdx === -1 ? target : target.slice(0, hashIdx)).trim();
+    const heading = hashIdx === -1 ? null : target.slice(hashIdx + 1).trim();
+    const display = (alias ?? key).trim();
+
+    const entry = embedMap.get(key);
+    if (!entry) return display;
+
+    const names = [entry.title, path.basename(entry.file, ".md"), ...hostNames];
+    let content = resolveImages(entry.body, kind, slug, names);
+    if (heading) {
+      const section = extractSection(content, heading);
+      if (section === null) return display;
+      content = section;
+    }
+    return resolveEmbeds(content, kind, slug, hostNames, depth + 1);
+  });
 }
 
 // Resolves [[Note Title]] / [[Note Title|display]] wikilinks into real links
@@ -175,9 +266,13 @@ function resolveWikilinks(body) {
 }
 
 function cleanBody(body, kind, slug, title, file) {
-  return resolveWikilinks(normalizeMathBlocks(resolveImages(body, kind, slug, title, file)));
+  const names = [title, path.basename(file, ".md")];
+  return resolveWikilinks(
+    resolveEmbeds(normalizeMathBlocks(resolveImages(body, kind, slug, names)), kind, slug, names)
+  );
 }
 
+const wikiNotes = readWikiNotes();
 const films = readCollection("film", { requireRating: true });
 const books = readCollection("book");
 const notes = readPublishedCollection("note");
@@ -214,6 +309,13 @@ for (const e of posts) {
 // Films have no individual page (just the /films listing), so they're left
 // out of the map — a wikilink to a film falls back to plain text.
 const linkMap = new Map();
+// embedMap backs resolveEmbeds' ![[Title]] lookups — unlike linkMap it also
+// carries the target's raw body (so it can be inlined) and includes the
+// vault's wiki/ glossary notes, which have no page of their own to link to.
+const embedMap = new Map();
+for (const [title, w] of wikiNotes) {
+  embedMap.set(title, { body: w.body, file: w.file, title: w.title });
+}
 for (const [entries, kind] of [
   [books, "books"],
   [notes, "notes"],
@@ -223,6 +325,9 @@ for (const [entries, kind] of [
     const filenameKey = path.basename(e.file, ".md");
     linkMap.set(filenameKey, { kind, slug: e.slug });
     if (e.title !== filenameKey) linkMap.set(e.title, { kind, slug: e.slug });
+    const embedEntry = { body: e.body, file: e.file, title: e.title };
+    embedMap.set(filenameKey, embedEntry);
+    if (e.title !== filenameKey) embedMap.set(e.title, embedEntry);
   }
 }
 
