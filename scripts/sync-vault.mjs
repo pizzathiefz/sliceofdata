@@ -136,6 +136,33 @@ function normalizeMathBlocks(body) {
 
 const IMAGE_EXT_RE = /\.(png|jpe?g|gif|svg|webp)$/i;
 
+// macOS's filesystem is case-insensitive, so a vault folder/file whose case
+// drifted from the note's title/filename (e.g. Obsidian creating "deep &
+// cross network" for a note titled "Deep & Cross Network") still resolves
+// locally — but silently fails on the case-sensitive Linux runner that CI
+// builds run on, leaving the raw ![[...]] embed unresolved in production.
+// These two helpers do the same directory/file lookups case-insensitively so
+// local and CI behavior match.
+const ASSETS_ROOT = path.join(VAULT_ROOT, "assets");
+let assetDirsByLowerName;
+function resolveAssetDir(name) {
+  if (!assetDirsByLowerName) {
+    assetDirsByLowerName = new Map();
+    for (const entry of fs.readdirSync(ASSETS_ROOT, { withFileTypes: true })) {
+      if (entry.isDirectory()) assetDirsByLowerName.set(entry.name.toLowerCase(), entry.name);
+    }
+  }
+  const real = assetDirsByLowerName.get(name.toLowerCase());
+  return real ? path.join(ASSETS_ROOT, real) : null;
+}
+function findFileCaseInsensitive(dir, filename) {
+  const direct = path.join(dir, filename);
+  if (fs.existsSync(direct)) return direct;
+  const lower = filename.toLowerCase();
+  const match = fs.readdirSync(dir).find((f) => f.toLowerCase() === lower);
+  return match ? path.join(dir, match) : null;
+}
+
 // Resolves ![[filename|width]] image embeds: copies the referenced asset from
 // the vault's assets/ folder into public/<kind>/<slug>/, and rewrites the
 // embed into a raw <img> tag (Astro's markdown pipeline passes raw HTML
@@ -155,7 +182,7 @@ const IMAGE_EXT_RE = /\.(png|jpe?g|gif|svg|webp)$/i;
 // Only embeds with an image extension are touched here — a bare ![[Title]]
 // embed (no extension) is a note transclusion, handled by resolveEmbeds.
 function resolveImages(body, kind, slug, names) {
-  const candidateDirs = [...new Set(names)].map((name) => path.join(VAULT_ROOT, "assets", name));
+  const candidateDirs = [...new Set(names)].map(resolveAssetDir).filter(Boolean);
   const publicDir = path.join("public", kind, slug);
   const withImages = body.replace(/!\[\[([^|\]]+)(?:\|(\d+))?\]\]/g, (whole, filename, width) => {
     if (!IMAGE_EXT_RE.test(filename.trim())) return whole;
@@ -165,8 +192,8 @@ function resolveImages(body, kind, slug, names) {
     // basename matters regardless of which form was written.
     const baseFilename = path.basename(filename);
     const srcPath = candidateDirs
-      .map((dir) => path.join(dir, baseFilename))
-      .find((p) => fs.existsSync(p));
+      .map((dir) => findFileCaseInsensitive(dir, baseFilename))
+      .find(Boolean);
     if (!srcPath) return whole;
     fs.mkdirSync(publicDir, { recursive: true });
     fs.copyFileSync(srcPath, path.join(publicDir, baseFilename));
