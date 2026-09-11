@@ -154,6 +154,13 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
       const input = document.getElementById("search-input") as HTMLInputElement;
       const results = document.getElementById("search-results") as HTMLDivElement;
 
+      const mobileQuery = matchMedia("(max-width: 480px)");
+      function updatePlaceholder() {
+        input.placeholder = mobileQuery.matches ? "Search" : "Search posts, notes, books…";
+      }
+      updatePlaceholder();
+      mobileQuery.addEventListener("change", updatePlaceholder);
+
       let activeIndex = -1;
 
       function openSearch() {
@@ -432,6 +439,20 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
   #search-toggle:hover {
     color: var(--accent);
     border-color: var(--accent);
+  }
+
+  @media (max-width: 480px) {
+    nav {
+      flex-wrap: wrap;
+      row-gap: 0.75rem;
+    }
+    nav .links {
+      order: 1;
+      flex-basis: 100%;
+    }
+    #search-toggle {
+      margin-left: auto;
+    }
   }
 
   .search-overlay {
