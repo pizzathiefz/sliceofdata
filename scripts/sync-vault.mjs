@@ -36,9 +36,11 @@ function parseFrontmatter(raw) {
         data[key] = undefined; // will become array via following list items
       } else {
         let v = value;
-        let quoted;
-        while ((quoted = v.match(/^"(.*)"$|^'(.*)'$/))) {
-          v = quoted[1] ?? quoted[2];
+        if (key !== "comment") {
+          let quoted;
+          while ((quoted = v.match(/^"(.*)"$|^'(.*)'$/))) {
+            v = quoted[1] ?? quoted[2];
+          }
         }
         data[key] = v;
       }

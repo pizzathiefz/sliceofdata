@@ -70,20 +70,22 @@ function splitTitle(title: string) {
             const { main, alt } = splitTitle(f.data.title);
             return (
               <li class="film-row">
-                <span class="film-title">
-                  {main}
-                  {alt && <span class="film-title-alt">; {alt}</span>}
-                </span>
-                {f.data.comment && <span class="film-chip">{f.data.comment}</span>}
-                <div class="film-meta">
-                  {f.data.year != null && <span class="film-year">{f.data.year}</span>}
-                  {f.data.rating != null && (
-                    <span class="film-rating">
-                      <span class="star">★</span>
-                      {f.data.rating}
-                    </span>
-                  )}
+                <div class="film-info">
+                  <span class="film-title">
+                    {main}
+                    {alt && <span class="film-title-alt">; {alt}</span>}
+                  </span>
+                  <div class="film-meta">
+                    {f.data.year != null && <span class="film-year">{f.data.year}</span>}
+                    {f.data.rating != null && (
+                      <span class="film-rating">
+                        <span class="star">★</span>
+                        {f.data.rating}
+                      </span>
+                    )}
+                  </div>
                 </div>
+                {f.data.comment && <span class="film-chip">{f.data.comment}</span>}
               </li>
             );
           })}
@@ -157,9 +159,8 @@ function splitTitle(title: string) {
     display: grid;
     grid-template-columns: 9rem 26rem;
     justify-content: start;
-    grid-template-rows: auto auto;
+    align-items: start;
     column-gap: 1.5rem;
-    row-gap: 0.2rem;
     padding: 0.9rem 0;
     border-bottom: 1px solid var(--border);
   }
@@ -169,10 +170,13 @@ function splitTitle(title: string) {
   .film-row[hidden] {
     display: none;
   }
-  .film-title {
+  .film-info {
     grid-column: 1;
-    grid-row: 1;
-    align-self: start;
+    display: flex;
+    flex-direction: column;
+    row-gap: 0.2rem;
+  }
+  .film-title {
     font-weight: 600;
     font-size: 0.92rem;
     line-height: 1.35;
@@ -185,8 +189,6 @@ function splitTitle(title: string) {
   }
   .film-chip {
     grid-column: 2;
-    grid-row: 1 / span 2;
-    align-self: start;
     padding: 0.2rem 0.5rem;
     font-size: 0.8rem;
     border: 1px solid var(--border);
@@ -194,9 +196,6 @@ function splitTitle(title: string) {
     background-color: var(--chip-bg);
   }
   .film-meta {
-    grid-column: 1;
-    grid-row: 2;
-    align-self: start;
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
@@ -247,21 +246,12 @@ function splitTitle(title: string) {
   @media (max-width: 600px) {
     .film-row {
       grid-template-columns: 1fr;
-      grid-template-rows: auto auto auto;
       row-gap: 0.4rem;
-    }
-    .film-title {
-      grid-row: 1;
-      max-width: none;
     }
     .film-chip {
       grid-column: 1;
-      grid-row: 3;
       justify-self: stretch;
       width: auto;
-    }
-    .film-meta {
-      grid-row: 2;
     }
   }
 </style>
