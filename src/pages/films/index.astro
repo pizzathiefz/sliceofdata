@@ -272,8 +272,17 @@ function splitTitle(title: string) {
   }
 
   tabs.forEach((tab) => {
-    tab.addEventListener("click", () => showYear(tab.dataset.year!));
+    tab.addEventListener("click", () => {
+      const year = tab.dataset.year!;
+      showYear(year);
+      history.replaceState(null, "", `#${year}`);
+    });
   });
+
+  const hashYear = location.hash.slice(1);
+  if (hashYear && [...tabs].some((t) => t.dataset.year === hashYear)) {
+    showYear(hashYear);
+  }
 
   groups.forEach((group) => {
     const rows = Array.from(group.querySelectorAll<HTMLLIElement>(".film-row"));

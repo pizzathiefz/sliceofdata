@@ -116,19 +116,34 @@ function normalizeMathBlocks(body) {
 }
 
 // Resolves ![[filename|width]] image embeds: copies the referenced asset from
-// the vault's assets/<title>/ folder into public/<kind>/<slug>/, and rewrites
-// the embed into a raw <img> tag (Astro's markdown pipeline passes raw HTML
+// the vault's assets/ folder into public/<kind>/<slug>/, and rewrites the
+// embed into a raw <img> tag (Astro's markdown pipeline passes raw HTML
 // through, so the width hint survives).
-function resolveImages(body, kind, slug, title) {
-  const assetDir = path.join(VAULT_ROOT, "assets", title);
+//
+// The attachment folder is named after the *title* for most notes, but posts
+// use a short English slug as their filename while keeping the attachment
+// folder under the original (often Korean) title — and some notes have had
+// their title edited without renaming the file, leaving the folder matching
+// only the filename. Try both and use whichever one actually has the file.
+function resolveImages(body, kind, slug, title, file) {
+  const candidateDirs = [...new Set([title, path.basename(file, ".md")])].map((name) =>
+    path.join(VAULT_ROOT, "assets", name)
+  );
   const publicDir = path.join("public", kind, slug);
   const withImages = body.replace(/!\[\[([^|\]]+)(?:\|(\d+))?\]\]/g, (whole, filename, width) => {
-    const srcPath = path.join(assetDir, filename);
-    if (!fs.existsSync(srcPath)) return whole;
+    // the embed text is sometimes a bare filename and sometimes a full
+    // "assets/<title>/..." path (Obsidian writes either depending on vault
+    // settings) — assets always live flat under their folder, so only the
+    // basename matters regardless of which form was written.
+    const baseFilename = path.basename(filename);
+    const srcPath = candidateDirs
+      .map((dir) => path.join(dir, baseFilename))
+      .find((p) => fs.existsSync(p));
+    if (!srcPath) return whole;
     fs.mkdirSync(publicDir, { recursive: true });
-    fs.copyFileSync(srcPath, path.join(publicDir, filename));
+    fs.copyFileSync(srcPath, path.join(publicDir, baseFilename));
     const widthAttr = width ? ` width="${width}"` : "";
-    return `<img src="/${kind}/${slug}/${filename}"${widthAttr} alt="" />`;
+    return `<img src="/${kind}/${slug}/${baseFilename}"${widthAttr} alt="" />`;
   });
   // an <img> HTML block absorbs any immediately-following line as raw HTML
   // (no blank line = same block in CommonMark) — force a blank line after so
@@ -136,8 +151,31 @@ function resolveImages(body, kind, slug, title) {
   return withImages.replace(/(<img[^>]*\/>)\n(?!\n)/g, "$1\n\n");
 }
 
-function cleanBody(body, kind, slug, title) {
-  return normalizeMathBlocks(resolveImages(body, kind, slug, title));
+// Resolves [[Note Title]] / [[Note Title|display]] wikilinks into real links
+// to the matching book/note/post page. A wikilink with no matching page (e.g.
+// it points at a private or unpublished vault note) is rendered as plain
+// text instead of the raw brackets.
+function resolveWikilinks(body) {
+  return body.replace(/(?<!!)\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (whole, target, alias) => {
+    const key = target.trim();
+    const display = (alias ?? target).trim();
+
+    // "YYYY 📚" / "YYYY 🎬" are the vault's yearly index notes — point them at
+    // the matching year tab on the books/films listing instead of leaving
+    // them unresolved (those index notes themselves aren't published).
+    const yearIndex = key.match(/^(\d{4})\s*(📚|🎬)$/);
+    if (yearIndex) {
+      const kind = yearIndex[2] === "📚" ? "books" : "films";
+      return `[${display}](/${kind}#${yearIndex[1]})`;
+    }
+
+    const hit = linkMap.get(key);
+    return hit ? `[${display}](/${hit.kind}/${hit.slug})` : display;
+  });
+}
+
+function cleanBody(body, kind, slug, title, file) {
+  return resolveWikilinks(normalizeMathBlocks(resolveImages(body, kind, slug, title, file)));
 }
 
 const films = readCollection("film", { requireRating: true });
@@ -148,6 +186,45 @@ const posts = readPublishedCollection("post");
 console.log(
   `films: ${films.length}, books: ${books.length}, notes: ${notes.length}, posts: ${posts.length}`
 );
+
+// Precompute output slugs up front (in the same order/sluggers used below)
+// so the link map below and the write loops agree on the same slug per
+// entry without calling any slugger twice.
+const filmSlug = makeSlugger();
+for (const e of films) {
+  e.title = e.fm.title ?? path.basename(e.file, ".md");
+  e.slug = filmSlug(e.title);
+}
+const bookSlug = makeSlugger();
+for (const e of books) {
+  e.title = e.fm.title ?? path.basename(e.file, ".md");
+  e.slug = bookSlug(e.title);
+}
+const noteSlug = makeSlugger();
+for (const e of notes) {
+  e.title = e.fm.title ?? path.basename(e.file, ".md");
+  e.slug = noteSlug(e.title);
+}
+const postSlug = makeSlugger();
+for (const e of posts) {
+  e.title = e.fm.title ?? path.basename(e.file, ".md");
+  e.slug = postSlug(path.basename(e.file, ".md"));
+}
+
+// Films have no individual page (just the /films listing), so they're left
+// out of the map — a wikilink to a film falls back to plain text.
+const linkMap = new Map();
+for (const [entries, kind] of [
+  [books, "books"],
+  [notes, "notes"],
+  [posts, "posts"],
+]) {
+  for (const e of entries) {
+    const filenameKey = path.basename(e.file, ".md");
+    linkMap.set(filenameKey, { kind, slug: e.slug });
+    if (e.title !== filenameKey) linkMap.set(e.title, { kind, slug: e.slug });
+  }
+}
 
 const outDirs = {
   films: "src/content/films",
@@ -162,10 +239,7 @@ for (const [kind, dir] of Object.entries(outDirs)) {
   fs.rmSync(path.join("public", kind), { recursive: true, force: true });
 }
 
-const filmSlug = makeSlugger();
-films.forEach(({ file, fm }) => {
-  const title = fm.title ?? path.basename(file, ".md");
-  const slug = filmSlug(title);
+films.forEach(({ fm, title, slug }) => {
   const fmOut = [
     "---",
     `title: ${JSON.stringify(title)}`,
@@ -182,10 +256,7 @@ films.forEach(({ file, fm }) => {
   fs.writeFileSync(path.join(outDirs.films, `${slug}.md`), fmOut);
 });
 
-const bookSlug = makeSlugger();
-books.forEach(({ file, fm, body }) => {
-  const title = fm.title ?? path.basename(file, ".md");
-  const slug = bookSlug(title);
+books.forEach(({ fm, body, title, slug, file }) => {
   const author = Array.isArray(fm.author) ? fm.author.join(", ") : fm.author;
   const fmOut = [
     "---",
@@ -201,17 +272,14 @@ books.forEach(({ file, fm, body }) => {
     `publish: true`,
     "---",
     "",
-    cleanBody(body, "books", slug, title),
+    cleanBody(body, "books", slug, title, file),
   ]
     .filter((line) => line !== null)
     .join("\n");
   fs.writeFileSync(path.join(outDirs.books, `${slug}.md`), fmOut);
 });
 
-const noteSlug = makeSlugger();
-notes.forEach(({ file, fm, body }) => {
-  const title = fm.title ?? path.basename(file, ".md");
-  const slug = noteSlug(title);
+notes.forEach(({ fm, body, title, slug, file }) => {
   const tags = Array.isArray(fm.tags) ? fm.tags : fm.tags ? [fm.tags] : [];
   const fmOut = [
     "---",
@@ -221,17 +289,14 @@ notes.forEach(({ file, fm, body }) => {
     `publish: true`,
     "---",
     "",
-    cleanBody(body, "notes", slug, title),
+    cleanBody(body, "notes", slug, title, file),
   ]
     .filter((line) => line !== null)
     .join("\n");
   fs.writeFileSync(path.join(outDirs.notes, `${slug}.md`), fmOut);
 });
 
-const postSlug = makeSlugger();
-posts.forEach(({ file, fm, body }) => {
-  const title = fm.title ?? path.basename(file, ".md");
-  const slug = postSlug(path.basename(file, ".md"));
+posts.forEach(({ fm, body, title, slug, file }) => {
   const tags = Array.isArray(fm.tags) ? fm.tags : fm.tags ? [fm.tags] : [];
   const fmOut = [
     "---",
@@ -241,7 +306,7 @@ posts.forEach(({ file, fm, body }) => {
     `publish: true`,
     "---",
     "",
-    cleanBody(body, "posts", slug, title),
+    cleanBody(body, "posts", slug, title, file),
   ]
     .filter((line) => line !== null)
     .join("\n");

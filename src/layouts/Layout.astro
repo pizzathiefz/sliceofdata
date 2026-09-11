@@ -101,6 +101,8 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
     --accent: #3f6fb8;
     --chip-bg: #f0f0ed;
     --tab-highlight: #e3e0d6;
+    --link-highlight: color-mix(in srgb, var(--accent) 20%, var(--bg));
+    --link-fg: color-mix(in srgb, var(--accent) 80%, var(--fg));
     --font-sans: "Pretendard", ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     --font-serif: Georgia, "Times New Roman", serif;
@@ -359,16 +361,22 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
     margin: 1.5rem 0 0.4rem;
   }
   article a {
-    font-family: var(--font-mono);
-    color: var(--fg);
-    text-decoration: underline;
-    text-decoration-color: var(--border);
-    text-decoration-thickness: 1px;
-    text-underline-offset: 2px;
-    transition: text-decoration-color 0.15s ease;
+    color: var(--link-fg);
+    text-decoration: none;
+    background-image: linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 35%,
+      var(--link-highlight) 35%,
+      var(--link-highlight) 80%,
+      transparent 80%
+    );
+    background-repeat: no-repeat;
   }
   article a:hover {
-    text-decoration-color: var(--fg);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
   }
 
   article blockquote {
