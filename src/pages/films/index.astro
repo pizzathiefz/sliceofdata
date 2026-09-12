@@ -12,6 +12,14 @@ const years = Object.keys(byYear)
   .sort((a, b) => b - a);
 const latestYear = years[0];
 
+const recommendedFilms = films.filter(
+  (f) => (f.data.rating ?? 0) >= 4 && commentText(f.data.comment)
+);
+const RECOMMEND_COUNT = 10;
+const showRefresh = recommendedFilms.length > RECOMMEND_COUNT;
+
+const defaultTab = recommendedFilms.length > 0 ? "recommend" : String(latestYear);
+
 function splitTitle(title: string) {
   const i = title.indexOf(";");
   if (i === -1) return { main: title, alt: null };
@@ -28,11 +36,35 @@ function commentText(comment?: string) {
 
   <div class="year-tabs" role="tablist">
     {
+      recommendedFilms.length > 0 && (
+        <button
+          class="year-tab recommend-tab"
+          data-year="recommend"
+          aria-pressed={defaultTab === "recommend" ? "true" : "false"}
+          aria-label="추천"
+          title="추천"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+          </svg>
+        </button>
+      )
+    }
+    {
       years.map((year) => (
         <button
           class="year-tab"
           data-year={year}
-          aria-pressed={year === latestYear ? "true" : "false"}
+          aria-pressed={String(year) === defaultTab ? "true" : "false"}
         >
           {year}
         </button>
@@ -41,8 +73,145 @@ function commentText(comment?: string) {
   </div>
 
   {
+    recommendedFilms.length > 0 && (
+      <div class="year-group recommend-group" data-year="recommend" hidden={defaultTab !== "recommend"}>
+        <div class="recommend-header">
+          <div class="recommend-title">
+            <span class="line" />
+            <span class="recommend-label">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
+                <line x1="7" y1="2" x2="7" y2="22" />
+                <line x1="17" y1="2" x2="17" y2="22" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <line x1="2" y1="7" x2="7" y2="7" />
+                <line x1="2" y1="17" x2="7" y2="17" />
+                <line x1="17" y1="17" x2="22" y2="17" />
+                <line x1="17" y1="7" x2="22" y2="7" />
+              </svg>
+              you might like
+            </span>
+            <span class="line" />
+          </div>
+          <div class="recommend-subtitle">(not an algorithm, just me.)</div>
+          {showRefresh && (
+            <div class="reroll-wrap">
+              <svg
+                class="nudge-arrow nudge-left"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+              <button class="reroll-btn" type="button" aria-label="Reroll" title="Reroll">
+                <svg
+                  class="dice-icon"
+                  width="26"
+                  height="26"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <rect
+                    x="2.5"
+                    y="2.5"
+                    width="19"
+                    height="19"
+                    rx="5"
+                    fill="var(--chip-bg)"
+                    stroke-width="1.6"
+                  />
+                  <path
+                    d="M5.3 8.8C5.9 6.2 8 4.2 10.6 3.7"
+                    fill="none"
+                    stroke-opacity="0.18"
+                    stroke-width="1.8"
+                    stroke-linecap="round"
+                  />
+                  <circle cx="8.2" cy="8.2" r="1.7" fill="currentColor" stroke="none" />
+                  <circle cx="15.8" cy="8.2" r="1.7" fill="currentColor" stroke="none" />
+                  <circle cx="8.2" cy="15.8" r="1.7" fill="currentColor" stroke="none" />
+                  <circle cx="15.8" cy="15.8" r="1.7" fill="currentColor" stroke="none" />
+                  <circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none" />
+                </svg>
+              </button>
+              <svg
+                class="nudge-arrow nudge-right"
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M15 6l-6 6 6 6" />
+              </svg>
+            </div>
+          )}
+        </div>
+        <ul class="film-list recommend-list">
+          {recommendedFilms.map((f) => {
+            const { main, alt } = splitTitle(f.data.title);
+            const comment = commentText(f.data.comment);
+            return (
+              <li class="film-row recommend-row" hidden>
+                <div class="film-info">
+                  <span class="film-title">
+                    {main}
+                    {alt && <span class="film-title-alt">; {alt}</span>}
+                  </span>
+                  <div class="film-meta">
+                    {f.data.year != null && <span class="film-year">{f.data.year}</span>}
+                    {f.data.rating != null && (
+                      <span class="film-rating">
+                        <span class="star">★</span>
+                        {f.data.rating}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                <span class="film-chip">
+                  {comment || (
+                    <svg
+                      class="more-icon"
+                      width="15"
+                      height="15"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <circle cx="5" cy="12" r="2" />
+                      <circle cx="12" cy="12" r="2" />
+                      <circle cx="19" cy="12" r="2" />
+                    </svg>
+                  )}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    )
+  }
+
+  {
     years.map((year) => (
-      <div class="year-group" data-year={year} hidden={year !== latestYear}>
+      <div class="year-group" data-year={year} hidden={String(year) !== defaultTab}>
         <div class="year-count">
           <span class="line" />
           <span class="count-badge">
@@ -65,9 +234,30 @@ function commentText(comment?: string) {
               <line x1="17" y1="17" x2="22" y2="17" />
               <line x1="17" y1="7" x2="22" y2="7" />
             </svg>
-            {byYear[year]!.length}
+            total {byYear[year]!.length}
           </span>
           <span class="line" />
+          <button
+            class="sort-btn"
+            type="button"
+            data-order="desc"
+            aria-label="Sort by date"
+            title="Sort by date"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 5v14" />
+              <path d="m19 12-7 7-7-7" />
+            </svg>
+          </button>
         </div>
         <ul class="film-list">
           {byYear[year]!.map((f) => {
@@ -147,12 +337,44 @@ function commentText(comment?: string) {
       transparent 80%
     );
   }
+  .recommend-tab {
+    display: inline-flex;
+    align-items: center;
+  }
+  .recommend-tab[aria-pressed="true"] svg {
+    fill: currentColor;
+  }
 
   .year-count {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 1rem;
     margin: 0 0 1.5rem;
+  }
+  .sort-btn {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border: none;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .sort-btn:hover {
+    color: var(--fg);
+  }
+  .sort-btn svg {
+    transition: transform 0.25s ease;
+  }
+  .sort-btn[data-order="asc"] svg {
+    transform: rotate(180deg);
   }
   .year-count .line {
     flex: 1;
@@ -169,6 +391,119 @@ function commentText(comment?: string) {
     font-size: 0.85rem;
     white-space: nowrap;
   }
+  .recommend-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    margin: 0 0 1.5rem;
+  }
+  .recommend-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+  }
+  .recommend-title .line {
+    flex: 1;
+    height: 0;
+    border-top: 1px dotted var(--border);
+  }
+  .recommend-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+  .recommend-subtitle {
+    align-self: flex-end;
+    margin-top: -0.35rem;
+    font-family: var(--font-mono);
+    font-style: italic;
+    font-size: 0.72rem;
+    color: var(--muted);
+    opacity: 0.7;
+  }
+  .reroll-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    margin-top: 0.55rem;
+  }
+  .nudge-arrow {
+    color: var(--muted);
+    opacity: 0.5;
+  }
+  .nudge-arrow.nudge-left {
+    animation: nudge-left 1.4s ease-in-out infinite;
+  }
+  .nudge-arrow.nudge-right {
+    animation: nudge-right 1.4s ease-in-out infinite;
+  }
+  @keyframes nudge-left {
+    0%,
+    100% {
+      transform: translateX(0);
+      opacity: 0.4;
+    }
+    50% {
+      transform: translateX(3px);
+      opacity: 1;
+    }
+  }
+  @keyframes nudge-right {
+    0%,
+    100% {
+      transform: translateX(0);
+      opacity: 0.4;
+    }
+    50% {
+      transform: translateX(-3px);
+      opacity: 1;
+    }
+  }
+  .reroll-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.6rem;
+    height: 2.6rem;
+    border: none;
+    border-radius: 50%;
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition:
+      transform 0.2s ease,
+      color 0.2s ease;
+  }
+  .reroll-btn:hover {
+    color: var(--fg);
+    transform: translateY(-2px) scale(1.08);
+  }
+  .reroll-btn:active {
+    transform: translateY(0) scale(0.95);
+  }
+  .reroll-btn .dice-icon {
+    filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.18));
+  }
+  .reroll-btn.spin .dice-icon {
+    animation: dice-spin 0.4s ease;
+  }
+  @keyframes dice-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   .film-list {
     list-style: none;
     margin: 0;
@@ -241,6 +576,9 @@ function commentText(comment?: string) {
     font-size: 1.4em;
     line-height: 1;
   }
+  .recommend-row .film-rating {
+    display: none;
+  }
 
   .load-more {
     display: flex;
@@ -276,6 +614,10 @@ function commentText(comment?: string) {
       justify-self: stretch;
       width: auto;
     }
+    .recommend-subtitle {
+      align-self: center;
+      margin-top: 0.3rem;
+    }
   }
 </style>
 
@@ -308,15 +650,17 @@ function commentText(comment?: string) {
   }
 
   groups.forEach((group) => {
+    const btn = group.querySelector<HTMLButtonElement>(".load-more");
+    if (!btn) return;
+    const list = group.querySelector<HTMLUListElement>(".film-list")!;
     const rows = Array.from(group.querySelectorAll<HTMLLIElement>(".film-row"));
-    const btn = group.querySelector<HTMLButtonElement>(".load-more")!;
     let visible = PAGE_SIZE;
 
     function render() {
       rows.forEach((row, i) => {
         row.hidden = i >= visible;
       });
-      btn.hidden = visible >= rows.length;
+      btn!.hidden = visible >= rows.length;
     }
 
     btn.addEventListener("click", () => {
@@ -324,6 +668,42 @@ function commentText(comment?: string) {
       render();
     });
 
+    const sortBtn = group.querySelector<HTMLButtonElement>(".sort-btn");
+    sortBtn?.addEventListener("click", () => {
+      sortBtn.dataset.order = sortBtn.dataset.order === "desc" ? "asc" : "desc";
+      rows.reverse();
+      rows.forEach((row) => list.appendChild(row));
+      visible = PAGE_SIZE;
+      render();
+    });
+
     render();
   });
+
+  const recommendGroup = document.querySelector<HTMLDivElement>(".recommend-group");
+  if (recommendGroup) {
+    const RECOMMEND_COUNT = 10;
+    const rows = Array.from(recommendGroup.querySelectorAll<HTMLLIElement>(".recommend-row"));
+    const refreshBtn = recommendGroup.querySelector<HTMLButtonElement>(".reroll-btn");
+
+    function pickRandom() {
+      const indices = rows.map((_, i) => i);
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      const chosen = new Set(indices.slice(0, RECOMMEND_COUNT));
+      rows.forEach((row, i) => {
+        row.hidden = !chosen.has(i);
+      });
+    }
+
+    refreshBtn?.addEventListener("click", () => {
+      refreshBtn.classList.add("spin");
+      pickRandom();
+      setTimeout(() => refreshBtn.classList.remove("spin"), 400);
+    });
+
+    pickRandom();
+  }
 </script>
