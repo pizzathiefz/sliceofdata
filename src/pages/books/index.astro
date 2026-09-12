@@ -17,6 +17,16 @@ const latestYear = years[0];
 // fixed character budget doesn't track a box whose width can change.
 const PREVIEW_CAP = 2000;
 
+function formatAuthors(author?: string) {
+  if (!author) return author;
+  const names = author
+    .split(",")
+    .map((n) => n.trim())
+    .filter(Boolean);
+  if (names.length <= 3) return author;
+  return `${names.slice(0, 3).join(", ")} 외 ${names.length - 3}인`;
+}
+
 function previewText(body: string) {
   const clean = body
     .replace(/^#+\s*/gm, "")
@@ -180,7 +190,7 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
                 >
                   <div class="book-left">
                     <div class="book-title">{b.data.title}</div>
-                    {b.data.author && <div class="book-author">{b.data.author}</div>}
+                    {b.data.author && <div class="book-author">{formatAuthors(b.data.author)}</div>}
                   </div>
                   <div class="book-chip">
                     {text && <span class="chip-text">{text}</span>}
@@ -262,7 +272,7 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
                 >
                   <div class="book-left">
                     <div class="book-title">{b.data.title}</div>
-                    {b.data.author && <div class="book-author">{b.data.author}</div>}
+                    {b.data.author && <div class="book-author">{formatAuthors(b.data.author)}</div>}
                   </div>
                   <div class="book-chip">
                     {text && <span class="chip-text">{text}</span>}
@@ -375,7 +385,7 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
     font-family: var(--font-mono);
     font-weight: 400;
     color: var(--muted);
-    font-size: 0.85rem;
+    font-size: 0.75rem;
     white-space: nowrap;
   }
 

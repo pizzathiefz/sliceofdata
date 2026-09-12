@@ -13,8 +13,18 @@ export async function getStaticPaths() {
 const { book } = Astro.props;
 const { Content } = await render(book);
 
+function formatAuthors(author?: string) {
+  if (!author) return author;
+  const names = author
+    .split(",")
+    .map((n) => n.trim())
+    .filter(Boolean);
+  if (names.length <= 3) return author;
+  return `${names.slice(0, 3).join(", ")} 외 ${names.length - 3}인`;
+}
+
 const metaParts = [
-  book.data.author,
+  formatAuthors(book.data.author),
   book.data.publisher,
   book.data.yearOfPublication,
   book.data.originalTitle,
