@@ -86,25 +86,6 @@ function readPublishedCollection(folder) {
   return entries.sort((a, b) => new Date(b.fm.created) - new Date(a.fm.created));
 }
 
-// Wiki notes (vault/content/wiki) are short glossary/definition entries with
-// no page of their own on the site — they only ever appear inlined via a
-// ![[Title]] embed in another note, so index them by title for that lookup.
-function readWikiNotes() {
-  const dir = path.join(VAULT, "wiki");
-  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md") && f !== "_index.md");
-
-  const map = new Map();
-  for (const file of files) {
-    const raw = fs.readFileSync(path.join(dir, file), "utf-8");
-    const parsed = parseFrontmatter(raw);
-    if (!parsed) continue;
-    const { fm, body } = parsed;
-    const title = fm.title ?? path.basename(file, ".md");
-    map.set(title, { body, file, title });
-  }
-  return map;
-}
-
 function slugify(str) {
   const slug = str
     .toLowerCase()
@@ -234,39 +215,68 @@ function extractSection(body, heading) {
   return lines.slice(startIdx, endIdx).join("\n").trim();
 }
 
+function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 // Resolves ![[Title]] / ![[Title#Heading]] note-transclusion embeds by
 // inlining the target's own content in place — the closest equivalent to
 // Obsidian's live transclusion, since the site has no per-block embed
-// rendering of its own. Works for a title from any collection (the vault's
-// wiki/ glossary notes as well as published books/notes/posts): a #Heading
-// suffix extracts just that section, otherwise the whole body is inlined.
-// The target's own images are resolved against the host page's kind/slug,
+// rendering of its own. Works for a title from any published collection
+// (books/notes/posts): a #Heading suffix extracts just that section,
+// otherwise the whole body is inlined. The target's own images are
+// resolved against the host page's kind/slug,
 // falling back to the host note's own asset folder for any image the
 // target's folder doesn't have (Obsidian resolves ![[img]] by a vault-wide
 // filename search, so an image referenced from an embedded note is often
 // actually sitting in whichever note first pasted it). Anything that
 // doesn't match a known title falls back to plain display text.
+//
+// When the embed is the sole content of its own line, the inlined content
+// is boxed as a raw <div class="embed"> (Astro's markdown passes block-level
+// HTML through untouched, the same trick resolveImages relies on for <img>)
+// with a link back to the source note tucked in its bottom-right corner —
+// so a reader can always tell an excerpt apart from the surrounding note and
+// jump to where it came from. An embed used inline mid-sentence/mid-line is
+// left as plain inlined text so it doesn't break the surrounding paragraph.
 function resolveEmbeds(body, kind, slug, hostNames, depth = 0) {
   if (depth > 5) return body;
-  return body.replace(/!\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g, (whole, target, alias) => {
-    if (IMAGE_EXT_RE.test(target.trim())) return whole;
-    const hashIdx = target.indexOf("#");
-    const key = (hashIdx === -1 ? target : target.slice(0, hashIdx)).trim();
-    const heading = hashIdx === -1 ? null : target.slice(hashIdx + 1).trim();
-    const display = (alias ?? key).trim();
+  return body.replace(
+    /!\[\[([^\]|]+)(?:\|([^\]]+))?\]\]/g,
+    (whole, target, alias, offset, full) => {
+      if (IMAGE_EXT_RE.test(target.trim())) return whole;
+      const hashIdx = target.indexOf("#");
+      const key = (hashIdx === -1 ? target : target.slice(0, hashIdx)).trim();
+      const heading = hashIdx === -1 ? null : target.slice(hashIdx + 1).trim();
+      const display = (alias ?? key).trim();
 
-    const entry = embedMap.get(key);
-    if (!entry) return display;
+      const entry = embedMap.get(key);
+      if (!entry) return display;
 
-    const names = [entry.title, path.basename(entry.file, ".md"), ...hostNames];
-    let content = resolveImages(entry.body, kind, slug, names);
-    if (heading) {
-      const section = extractSection(content, heading);
-      if (section === null) return display;
-      content = section;
+      const names = [entry.title, path.basename(entry.file, ".md"), ...hostNames];
+      let content = resolveImages(entry.body, kind, slug, names);
+      if (heading) {
+        const section = extractSection(content, heading);
+        if (section === null) return display;
+        content = section;
+      }
+      content = resolveEmbeds(content, kind, slug, hostNames, depth + 1);
+
+      const lineStart = full.lastIndexOf("\n", offset - 1) + 1;
+      const lineEndIdx = full.indexOf("\n", offset + whole.length);
+      const line = full.slice(lineStart, lineEndIdx === -1 ? full.length : lineEndIdx);
+      if (line.trim() !== whole.trim()) return content;
+
+      const link = linkMap.get(key);
+      const sourceHref = link ? `/${link.kind}/${link.slug}` : null;
+      const sourceLabel = escapeHtml(entry.title);
+      const source = sourceHref
+        ? `<a href="${sourceHref}">${sourceLabel}</a>`
+        : sourceLabel;
+
+      return `<div class="embed">\n\n${content}\n\n<p class="embed-source">${source}</p>\n</div>\n`;
     }
-    return resolveEmbeds(content, kind, slug, hostNames, depth + 1);
-  });
+  );
 }
 
 // Resolves [[Note Title]] / [[Note Title|display]] wikilinks into real links
@@ -299,7 +309,6 @@ function cleanBody(body, kind, slug, title, file) {
   );
 }
 
-const wikiNotes = readWikiNotes();
 const films = readCollection("film", { requireRating: true });
 const books = readCollection("book");
 const notes = readPublishedCollection("note");
@@ -337,12 +346,8 @@ for (const e of posts) {
 // out of the map — a wikilink to a film falls back to plain text.
 const linkMap = new Map();
 // embedMap backs resolveEmbeds' ![[Title]] lookups — unlike linkMap it also
-// carries the target's raw body (so it can be inlined) and includes the
-// vault's wiki/ glossary notes, which have no page of their own to link to.
+// carries the target's raw body (so it can be inlined).
 const embedMap = new Map();
-for (const [title, w] of wikiNotes) {
-  embedMap.set(title, { body: w.body, file: w.file, title: w.title });
-}
 for (const [entries, kind] of [
   [books, "books"],
   [notes, "notes"],

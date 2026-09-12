@@ -828,4 +828,26 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
   article .callout-danger {
     --callout-color: #c14f4f;
   }
+
+  article .embed {
+    margin: 1.5rem 0;
+    padding: 0.7rem 1rem;
+    border: none;
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    background: var(--chip-bg);
+  }
+  article .embed > :first-child {
+    margin-top: 0;
+  }
+  article .embed-source {
+    margin: 0.6rem 0 0;
+    text-align: right;
+    font-size: 0.88rem;
+    font-style: italic;
+    color: var(--muted);
+  }
+  article .embed-source::before {
+    content: "↗ ";
+  }
 </style>
