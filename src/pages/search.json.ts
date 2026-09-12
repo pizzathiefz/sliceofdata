@@ -31,6 +31,7 @@ export const GET: APIRoute = async () => {
       title: entry.data.title,
       url: `/posts/${entry.id}`,
       tags: entry.data.tags,
+      created: entry.data.created.toISOString(),
       body: stripMarkdown(entry.body ?? ""),
     })),
     ...notes.map((entry) => ({
@@ -38,6 +39,7 @@ export const GET: APIRoute = async () => {
       title: entry.data.title,
       url: `/notes/${entry.id}`,
       tags: entry.data.tags,
+      created: entry.data.created.toISOString(),
       body: stripMarkdown(entry.body ?? ""),
     })),
     ...books

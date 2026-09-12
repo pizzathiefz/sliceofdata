@@ -20,7 +20,19 @@ const { Content } = await render(post);
   <h1>{post.data.title}</h1>
   <p class="meta">
     {post.data.created.toISOString().slice(0, 10)}
-    {post.data.tags.length > 0 && <span> · {post.data.tags.join(", ")}</span>}
+    {post.data.tags.length > 0 && (
+      <span>
+        {" · "}
+        {post.data.tags.map((tag, i) => (
+          <Fragment>
+            {i > 0 && ", "}
+            <button type="button" class="tag-link" data-tag={tag}>
+              {tag}
+            </button>
+          </Fragment>
+        ))}
+      </span>
+    )}
   </p>
   <article>
     <Content />

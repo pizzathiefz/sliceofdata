@@ -91,6 +91,16 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
       </div>
     </div>
 
+    <div id="tag-overlay" class="search-overlay" hidden>
+      <div class="search-modal" role="dialog" aria-modal="true" aria-label="Tagged items">
+        <div class="tag-modal-header">
+          <span class="tag-modal-label">#<span id="tag-modal-name"></span></span>
+          <button id="tag-modal-close" aria-label="Close">✕</button>
+        </div>
+        <div id="tag-modal-results" class="search-results"></div>
+      </div>
+    </div>
+
     {
       !isDetailPage && (
         <footer>
@@ -129,6 +139,7 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
         tags?: string[];
         meta?: string;
         body?: string;
+        created?: string;
       };
 
       const SECTION_LABEL: Record<SearchItem["section"], string> = {
@@ -314,6 +325,62 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
           const el = results.querySelectorAll<HTMLAnchorElement>(".search-result")[activeIndex];
           if (el) location.href = el.href;
         }
+      });
+
+      const tagOverlay = document.getElementById("tag-overlay") as HTMLDivElement;
+      const tagModalName = document.getElementById("tag-modal-name")!;
+      const tagModalResults = document.getElementById("tag-modal-results") as HTMLDivElement;
+      const tagModalClose = document.getElementById("tag-modal-close")!;
+
+      function renderTagResults(tag: string, data: SearchItem[]) {
+        const matches = data
+          .filter((item) => (item.tags ?? []).some((t) => t.toLowerCase() === tag.toLowerCase()))
+          .sort((a, b) => (b.created ?? "").localeCompare(a.created ?? ""));
+        if (matches.length === 0) {
+          tagModalResults.innerHTML = `<p class="search-empty">No results</p>`;
+          return;
+        }
+        tagModalResults.innerHTML = matches
+          .map(
+            (item) => `
+          <a href="${item.url}" class="search-result">
+            <span class="search-row">
+              <span class="search-section">${SECTION_LABEL[item.section]}</span>
+              <span class="search-title">${escapeHtml(item.title)}</span>
+            </span>
+            ${item.created ? `<span class="search-meta">${item.created.slice(0, 10)}</span>` : ""}
+          </a>`
+          )
+          .join("");
+      }
+
+      function openTagModal(tag: string) {
+        tagModalName.textContent = tag;
+        tagModalResults.innerHTML = `<p class="search-empty">Loading…</p>`;
+        tagOverlay.hidden = false;
+        document.body.style.overflow = "hidden";
+        loadIndex().then((data) => renderTagResults(tag, data));
+      }
+
+      function closeTagModal() {
+        tagOverlay.hidden = true;
+        document.body.style.overflow = "";
+      }
+
+      document.addEventListener("click", (e) => {
+        const tagEl = (e.target as HTMLElement).closest<HTMLElement>(".tag-link");
+        if (tagEl) {
+          e.preventDefault();
+          openTagModal(tagEl.dataset.tag!);
+        }
+      });
+
+      tagModalClose.addEventListener("click", closeTagModal);
+      tagOverlay.addEventListener("click", (e) => {
+        if (e.target === tagOverlay) closeTagModal();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (!tagOverlay.hidden && e.key === "Escape") closeTagModal();
       });
     </script>
   </body>
@@ -583,6 +650,49 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
     font-family: var(--font-mono);
     font-size: 0.82rem;
     color: var(--muted);
+  }
+
+  .tag-link {
+    appearance: none;
+    -webkit-appearance: none;
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    color: var(--link-fg);
+    cursor: pointer;
+  }
+  .tag-link:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+  }
+
+  .tag-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 1rem;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .tag-modal-label {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    color: var(--fg);
+  }
+  #tag-modal-close {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.85rem;
+    line-height: 1;
+    padding: 0.2rem;
+    cursor: pointer;
+  }
+  #tag-modal-close:hover {
+    color: var(--accent);
   }
 
   footer {
