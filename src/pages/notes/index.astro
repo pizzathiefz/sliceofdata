@@ -25,7 +25,7 @@ function splitAtSuffix(title: string) {
               {main}
               {suffix && <span class="title-suffix">{suffix}</span>}
             </a>
-            <time class="row-meta">{note.data.created.toISOString().slice(0, 10)}</time>
+            <time class="row-meta">{note.data.created.toISOString().slice(2, 10).replace(/-/g, ".")}</time>
           </li>
         );
       })
@@ -36,16 +36,20 @@ function splitAtSuffix(title: string) {
 
 <style>
   ul.rows li.row {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6em;
     padding: 0.5rem 0;
   }
   ul.rows li.row[hidden] {
     display: none;
   }
   ul.rows .row-title {
-    display: inline;
+    flex: 1 1 auto;
+    min-width: 0;
     font-size: 0.85rem;
-    line-height: 1.05;
+    line-height: 1.55;
     white-space: normal;
     overflow: visible;
     text-overflow: clip;
@@ -54,8 +58,8 @@ function splitAtSuffix(title: string) {
     color: var(--muted);
   }
   ul.rows .row-meta {
-    display: inline;
-    margin-left: 0.6em;
+    flex: 0 0 auto;
+    line-height: 1;
     padding: 0.05em 0.35em;
     font-size: 0.75rem;
     background-image: linear-gradient(
