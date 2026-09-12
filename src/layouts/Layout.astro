@@ -7,6 +7,7 @@ interface Props {
 const { title } = Astro.props;
 
 const path = Astro.url.pathname;
+const isHome = path === "/";
 function isActive(section: string) {
   return path === `/${section}` || path.startsWith(`/${section}/`);
 }
@@ -33,29 +34,47 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
   <body>
     <header>
       <nav>
-        <a class="brand" href="/">main</a>
-        <div class="links">
-          <a href="/posts" class:list={{ active: isActive("posts") }}>posts</a>
-          <a href="/notes" class:list={{ active: isActive("notes") }}>notes</a>
-          <a href="/books" class:list={{ active: isActive("books") }}>books</a>
-          <a href="/films" class:list={{ active: isActive("films") }}>films</a>
-        </div>
-        <button id="search-toggle" aria-label="Search">
+        <a class="brand" href="/" aria-current={isHome ? "page" : undefined} aria-label="main">
+          <span class="brand-text">main</span>
           <svg
-            width="14"
-            height="14"
+            class="brand-icon"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
+            aria-hidden="true"
           >
-            <circle cx="11" cy="11" r="7" />
-            <path d="m21 21-4.3-4.3" />
+            <path d="M12 3 21 10 V21 H3 V10 Z" />
           </svg>
-        </button>
-        <button id="theme-toggle" aria-label="Toggle theme">◐</button>
+        </a>
+        <div class="links">
+          <a href="/posts" class:list={{ active: isActive("posts") }}>posts</a>
+          <a href="/notes" class:list={{ active: isActive("notes") }}>notes</a>
+          <a href="/books" class:list={{ active: isActive("books") }}>books</a>
+          <a href="/films" class:list={{ active: isActive("films") }}>films</a>
+        </div>
+        <div class="nav-icons">
+          <button id="search-toggle" aria-label="Search">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+          </button>
+          <button id="theme-toggle" aria-label="Toggle theme">◐</button>
+        </div>
       </nav>
     </header>
     <main>
@@ -454,16 +473,31 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
     align-items: center;
     gap: 1.25rem;
     margin-bottom: 3rem;
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+      sans-serif;
   }
   nav .brand {
+    display: inline-flex;
+    align-items: center;
     font-weight: 700;
     text-decoration: none;
     letter-spacing: -0.01em;
+  }
+  nav .brand[aria-current="page"] .brand-icon {
+    fill: currentColor;
+  }
+  .brand-text {
+    display: none;
   }
   nav .links {
     display: flex;
     gap: 1rem;
     flex: 1;
+  }
+  .nav-icons {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
   }
   nav a {
     text-decoration: none;
@@ -513,12 +547,10 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
       flex-wrap: wrap;
       row-gap: 0.75rem;
     }
-    nav .links {
-      order: 1;
+    .nav-icons {
+      order: -1;
       flex-basis: 100%;
-    }
-    #search-toggle {
-      margin-left: auto;
+      justify-content: flex-end;
     }
   }
 

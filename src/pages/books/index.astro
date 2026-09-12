@@ -53,6 +53,7 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
 <Layout title="books">
   <h1>books</h1>
 
+  <div class="year-tabs-wrap">
   <div class="year-tabs" role="tablist">
     {
       recommendedBooks.length > 0 && (
@@ -90,6 +91,8 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
       ))
     }
   </div>
+  <span class="year-tabs-hint" aria-hidden="true">&rsaquo;</span>
+  </div>
 
   {
     recommendedBooks.length > 0 && (
@@ -113,9 +116,9 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
               </svg>
               you might like
             </span>
-            <span class="line" />
+            <span class="line line-end" />
+            <span class="recommend-subtitle">(not an algorithm, just me.)</span>
           </div>
-          <div class="recommend-subtitle">(not an algorithm, just me.)</div>
           {showRefresh && (
             <div class="reroll-wrap">
               <svg
@@ -303,12 +306,22 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
 </Layout>
 
 <style>
+  h1 {
+    display: none;
+  }
+  .year-tabs-wrap {
+    position: relative;
+  }
   .year-tabs {
     display: flex;
     column-gap: 1.1rem;
     row-gap: 0.2rem;
-    margin-bottom: 1rem;
+    margin-top: -1.5rem;
+    margin-bottom: 1.75rem;
     flex-wrap: wrap;
+  }
+  .year-tabs-hint {
+    display: none;
   }
   .year-tab {
     background: none;
@@ -398,8 +411,11 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
   }
   .recommend-title {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 1rem;
+    justify-content: center;
+    column-gap: 1rem;
+    row-gap: 0.1rem;
     width: 100%;
   }
   .recommend-title .line {
@@ -418,8 +434,8 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
     white-space: nowrap;
   }
   .recommend-subtitle {
-    align-self: flex-end;
-    margin-top: -0.35rem;
+    flex-basis: 100%;
+    text-align: center;
     font-family: var(--font-mono);
     font-style: italic;
     font-size: 0.72rem;
@@ -595,6 +611,17 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
     display: none;
   }
 
+  @media (min-width: 601px) {
+    .recommend-subtitle {
+      order: 1;
+      flex-basis: auto;
+      margin-left: -0.6rem;
+    }
+    .recommend-title .line-end {
+      order: 2;
+    }
+  }
+
   @media (max-width: 600px) {
     .book-link {
       grid-template-columns: 1fr;
@@ -603,9 +630,33 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
     .book-chip {
       width: 100%;
     }
-    .recommend-subtitle {
-      align-self: center;
-      margin-top: 0.3rem;
+    .year-tabs {
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent 100%);
+      -webkit-mask-image: linear-gradient(to right, black calc(100% - 2rem), transparent 100%);
+    }
+    .year-tabs::-webkit-scrollbar {
+      display: none;
+    }
+    .year-tab {
+      flex-shrink: 0;
+    }
+    .year-tabs-hint {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 1.4rem;
+      background: linear-gradient(to right, transparent, var(--bg) 40%);
+      color: var(--muted);
+      font-size: 1.1rem;
+      pointer-events: none;
     }
   }
 
