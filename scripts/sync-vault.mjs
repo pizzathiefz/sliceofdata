@@ -36,7 +36,15 @@ function parseFrontmatter(raw) {
         data[key] = undefined; // will become array via following list items
       } else {
         let v = value;
-        if (key !== "comment") {
+        if (key === "comment") {
+          // Only strip one layer of YAML quoting (whichever quote char the
+          // vault note used to wrap the value, chosen to avoid escaping
+          // whatever literal quote marks are already inside). Don't loop:
+          // an intentional quoted line inside the comment (e.g. a quote
+          // wrapped in the *other* quote char) must survive.
+          const quoted = v.match(/^"(.*)"$|^'(.*)'$/);
+          if (quoted) v = quoted[1] ?? quoted[2];
+        } else {
           let quoted;
           while ((quoted = v.match(/^"(.*)"$|^'(.*)'$/))) {
             v = quoted[1] ?? quoted[2];
