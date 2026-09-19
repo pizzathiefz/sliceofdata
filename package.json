@@ -21,6 +21,7 @@
     "katex": "^0.18.7",
     "mimetext": "^3.0.28",
     "rehype-katex": "^7.0.1",
+    "remark-breaks": "^4.0.0",
     "remark-math": "^6.0.0",
     "unist-util-visit": "^5.1.0"
   },
