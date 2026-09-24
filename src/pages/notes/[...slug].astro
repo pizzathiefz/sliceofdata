@@ -24,22 +24,18 @@ const titleSuffix = titleMatch ? titleMatch[2] : null;
     {titleMain}
     {titleSuffix && <span class="title-suffix">{titleSuffix}</span>}
   </h1>
-  <p class="meta">
-    {note.data.created.toISOString().slice(0, 10)}
-    {note.data.tags.length > 0 && (
-      <span>
-        {" · "}
-        {note.data.tags.map((tag, i) => (
-          <Fragment>
-            {i > 0 && ", "}
-            <button type="button" class="tag-link" data-tag={tag}>
-              {tag}
-            </button>
-          </Fragment>
-        ))}
-      </span>
-    )}
-  </p>
+  {note.data.tags.length > 0 && (
+    <p class="note-meta">
+      {note.data.tags.map((tag, i) => (
+        <Fragment>
+          {i > 0 && ", "}
+          <button type="button" class="tag-link" data-tag={tag}>
+            {tag}
+          </button>
+        </Fragment>
+      ))}
+    </p>
+  )}
   <article>
     <Content />
   </article>
@@ -48,5 +44,11 @@ const titleSuffix = titleMatch ? titleMatch[2] : null;
 <style>
   .title-suffix {
     color: var(--muted);
+  }
+  .note-meta {
+    text-align: right;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 0.4rem 0 2rem;
   }
 </style>

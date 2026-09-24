@@ -13,16 +13,17 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+
+const writtenDateIso = post.data.created.toISOString().slice(0, 10);
+const writtenDateLabel = writtenDateIso.replace(/-/g, ".");
 ---
 
 <Layout title={post.data.title}>
   <a class="back" href="/posts">← posts</a>
   <h1>{post.data.title}</h1>
-  <p class="meta">
-    {post.data.created.toISOString().slice(0, 10)}
+  <p class="post-meta">
     {post.data.tags.length > 0 && (
-      <span>
-        {" · "}
+      <Fragment>
         {post.data.tags.map((tag, i) => (
           <Fragment>
             {i > 0 && ", "}
@@ -31,11 +32,29 @@ const { Content } = await render(post);
             </button>
           </Fragment>
         ))}
-      </span>
+        <span class="sep" aria-hidden="true">|</span>
+      </Fragment>
     )}
+    <time class="written-date" datetime={writtenDateIso}>{writtenDateLabel} 씀</time>
   </p>
   <article>
     <Content />
   </article>
   <Comments path={Astro.url.pathname} />
 </Layout>
+
+<style>
+  .post-meta {
+    text-align: right;
+    color: var(--muted);
+    font-size: 0.85rem;
+    margin: 0.4rem 0 2rem;
+  }
+  .post-meta .sep {
+    margin: 0 0.6em;
+    color: var(--border);
+  }
+  .post-meta .written-date {
+    font-variant-numeric: tabular-nums;
+  }
+</style>
