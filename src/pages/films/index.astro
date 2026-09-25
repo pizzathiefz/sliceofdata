@@ -216,7 +216,50 @@ function commentText(comment?: string) {
     years.map((year) => (
       <div class="year-group" data-year={year} hidden={String(year) !== defaultTab}>
         <div class="year-count">
-          <span class="line" />
+          <div class="sort-row">
+            <span class="line" />
+            <button
+              class="sort-btn"
+              type="button"
+              data-mode="random"
+              aria-label="Sort order"
+              title="랜덤순"
+            >
+              <svg
+                class="sort-icon-dice"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="18" height="18" rx="4" />
+                <circle cx="8" cy="8" r="1.2" fill="currentColor" stroke="none" />
+                <circle cx="16" cy="8" r="1.2" fill="currentColor" stroke="none" />
+                <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+                <circle cx="8" cy="16" r="1.2" fill="currentColor" stroke="none" />
+                <circle cx="16" cy="16" r="1.2" fill="currentColor" stroke="none" />
+              </svg>
+              <svg
+                class="sort-icon-arrow"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 5v14" />
+                <path d="m19 12-7 7-7-7" />
+              </svg>
+            </button>
+            <span class="line" />
+          </div>
           <span class="count-badge">
             <svg
               width="14"
@@ -237,49 +280,8 @@ function commentText(comment?: string) {
               <line x1="17" y1="17" x2="22" y2="17" />
               <line x1="17" y1="7" x2="22" y2="7" />
             </svg>
-            total {byYear[year]!.length}
+            {byYear[year]!.length}
           </span>
-          <button
-            class="sort-btn"
-            type="button"
-            data-mode="random"
-            aria-label="Sort order"
-            title="랜덤순"
-          >
-            <svg
-              class="sort-icon-dice"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect x="3" y="3" width="18" height="18" rx="4" />
-              <circle cx="8" cy="8" r="1.2" fill="currentColor" stroke="none" />
-              <circle cx="16" cy="8" r="1.2" fill="currentColor" stroke="none" />
-              <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
-              <circle cx="8" cy="16" r="1.2" fill="currentColor" stroke="none" />
-              <circle cx="16" cy="16" r="1.2" fill="currentColor" stroke="none" />
-            </svg>
-            <svg
-              class="sort-icon-arrow"
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M12 5v14" />
-              <path d="m19 12-7 7-7-7" />
-            </svg>
-          </button>
-          <span class="line" />
         </div>
         <ul class="film-list">
           {byYear[year]!.map((f) => {
@@ -393,9 +395,14 @@ function commentText(comment?: string) {
   .year-count {
     position: relative;
     display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin: 0 0 0.3rem;
+  }
+  .sort-row {
+    display: flex;
     align-items: center;
     gap: 1rem;
-    margin: 0 0 1.5rem;
   }
   .sort-btn {
     display: inline-grid;
@@ -464,6 +471,7 @@ function commentText(comment?: string) {
   }
   .count-badge {
     display: inline-flex;
+    align-self: flex-end;
     align-items: center;
     gap: 0.35rem;
     font-family: var(--font-mono);
