@@ -239,15 +239,33 @@ function commentText(comment?: string) {
             </svg>
             total {byYear[year]!.length}
           </span>
-          <span class="line" />
           <button
             class="sort-btn"
             type="button"
-            data-order="desc"
-            aria-label="Sort by date"
-            title="Sort by date"
+            data-mode="random"
+            aria-label="Sort order"
+            title="랜덤순"
           >
             <svg
+              class="sort-icon-dice"
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="4" />
+              <circle cx="8" cy="8" r="1.2" fill="currentColor" stroke="none" />
+              <circle cx="16" cy="8" r="1.2" fill="currentColor" stroke="none" />
+              <circle cx="12" cy="12" r="1.2" fill="currentColor" stroke="none" />
+              <circle cx="8" cy="16" r="1.2" fill="currentColor" stroke="none" />
+              <circle cx="16" cy="16" r="1.2" fill="currentColor" stroke="none" />
+            </svg>
+            <svg
+              class="sort-icon-arrow"
               width="14"
               height="14"
               viewBox="0 0 24 24"
@@ -261,13 +279,14 @@ function commentText(comment?: string) {
               <path d="m19 12-7 7-7-7" />
             </svg>
           </button>
+          <span class="line" />
         </div>
         <ul class="film-list">
           {byYear[year]!.map((f) => {
             const { main, alt } = splitTitle(f.data.title);
             const comment = commentText(f.data.comment);
             return (
-              <li class="film-row">
+              <li class="film-row" data-created={f.data.created.valueOf()}>
                 <div class="film-info">
                   <span class="film-title">
                     {main}
@@ -302,7 +321,20 @@ function commentText(comment?: string) {
             );
           })}
         </ul>
-        <button class="load-more"><span class="more-text">more</span></button>
+        <button class="load-more" aria-label="더 보기" title="더 보기">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+        </button>
       </div>
     ))
   }
@@ -366,28 +398,67 @@ function commentText(comment?: string) {
     margin: 0 0 1.5rem;
   }
   .sort-btn {
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.6rem;
-    height: 1.6rem;
-    border: none;
-    background: none;
+    display: inline-grid;
+    place-items: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--chip-bg);
     color: var(--muted);
     cursor: pointer;
+    transition:
+      color 0.25s ease,
+      border-color 0.25s ease;
   }
   .sort-btn:hover {
     color: var(--fg);
+    border-color: var(--fg);
   }
-  .sort-btn svg {
-    transition: transform 0.25s ease;
+  .sort-btn[data-mode="random"] {
+    color: var(--fg);
   }
-  .sort-btn[data-order="asc"] svg {
-    transform: rotate(180deg);
+  .sort-btn .sort-icon-dice,
+  .sort-btn .sort-icon-arrow {
+    grid-area: 1 / 1;
+    --rot: 0deg;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
+  }
+  .sort-btn .sort-icon-dice {
+    opacity: 0;
+    transform: scale(0.5) rotate(-90deg);
+  }
+  .sort-btn[data-mode="random"] .sort-icon-dice {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  .sort-btn[data-mode="random"] .sort-icon-arrow {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  .sort-btn[data-mode="asc"] .sort-icon-arrow {
+    --rot: 180deg;
+    transform: rotate(var(--rot));
+  }
+  .sort-btn.spin .sort-icon-dice {
+    animation: dice-spin 0.4s ease;
+  }
+  .sort-btn.pulse .sort-icon-arrow {
+    animation: sort-pulse 0.3s ease;
+  }
+  @keyframes sort-pulse {
+    0% {
+      transform: rotate(var(--rot)) scale(0.6);
+    }
+    60% {
+      transform: rotate(var(--rot)) scale(1.2);
+    }
+    100% {
+      transform: rotate(var(--rot)) scale(1);
+    }
   }
   .year-count .line {
     flex: 1;
@@ -603,18 +674,18 @@ function commentText(comment?: string) {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: fit-content;
+    width: 1.9rem;
+    height: 1.9rem;
     margin: 1.5rem auto 0;
-    padding: 0.22rem 0.65rem;
+    padding: 0;
     border: 1px solid var(--border);
-    border-radius: 0;
+    border-radius: 999px;
     appearance: none;
     -webkit-appearance: none;
-    background: none;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
+    background: var(--chip-bg);
     color: var(--fg);
     cursor: pointer;
+    transition: border-color 0.25s ease;
   }
   .load-more:hover {
     border-color: var(--fg);
@@ -723,13 +794,43 @@ function commentText(comment?: string) {
     });
 
     const sortBtn = group.querySelector<HTMLButtonElement>(".sort-btn");
-    sortBtn?.addEventListener("click", () => {
-      sortBtn.dataset.order = sortBtn.dataset.order === "desc" ? "asc" : "desc";
-      rows.reverse();
+    const modeTitles: Record<string, string> = {
+      random: "랜덤순",
+      desc: "최신순",
+      asc: "오래된순",
+    };
+
+    function applyMode(mode: string) {
+      if (mode === "random") {
+        for (let i = rows.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [rows[i], rows[j]] = [rows[j], rows[i]];
+        }
+      } else {
+        rows.sort((a, b) => {
+          const diff = Number(a.dataset.created) - Number(b.dataset.created);
+          return mode === "asc" ? diff : -diff;
+        });
+      }
       rows.forEach((row) => list.appendChild(row));
-      visible = PAGE_SIZE;
-      render();
-    });
+    }
+
+    if (sortBtn) {
+      applyMode(sortBtn.dataset.mode ?? "random");
+      sortBtn.addEventListener("click", () => {
+        const next =
+          sortBtn.dataset.mode === "random" ? "desc" : sortBtn.dataset.mode === "desc" ? "asc" : "random";
+        sortBtn.dataset.mode = next;
+        sortBtn.title = modeTitles[next];
+        applyMode(next);
+        visible = PAGE_SIZE;
+        render();
+        sortBtn.classList.remove("spin", "pulse");
+        void sortBtn.offsetWidth;
+        sortBtn.classList.add(next === "random" ? "spin" : "pulse");
+        setTimeout(() => sortBtn.classList.remove("spin", "pulse"), 400);
+      });
+    }
 
     render();
   });
