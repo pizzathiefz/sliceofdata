@@ -404,7 +404,7 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
     flex-shrink: 0;
     border: 1px solid var(--border);
     border-radius: 999px;
-    background: var(--chip-bg);
+    background: none;
     color: var(--muted);
     cursor: pointer;
     transition:
@@ -412,11 +412,8 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
       border-color 0.25s ease;
   }
   .sort-btn:hover {
-    color: var(--fg);
-    border-color: var(--fg);
-  }
-  .sort-btn[data-mode="random"] {
-    color: var(--fg);
+    color: var(--accent);
+    border-color: var(--accent);
   }
   .sort-btn .sort-icon-dice,
   .sort-btn .sort-icon-arrow {
@@ -673,13 +670,16 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
     border-radius: 999px;
     appearance: none;
     -webkit-appearance: none;
-    background: var(--chip-bg);
-    color: var(--fg);
+    background: none;
+    color: var(--muted);
     cursor: pointer;
-    transition: border-color 0.25s ease;
+    transition:
+      color 0.25s ease,
+      border-color 0.25s ease;
   }
   .load-more:hover {
-    border-color: var(--fg);
+    color: var(--accent);
+    border-color: var(--accent);
   }
   .load-more[hidden] {
     display: none;
