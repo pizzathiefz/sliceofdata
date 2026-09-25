@@ -16,7 +16,7 @@ const posts = (await getCollection("posts", ({ data }) => data.publish)).sort(
           <a class="row-title" href={`/posts/${post.id}`}>
             {post.data.title}
           </a>
-          <time class="row-meta">{post.data.created.toISOString().slice(2, 10).replace(/-/g, ".")}</time>
+          <time class="row-meta">{post.data.created.toISOString().slice(0, 10).replace(/-/g, ".")}</time>
         </li>
       ))
     }

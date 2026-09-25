@@ -25,7 +25,7 @@ function splitAtSuffix(title: string) {
               {main}
               {suffix && <span class="title-suffix">{suffix}</span>}
             </a>
-            <time class="row-meta">{note.data.created.toISOString().slice(2, 10).replace(/-/g, ".")}</time>
+            <time class="row-meta">{note.data.created.toISOString().slice(0, 10).replace(/-/g, ".")}</time>
           </li>
         );
       })
