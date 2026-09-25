@@ -1,6 +1,14 @@
 import { visit } from "unist-util-visit";
 
-const CALLOUT_RE = /^\[!(\w+)\]([+-])?\s*(.*)$/;
+// remarkCallouts runs before remarkBreaks, so continuation lines are still
+// literal "\n" inside the text node here — the title capture must stop at
+// the first newline, or a titleless callout swallows its whole body as the
+// title (since \s* matches \n and .* + $ then consume the rest of the node).
+const CALLOUT_RE = /^\[!(\w+)\]([+-])?[ \t]*([^\n]*)/;
+
+// Overrides the auto-generated (capitalized-type) label for types whose
+// display label isn't just Title Case of the type name.
+const DEFAULT_LABELS = { tldr: "TL;DR" };
 
 export function remarkCallouts() {
   return (tree) => {
@@ -24,7 +32,8 @@ export function remarkCallouts() {
       }
 
       const kind = type.toLowerCase();
-      const label = title || type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+      const label =
+        title || DEFAULT_LABELS[kind] || type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
       node.data = node.data || {};
       node.data.hName = "div";
