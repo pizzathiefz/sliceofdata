@@ -3,7 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import { getCollection, render } from "astro:content";
 
 export async function getStaticPaths() {
-  const notes = await getCollection("notes");
+  const notes = await getCollection("notes", ({ data }) => data.publish);
   return notes.map((note) => ({
     params: { slug: note.id },
     props: { note },
@@ -42,13 +42,17 @@ const titleSuffix = titleMatch ? titleMatch[2] : null;
 </Layout>
 
 <style>
+  h1 {
+    font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+      sans-serif;
+  }
   .title-suffix {
     color: var(--muted);
   }
   .note-meta {
-    text-align: right;
+    text-align: left;
     color: var(--muted);
     font-size: 0.85rem;
-    margin: 0.4rem 0 2rem;
+    margin: 0.4rem 0 1rem;
   }
 </style>

@@ -908,7 +908,6 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
   article blockquote p {
     margin: 0.5rem 0;
   }
-
   article img {
     display: block;
     max-width: 100%;
@@ -1004,6 +1003,28 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
       transparent 80%
     );
     background-repeat: no-repeat;
+  }
+  article .callout-source {
+    margin: 0.2rem 0 1.5rem;
+    padding: 0.05rem 0 0.05rem 0.75rem;
+    border: none;
+    border-left: 2px solid var(--accent);
+    border-radius: 0;
+    background: none;
+    color: var(--muted);
+    font-style: normal;
+    font-size: 0.82rem;
+    line-height: 1.5;
+  }
+  article .callout-source .callout-title {
+    display: none;
+  }
+  article .callout-source p {
+    margin: 0;
+  }
+  article .callout-source a {
+    font-weight: 600;
+    font-style: italic;
   }
 
   article .embed {
