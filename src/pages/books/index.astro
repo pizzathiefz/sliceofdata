@@ -50,6 +50,8 @@ const RECOMMEND_COUNT = 10;
 const showRefresh = recommendedBooks.length > RECOMMEND_COUNT;
 
 const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear);
+
+const PAGE_SIZE = 10;
 ---
 
 <Layout title="books">
@@ -320,6 +322,9 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
             );
           })}
         </ul>
+        <div class="pagination-info">
+          {Math.min(PAGE_SIZE, byYear[year]!.length)}/{byYear[year]!.length}
+        </div>
         <button class="load-more" aria-label="더 보기" title="더 보기">
           <svg
             width="14"
@@ -666,13 +671,22 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
     color: var(--accent);
   }
 
+  .pagination-info {
+    margin: 0.6rem 0 0;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
+
   .load-more {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 1.9rem;
     height: 1.9rem;
-    margin: 1.5rem auto 0;
+    margin: 0.75rem auto 0;
     padding: 0;
     border: 1px solid var(--border);
     border-radius: 999px;
@@ -809,6 +823,7 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
     const btn = group.querySelector<HTMLButtonElement>(".load-more");
     if (!btn) return;
     const list = group.querySelector<HTMLUListElement>(".book-list")!;
+    const paginationInfo = group.querySelector<HTMLDivElement>(".pagination-info");
     const rows = Array.from(group.querySelectorAll<HTMLLIElement>(".book-row"));
     let visible = PAGE_SIZE;
 
@@ -817,6 +832,9 @@ const defaultTab = recommendedBooks.length > 0 ? "recommend" : String(latestYear
         row.hidden = i >= visible;
       });
       btn!.hidden = visible >= rows.length;
+      if (paginationInfo) {
+        paginationInfo.textContent = `${Math.min(visible, rows.length)}/${rows.length}`;
+      }
       updateMoreIcons();
     }
 

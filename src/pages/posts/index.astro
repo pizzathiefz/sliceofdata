@@ -55,15 +55,6 @@ const posts = (await getCollection("posts", ({ data }) => data.publish)).sort(
     line-height: 1;
     padding: 0.05em 0.35em;
     font-size: 0.75rem;
-    background-image: linear-gradient(
-      180deg,
-      transparent 0%,
-      transparent 35%,
-      var(--tab-highlight) 35%,
-      var(--tab-highlight) 80%,
-      transparent 80%
-    );
-    background-repeat: no-repeat;
   }
   .load-more {
     display: flex;
