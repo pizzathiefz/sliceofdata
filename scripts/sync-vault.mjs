@@ -58,13 +58,29 @@ function parseFrontmatter(raw) {
   return { fm: data, body };
 }
 
+// Vault folders like book/ and film/ are treated as flat: any subfolder the
+// vault app creates inside them (e.g. book/reading/, film/watching/) is
+// walked too, but only the filename is kept, never the subfolder path.
+function listMarkdownFiles(dir) {
+  const results = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const fullPath = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...listMarkdownFiles(fullPath));
+    } else if (entry.isFile() && entry.name.endsWith(".md")) {
+      results.push(fullPath);
+    }
+  }
+  return results;
+}
+
 function readCollection(folder, { requireRating = false, minYear = 2000 } = {}) {
   const dir = path.join(VAULT, folder);
-  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
+  const files = listMarkdownFiles(dir);
 
   const entries = [];
-  for (const file of files) {
-    const raw = fs.readFileSync(path.join(dir, file), "utf-8");
+  for (const filePath of files) {
+    const raw = fs.readFileSync(filePath, "utf-8");
     const parsed = parseFrontmatter(raw);
     if (!parsed) continue;
     const { fm, body } = parsed;
@@ -72,24 +88,24 @@ function readCollection(folder, { requireRating = false, minYear = 2000 } = {}) 
     if (new Date(fm.created).getFullYear() < minYear) continue;
     if (new Date(fm.created) > new Date()) continue;
     if (requireRating && !(Number(fm.rating) > 0)) continue;
-    entries.push({ file, fm, body });
+    entries.push({ file: path.basename(filePath), fm, body });
   }
   return entries.sort((a, b) => new Date(b.fm.created) - new Date(a.fm.created));
 }
 
 function readPublishedCollection(folder) {
   const dir = path.join(VAULT, folder);
-  const files = fs.readdirSync(dir).filter((f) => f.endsWith(".md"));
+  const files = listMarkdownFiles(dir);
 
   const entries = [];
-  for (const file of files) {
-    const raw = fs.readFileSync(path.join(dir, file), "utf-8");
+  for (const filePath of files) {
+    const raw = fs.readFileSync(filePath, "utf-8");
     const parsed = parseFrontmatter(raw);
     if (!parsed) continue;
     const { fm, body } = parsed;
     if (!fm.created) continue;
     if (fm.publish !== "true") continue;
-    entries.push({ file, fm, body });
+    entries.push({ file: path.basename(filePath), fm, body });
   }
   return entries.sort((a, b) => new Date(b.fm.created) - new Date(a.fm.created));
 }
