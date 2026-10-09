@@ -9,6 +9,8 @@ const posts = (await getCollection("posts", ({ data }) => data.publish))
 const notes = (await getCollection("notes", ({ data }) => data.publish))
   .sort((a, b) => b.data.created.valueOf() - a.data.created.valueOf())
   .slice(0, 5);
+
+const stripCompany = (title: string) => title.replace(/\s+@[^@]+$/, "");
 ---
 
 <Layout title="home">
@@ -116,7 +118,7 @@ const notes = (await getCollection("notes", ({ data }) => data.publish))
             notes.map((note) => (
               <li class="row">
                 <a class="row-title" href={`/notes/${note.id}`}>
-                  {note.data.title}
+                  {stripCompany(note.data.title)}
                 </a>
               </li>
             ))
