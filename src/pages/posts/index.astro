@@ -21,7 +21,21 @@ const posts = (await getCollection("posts", ({ data }) => data.publish)).sort(
       ))
     }
   </ul>
-  <button class="load-more"><span class="more-text">more</span></button>
+  <div class="pagination-info">{Math.min(15, posts.length)}/{posts.length}</div>
+  <button class="load-more" aria-label="더 보기" title="더 보기">
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  </button>
 </Layout>
 
 <style>
@@ -57,25 +71,36 @@ const posts = (await getCollection("posts", ({ data }) => data.publish)).sort(
     padding: 0.05em 0.35em;
     font-size: 0.75rem;
   }
+  .pagination-info {
+    margin: 0.6rem 0 0;
+    text-align: right;
+    font-family: var(--font-mono);
+    font-weight: 400;
+    color: var(--muted);
+    font-size: 0.75rem;
+  }
   .load-more {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: fit-content;
-    margin: 1.5rem auto 0;
-    padding: 0.22rem 0.65rem;
+    width: 1.9rem;
+    height: 1.9rem;
+    margin: 0.75rem auto 0;
+    padding: 0;
     border: 1px solid var(--border);
-    border-radius: 0;
+    border-radius: 999px;
     appearance: none;
     -webkit-appearance: none;
     background: none;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    color: var(--fg);
+    color: var(--muted);
     cursor: pointer;
+    transition:
+      color 0.25s ease,
+      border-color 0.25s ease;
   }
   .load-more:hover {
-    border-color: var(--fg);
+    color: var(--accent);
+    border-color: var(--accent);
   }
   .load-more[hidden] {
     display: none;
@@ -86,6 +111,7 @@ const posts = (await getCollection("posts", ({ data }) => data.publish)).sort(
   const PAGE_SIZE = 15;
   const rows = Array.from(document.querySelectorAll<HTMLLIElement>(".row"));
   const btn = document.querySelector<HTMLButtonElement>(".load-more")!;
+  const info = document.querySelector<HTMLDivElement>(".pagination-info")!;
   let visible = PAGE_SIZE;
 
   function render() {
@@ -93,6 +119,7 @@ const posts = (await getCollection("posts", ({ data }) => data.publish)).sort(
       row.hidden = i >= visible;
     });
     btn.hidden = visible >= rows.length;
+    info.textContent = `${Math.min(visible, rows.length)}/${rows.length}`;
   }
 
   btn.addEventListener("click", () => {

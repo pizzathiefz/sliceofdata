@@ -4,11 +4,11 @@ import { getCollection } from "astro:content";
 
 const posts = (await getCollection("posts", ({ data }) => data.publish))
   .sort((a, b) => b.data.created.valueOf() - a.data.created.valueOf())
-  .slice(0, 7);
+  .slice(0, 6);
 
 const notes = (await getCollection("notes", ({ data }) => data.publish))
   .sort((a, b) => b.data.created.valueOf() - a.data.created.valueOf())
-  .slice(0, 5);
+  .slice(0, 6);
 
 const stripCompany = (title: string) => title.replace(/\s+@[^@]+$/, "");
 ---
