@@ -888,6 +888,8 @@ const PAGE_SIZE = 10;
       rows.forEach((row, i) => {
         row.hidden = !chosen.has(i);
       });
+      // show the picks in shuffled order too, not the original newest-first order
+      indices.forEach((i) => rows[i].parentElement!.appendChild(rows[i]));
       updateMoreIcons();
     }
 

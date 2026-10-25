@@ -331,17 +331,21 @@ for (const kind of kinds) {
       .map(({ item }) => item);
   }
 
+  // hrefs shown in the last two runs, kept out of the next draw so re-runs feel fresh
+  const recentRuns: Set<string>[] = [];
+
   function sample() {
     const posts = randInt(1, 2);
     const books = randInt(1, 3);
     const quota = { post: posts, book: books, note: SAMPLE_SIZE - posts - books };
-    const picked = Object.entries(quota).flatMap(([kind, n]) =>
-      weightedSample(
-        items.filter((item) => item[0] === kind),
-        n,
-        weight,
-      ),
-    );
+    const seen = (item: (typeof items)[number]) => recentRuns.some((run) => run.has(item[2]));
+    const picked = Object.entries(quota).flatMap(([kind, n]) => {
+      const pool = items.filter((item) => item[0] === kind);
+      const fresh = pool.filter((item) => !seen(item));
+      return weightedSample(fresh.length >= n ? fresh : pool, n, weight);
+    });
+    recentRuns.unshift(new Set(picked.map((item) => item[2])));
+    recentRuns.length = Math.min(recentRuns.length, 2);
     sampleOut.replaceChildren(
       ...shuffle(picked).map(([kind, title, href]) => {
         const chip = document.createElement("a");
