@@ -2,234 +2,579 @@
 import Layout from "../layouts/Layout.astro";
 import { getCollection } from "astro:content";
 
-const posts = (await getCollection("posts", ({ data }) => data.publish))
-  .sort((a, b) => b.data.created.valueOf() - a.data.created.valueOf())
-  .slice(0, 6);
-
-const notes = (await getCollection("notes", ({ data }) => data.publish))
-  .sort((a, b) => b.data.created.valueOf() - a.data.created.valueOf())
-  .slice(0, 6);
-
+// per-day counts of everything published, keyed "YYYY-MM-DD"
+const kinds = ["posts", "notes", "books", "films"] as const;
+const activity: Record<string, Record<string, number>> = {};
+// linkable entries as [kind, title, href], for the sample cell
+const items: [string, string, string][] = [];
 const stripCompany = (title: string) => title.replace(/\s+@[^@]+$/, "");
+for (const kind of kinds) {
+  const entries = await getCollection(kind, ({ data }) => data.publish);
+  for (const entry of entries) {
+    const day = entry.data.created.toISOString().slice(0, 10);
+    activity[day] ??= {};
+    activity[day][kind] = (activity[day][kind] ?? 0) + 1;
+    // films have no detail page, and books without a write-up aren't worth a click
+    if (kind === "films") continue;
+    if (kind === "books" && !entry.body?.replace(/-{3,}/g, "").trim()) continue;
+    // rating 0 means unrated, so only real low scores are skipped; older reads are left out too
+    if (kind === "books") {
+      const rating = (entry.data as { rating?: number }).rating ?? 0;
+      if (rating > 0 && rating < 3) continue;
+      if (day < "2021-01-01") continue;
+    }
+    const title = kind === "notes" ? stripCompany(entry.data.title) : entry.data.title;
+    items.push([kind.slice(0, -1), title, `/${kind}/${entry.id}`]);
+  }
+}
 ---
 
 <Layout title="home">
-  <div class="hero">
-    <svg
-      class="logo"
-      width="26"
-      height="26"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    >
-      <path d="M4 4 L20 4 L12 21 Z" />
-      <path d="M4 4 Q12 8 20 4" />
-      <circle cx="10.5" cy="10" r="1" fill="currentColor" stroke="none" />
-      <circle cx="14" cy="12.5" r="1" fill="currentColor" stroke="none" />
-      <circle cx="10.5" cy="15" r="1" fill="currentColor" stroke="none" />
-    </svg>
-    <h1>slice.of.data</h1>
-  </div>
-  <p class="tagline">Half data, half everything else. Served one slice at a time.</p>
-
-  <div class="social">
-    <a href="https://github.com/pizzathiefz" aria-label="GitHub" target="_blank" rel="noopener">
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-      </svg>
-    </a>
-    <a
-      href="https://www.linkedin.com/in/youngshin-son/"
-      aria-label="LinkedIn"
-      target="_blank"
-      rel="noopener"
-    >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-        <rect x="2" y="9" width="4" height="12" />
-        <circle cx="4" cy="4" r="2" />
-      </svg>
-    </a>
-    <a href="mailto:pizzathief0@gmail.com" aria-label="Email">
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-      >
-        <rect x="2" y="4" width="20" height="16" rx="2" />
-        <polyline points="22,6 12,13 2,6" />
-      </svg>
-    </a>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="split">
-    <div class="col">
-      <div class="box">
-        <ul class="rows">
-          {
-            posts.map((post) => (
-              <li class="row">
-                <a class="row-title" href={`/posts/${post.id}`}>
-                  {post.data.title}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
+  <div class="home">
+    <div class="notebook">
+      <div class="prompt-row">
+        <div class="prompt">[ ]:</div>
+        <div class="social">
+          <a href="https://github.com/pizzathiefz" aria-label="GitHub" target="_blank" rel="noopener">
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
+            </svg>
+          </a>
+          <a
+            href="https://www.linkedin.com/in/youngshin-son/"
+            aria-label="LinkedIn"
+            target="_blank"
+            rel="noopener"
+          >
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+              <rect x="2" y="9" width="4" height="12" />
+              <circle cx="4" cy="4" r="2" />
+            </svg>
+          </a>
+          <a href="mailto:pizzathief0@gmail.com" aria-label="Email">
+            <svg
+              width="17"
+              height="17"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <polyline points="22,6 12,13 2,6" />
+            </svg>
+          </a>
+        </div>
       </div>
-      <a class="more-link" href="/posts">
-        모든 posts →
-      </a>
-    </div>
-
-    <div class="col">
-      <div class="box">
-        <ul class="rows">
-          {
-            notes.map((note) => (
-              <li class="row">
-                <a class="row-title" href={`/notes/${note.id}`}>
-                  {stripCompany(note.data.title)}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
+      <div class="cell md">
+        <h1><span class="hash">#</span> slice.of.data</h1>
+        <p class="tagline">Half data, half everything else. Served one slice at a time.</p>
       </div>
-      <a class="more-link" href="/notes">
-        모든 notes →
-      </a>
+
+      <div class="prompt start">[1]:</div>
+      <div class="cell code">
+        <code class="expr" id="heatmap-expr"></code>
+      </div>
+      <div class="output">
+        <div class="grid" id="heatmap-grid" data-activity={JSON.stringify(activity)}>
+          <div class="selection" id="heatmap-selection" hidden></div>
+        </div>
+        <div class="out" id="heatmap-out"></div>
+      </div>
+
+      <div class="prompt-row start">
+        <div class="prompt" id="sample-in">[2]:</div>
+        <button class="run" id="sample-run" aria-label="Run cell" title="Run cell">
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="6 4 20 12 6 20 6 4" />
+          </svg>
+        </button>
+      </div>
+      <div class="cell code">
+        <code class="expr"
+          ><span class="ps">&gt;&gt;&gt;</span> <span class="var">data</span>.sample(<span class="num">10</span>)</code
+        >
+      </div>
+      <div class="output">
+        <div class="chips" id="sample-out" data-items={JSON.stringify(items)}></div>
+      </div>
     </div>
   </div>
 </Layout>
 
+<script>
+  const KINDS = ["posts", "notes", "books", "films"];
+  const mobile = matchMedia("(max-width: 480px)");
+
+  const grid = document.getElementById("heatmap-grid")!;
+  const selectionBox = document.getElementById("heatmap-selection")!;
+  const expr = document.getElementById("heatmap-expr")!;
+  const out = document.getElementById("heatmap-out")!;
+  const activity: Record<string, Record<string, number>> = JSON.parse(grid.dataset.activity!);
+
+  // dates are handled as UTC days so keys match the frontmatter dates
+  const now = new Date();
+  const today = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+  const todayKey = keyOf(today);
+
+  let weeks = 0;
+  let start = today;
+  let cells: HTMLElement[][] = [];
+
+  function keyOf(d: Date) {
+    return d.toISOString().slice(0, 10);
+  }
+  function dayKey(week: number, weekday: number) {
+    const d = new Date(start);
+    d.setUTCDate(start.getUTCDate() + week * 7 + weekday);
+    return keyOf(d);
+  }
+  function total(key: string) {
+    return Object.values(activity[key] ?? {}).reduce((a, b) => a + b, 0);
+  }
+  // "2026-05-03" -> "260503"
+  function label(key: string) {
+    return key.slice(2).replaceAll("-", "");
+  }
+
+  function render() {
+    weeks = mobile.matches ? 26 : 53;
+    start = new Date(today);
+    start.setUTCDate(today.getUTCDate() - (weeks - 1) * 7 - today.getUTCDay());
+    grid.style.gridTemplateColumns = `repeat(${weeks}, 1fr)`;
+    cells.flat().forEach((c) => c.remove());
+    cells = [];
+    for (let w = 0; w < weeks; w++) {
+      cells.push([]);
+      for (let d = 0; d < 7; d++) {
+        const key = dayKey(w, d);
+        const n = total(key);
+        const cell = document.createElement("span");
+        cell.className = "cell";
+        cell.dataset.week = String(w);
+        cell.dataset.key = key;
+        cell.dataset.level = String(n === 0 ? 0 : n === 1 ? 1 : n <= 3 ? 2 : 3);
+        if (key > todayKey) cell.classList.add("future");
+        cell.style.gridColumn = String(w + 1);
+        cell.style.gridRow = String(d + 1);
+        grid.appendChild(cell);
+        cells[w].push(cell);
+      }
+    }
+  }
+
+  const str = (s: string) => `<span class="str">'${s}'</span>`;
+
+  // sum activity between two keys (inclusive) and print it like a REPL
+  function describe(index: string, from: string, to: string) {
+    const counts: Record<string, number> = {};
+    for (const [key, byKind] of Object.entries(activity)) {
+      if (key < from || key > to) continue;
+      for (const [kind, n] of Object.entries(byKind)) counts[kind] = (counts[kind] ?? 0) + n;
+    }
+    const sum = Object.values(counts).reduce((a, b) => a + b, 0);
+    const parts = KINDS.filter((k) => counts[k]).map(
+      (k) => `<a href="/${k}">${counts[k]} ${counts[k] === 1 ? k.slice(0, -1) : k}</a>`,
+    );
+    expr.innerHTML = `<span class="ps">&gt;&gt;&gt;</span> <span class="var">data</span>[${index}]`;
+    out.innerHTML =
+      `${sum} slice${sum === 1 ? "" : "s"}` +
+      (parts.length ? ` <span class="sep">|</span> ${parts.join(" · ")}` : "");
+  }
+
+  const weekStart = (w: number) => dayKey(w, 0);
+  const weekEnd = (w: number) => {
+    const key = dayKey(w, 6);
+    return key > todayKey ? todayKey : key;
+  };
+  const showRange = (from: string, to: string) =>
+    describe(`${str(label(from))}:${str(label(to))}`, from, to);
+
+  let anchor: number | null = null;
+  let range: [number, number] | null = null;
+
+  // the weeks covering the last 30 days, selected by default
+  function selectRecent() {
+    const days = Math.round((today.getTime() - start.getTime()) / 86400000);
+    select(Math.floor((days - 29) / 7), weeks - 1);
+  }
+
+  function select(a: number, b: number) {
+    const [lo, hi] = a <= b ? [a, b] : [b, a];
+    range = [lo, hi];
+    grid.classList.add("selecting");
+    cells.forEach((col, w) => col.forEach((c) => c.classList.toggle("in", w >= lo && w <= hi)));
+    const first = cells[lo][0];
+    const last = cells[hi][6];
+    selectionBox.hidden = false;
+    selectionBox.style.left = `${first.offsetLeft - 3}px`;
+    selectionBox.style.top = `${first.offsetTop - 3}px`;
+    selectionBox.style.width = `${last.offsetLeft + last.offsetWidth - first.offsetLeft + 6}px`;
+    selectionBox.style.height = `${last.offsetTop + last.offsetHeight - first.offsetTop + 6}px`;
+    showRange(weekStart(lo), weekEnd(hi));
+  }
+
+  function weekAt(e: PointerEvent) {
+    const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+    return el?.dataset.week !== undefined ? Number(el.dataset.week) : null;
+  }
+
+  grid.addEventListener("pointerdown", (e) => {
+    const w = weekAt(e);
+    if (w === null) return;
+    // clicking inside the current single-week selection resets it
+    if (range && range[0] === w && range[1] === w) {
+      selectRecent();
+      return;
+    }
+    anchor = w;
+    grid.setPointerCapture(e.pointerId);
+    select(w, w);
+  });
+  grid.addEventListener("pointermove", (e) => {
+    if (anchor === null) return;
+    const w = weekAt(e);
+    if (w !== null) select(anchor, w);
+  });
+  grid.addEventListener("pointerup", () => (anchor = null));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") selectRecent();
+  });
+  window.addEventListener("resize", () => range && select(...range));
+  mobile.addEventListener("change", () => {
+    render();
+    selectRecent();
+  });
+
+  render();
+  selectRecent();
+
+  // [2]: shown as data.sample(10), but drawn as 1–2 posts + 1–3 books + notes for the rest
+  // — re-running bumps the execution count like Jupyter
+  const SAMPLE_SIZE = 10;
+  const randInt = (lo: number, hi: number) => lo + Math.floor(Math.random() * (hi - lo + 1));
+  const sampleOut = document.getElementById("sample-out")!;
+  const sampleIn = document.getElementById("sample-in")!;
+  const items: [string, string, string][] = JSON.parse(sampleOut.dataset.items!);
+  let runCount = 2;
+
+  function shuffle<T>(arr: T[]) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function sample() {
+    const posts = randInt(1, 2);
+    const books = randInt(1, 3);
+    const quota = { post: posts, book: books, note: SAMPLE_SIZE - posts - books };
+    const picked = Object.entries(quota).flatMap(([kind, n]) =>
+      shuffle(items.filter((item) => item[0] === kind)).slice(0, n),
+    );
+    sampleOut.replaceChildren(
+      ...shuffle(picked).map(([kind, title, href]) => {
+        const chip = document.createElement("a");
+        chip.className = `chip ${kind}`;
+        chip.href = href;
+        chip.dataset.title = title;
+        const text = document.createElement("span");
+        text.textContent = title;
+        chip.appendChild(text);
+        return chip;
+      }),
+    );
+    markClipped();
+  }
+
+  // only clipped titles get the hover tooltip
+  function markClipped() {
+    for (const chip of sampleOut.children as HTMLCollectionOf<HTMLElement>) {
+      const text = chip.firstElementChild!;
+      chip.classList.toggle("clipped", text.scrollWidth > text.clientWidth);
+    }
+  }
+  window.addEventListener("resize", markClipped);
+
+  document.getElementById("sample-run")!.addEventListener("click", () => {
+    runCount++;
+    sampleIn.textContent = `[${runCount}]:`;
+    sample();
+  });
+  sample();
+</script>
+
 <style>
-  .hero {
+  .home {
+    min-height: 60vh;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.55rem;
+    justify-content: center;
+    text-align: center;
   }
-  .logo {
-    color: var(--accent);
-    flex-shrink: 0;
+  .notebook {
+    width: 100%;
+    max-width: 600px;
+    text-align: left;
   }
-  .hero h1 {
+  .start {
+    margin-top: 1.8rem;
+  }
+  .prompt {
+    margin-bottom: 0.3rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .prompt-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 0.3rem;
+  }
+  .prompt-row .prompt {
+    margin-bottom: 0;
+  }
+  .cell.md {
+    padding: 0.35rem 0 0.35rem 1rem;
+    border-left: 2px solid var(--border);
+  }
+  .cell.code {
+    padding: 0.5rem 0.85rem;
+    background: var(--chip-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow-x: auto;
+  }
+  .expr :global(.ps),
+  .expr .ps {
+    margin-right: 0.15em;
+    color: var(--muted);
+  }
+  .cell h1 {
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 0.95rem;
+    color: color-mix(in srgb, var(--fg) 75%, var(--muted));
+  }
+  .hash {
+    margin-right: 0.2em;
+    color: var(--muted);
+    font-weight: 400;
   }
   .tagline {
-    margin: 0.5rem 0 0;
+    margin: 0.2rem 0 0;
     font-family: var(--font-mono);
     font-style: italic;
-    font-size: 0.82rem;
+    font-size: 0.75rem;
     color: var(--muted);
     word-spacing: -0.2em;
   }
+  .run {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: color-mix(in srgb, var(--fg) 50%, var(--muted));
+    line-height: 0;
+    cursor: pointer;
+  }
+  .run:hover {
+    color: var(--accent);
+  }
+  .chips {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+  @media (max-width: 480px) {
+    .chips {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  .chips :global(.chip) {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    color: var(--fg);
+    text-decoration: none;
+    transition:
+      transform 0.15s,
+      border-color 0.15s;
+  }
+  .chips :global(.chip) {
+    position: relative;
+  }
+  .chips :global(.chip.clipped)::after {
+    content: attr(data-title);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 0;
+    z-index: 10;
+    width: max-content;
+    max-width: min(22rem, 80vw);
+    padding: 0.35rem 0.6rem;
+    border-radius: 4px;
+    background: var(--fg);
+    color: var(--bg);
+    font-size: 0.72rem;
+    line-height: 1.4;
+    white-space: normal;
+    opacity: 0;
+    transform: translateY(3px);
+    transition:
+      opacity 0.15s,
+      transform 0.15s;
+    pointer-events: none;
+  }
+  .chips :global(.chip.clipped:hover)::after {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .chips :global(.chip span) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .chips :global(.chip)::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .chips :global(.chip.post)::before {
+    background: #c98a2b;
+  }
+  .chips :global(.chip.note)::before {
+    background: #3f9d6b;
+  }
+  .chips :global(.chip.book)::before {
+    background: var(--accent);
+  }
+  .chips :global(.chip:hover) {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+  }
   .social {
     display: flex;
-    gap: 0.75rem;
-    margin-top: 0.75rem;
+    gap: 0.6rem;
   }
   .social a {
-    color: var(--muted);
+    color: color-mix(in srgb, var(--fg) 50%, var(--muted));
     line-height: 0;
   }
   .social a:hover {
     color: var(--fg);
   }
 
-  .divider {
-    width: 50%;
-    height: 0;
-    margin: 2.25rem auto;
-    border-top: 2px dotted var(--muted);
-    opacity: 0.6;
-  }
-
-  .split {
+  .grid {
+    position: relative;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    column-gap: 1.5rem;
-    align-items: stretch;
+    grid-template-rows: repeat(7, auto);
+    gap: 2px;
+    cursor: crosshair;
+    user-select: none;
+    touch-action: pan-y;
   }
-  .col {
-    display: flex;
-    flex-direction: column;
+  .grid :global(.cell) {
+    aspect-ratio: 1;
+    border-radius: 1px;
+    background: color-mix(in srgb, var(--fg) 9%, var(--bg));
+    transition: opacity 0.15s;
   }
-  .box {
-    flex: 1;
-    border: 1px solid var(--border);
-    border-radius: 0;
-    background: var(--chip-bg);
-    padding: 1rem 1.4rem;
+  .grid :global(.cell[data-level="1"]) {
+    background: color-mix(in srgb, var(--accent) 45%, var(--bg));
   }
-
-  ul.rows {
-    list-style: disc;
-    padding-left: 1.1rem;
+  .grid :global(.cell[data-level="2"]) {
+    background: color-mix(in srgb, var(--accent) 75%, var(--bg));
   }
-  ul.rows li.row {
-    display: list-item;
-    padding: 0.12rem 0;
-    border-bottom: none;
+  .grid :global(.cell[data-level="3"]) {
+    background: var(--accent);
   }
-  ul.rows li.row:first-child {
-    border-top: none;
+  .grid :global(.cell.future) {
+    visibility: hidden;
   }
-  ul.rows .row-title {
-    display: inline;
-    font-size: 0.82rem;
-    line-height: 1.3;
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
+  .grid.selecting :global(.cell:not(.in)) {
+    opacity: 0.45;
   }
-  .more-link {
-    display: inline-block;
+  .selection {
+    position: absolute;
+    border: 1px solid var(--accent);
+    border-radius: 2px;
+    pointer-events: none;
+  }
+  .output {
+    margin-top: 0.75rem;
+    padding-left: calc(0.8rem + 2px);
+  }
+  .expr {
+    display: block;
+    padding: 0;
+    background: none;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--fg);
+    white-space: pre;
+  }
+  .expr :global(.var) {
+    color: var(--accent);
+  }
+  .expr :global(.str) {
+    color: #3f9d6b;
+  }
+  .expr .num {
+    color: #c98a2b;
+  }
+  .out {
     margin-top: 0.6rem;
     font-family: var(--font-mono);
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: var(--muted);
-    text-decoration: none;
   }
-  .more-link:hover {
+  .out :global(.sep) {
+    opacity: 0.6;
+  }
+  .out :global(a) {
+    color: inherit;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+  }
+  .out :global(a:hover) {
     color: var(--fg);
   }
-
-  @media (max-width: 600px) {
-    .split {
-      grid-template-columns: 1fr;
-      row-gap: 1.25rem;
-    }
-  }
-
 </style>
