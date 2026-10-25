@@ -5,8 +5,8 @@ import { getCollection } from "astro:content";
 // per-day counts of everything published, keyed "YYYY-MM-DD"
 const kinds = ["posts", "notes", "books", "films"] as const;
 const activity: Record<string, Record<string, number>> = {};
-// linkable entries as [kind, title, href], for the sample cell
-const items: [string, string, string][] = [];
+// linkable entries as [kind, title, href, date], for the sample cell
+const items: [string, string, string, string][] = [];
 const stripCompany = (title: string) => title.replace(/\s+@[^@]+$/, "");
 for (const kind of kinds) {
   const entries = await getCollection(kind, ({ data }) => data.publish);
@@ -24,7 +24,7 @@ for (const kind of kinds) {
       if (day < "2021-01-01") continue;
     }
     const title = kind === "notes" ? stripCompany(entry.data.title) : entry.data.title;
-    items.push([kind.slice(0, -1), title, `/${kind}/${entry.id}`]);
+    items.push([kind.slice(0, -1), title, `/${kind}/${entry.id}`, day]);
   }
 }
 ---
@@ -32,8 +32,60 @@ for (const kind of kinds) {
 <Layout title="home">
   <div class="home">
     <div class="notebook">
-      <div class="prompt-row">
-        <div class="prompt">[ ]:</div>
+      <div class="prompt">[ ]:</div>
+      <div class="cell md">
+        <h1><span class="hash">#</span> slice.of.data</h1>
+        <p class="tagline">Half data, half everything else. Served one slice at a time.</p>
+      </div>
+
+      <div class="prompt start">[1]:</div>
+      <div class="cell code">
+        <code class="expr" id="heatmap-expr"></code>
+      </div>
+      <div class="output">
+        <div class="grid" id="heatmap-grid" data-activity={JSON.stringify(activity)}>
+          <div class="selection" id="heatmap-selection" hidden></div>
+        </div>
+        <div class="out" id="heatmap-out"></div>
+      </div>
+
+      <div class="prompt-row start">
+        <div class="prompt" id="sample-in">[2]:</div>
+        <button class="run" id="sample-run" aria-label="Run cell" title="Run cell">
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polygon points="6 4 20 12 6 20 6 4" />
+          </svg>
+        </button>
+      </div>
+      <div class="cell code">
+        <code class="expr"
+          ><span class="ps">&gt;&gt;&gt;</span> <span class="var">data</span>.sample(<span class="num">10</span>)</code
+        >
+      </div>
+      <div class="output">
+        <div class="chips" id="sample-out" data-items={JSON.stringify(items)}></div>
+      </div>
+
+      <div class="prompt start">[3]:</div>
+      <div class="cell code">
+        <code class="expr"
+          ><span class="ps">&gt;&gt;&gt;</span> pprint(<span class="var">about</span>)</code
+        >
+      </div>
+      <div class="output">
+        <pre class="pp">{"{"}<span class="str">'name'</span>: <span class="str">'Youngshin Son'</span>,
+ <span class="str">'class'</span>: <span class="str">'ML Engineer'</span>,
+ <span class="str">'passive'</span>: <span class="str">'Makes things people enjoy, '</span>
+            <span class="str">'and makes a point of enjoying it.'</span>{"}"}</pre>
         <div class="social">
           <a href="https://github.com/pizzathiefz" aria-label="GitHub" target="_blank" rel="noopener">
             <svg
@@ -86,47 +138,6 @@ for (const kind of kinds) {
             </svg>
           </a>
         </div>
-      </div>
-      <div class="cell md">
-        <h1><span class="hash">#</span> slice.of.data</h1>
-        <p class="tagline">Half data, half everything else. Served one slice at a time.</p>
-      </div>
-
-      <div class="prompt start">[1]:</div>
-      <div class="cell code">
-        <code class="expr" id="heatmap-expr"></code>
-      </div>
-      <div class="output">
-        <div class="grid" id="heatmap-grid" data-activity={JSON.stringify(activity)}>
-          <div class="selection" id="heatmap-selection" hidden></div>
-        </div>
-        <div class="out" id="heatmap-out"></div>
-      </div>
-
-      <div class="prompt-row start">
-        <div class="prompt" id="sample-in">[2]:</div>
-        <button class="run" id="sample-run" aria-label="Run cell" title="Run cell">
-          <svg
-            width="17"
-            height="17"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polygon points="6 4 20 12 6 20 6 4" />
-          </svg>
-        </button>
-      </div>
-      <div class="cell code">
-        <code class="expr"
-          ><span class="ps">&gt;&gt;&gt;</span> <span class="var">data</span>.sample(<span class="num">10</span>)</code
-        >
-      </div>
-      <div class="output">
-        <div class="chips" id="sample-out" data-items={JSON.stringify(items)}></div>
       </div>
     </div>
   </div>
@@ -285,8 +296,9 @@ for (const kind of kinds) {
   const randInt = (lo: number, hi: number) => lo + Math.floor(Math.random() * (hi - lo + 1));
   const sampleOut = document.getElementById("sample-out")!;
   const sampleIn = document.getElementById("sample-in")!;
-  const items: [string, string, string][] = JSON.parse(sampleOut.dataset.items!);
-  let runCount = 2;
+  const items: [string, string, string, string][] = JSON.parse(sampleOut.dataset.items!);
+  // [3] has already run, so re-running [2] continues from [4]
+  let runCount = 3;
 
   function shuffle<T>(arr: T[]) {
     for (let i = arr.length - 1; i > 0; i--) {
@@ -296,12 +308,32 @@ for (const kind of kinds) {
     return arr;
   }
 
+  // books and notes lean recent, stepping by year: this year 3x, last year 2x, older 1x
+  function weight([kind, , , day]: (typeof items)[number]) {
+    if (kind === "post") return 1;
+    const yearsAgo = today.getUTCFullYear() - Number(day.slice(0, 4));
+    return Math.max(1, 3 - yearsAgo);
+  }
+
+  // weighted sampling without replacement (Efraimidis–Spirakis keys)
+  function weightedSample<T>(pool: T[], n: number, w: (item: T) => number) {
+    return pool
+      .map((item) => ({ item, key: Math.random() ** (1 / w(item)) }))
+      .sort((a, b) => b.key - a.key)
+      .slice(0, n)
+      .map(({ item }) => item);
+  }
+
   function sample() {
     const posts = randInt(1, 2);
     const books = randInt(1, 3);
     const quota = { post: posts, book: books, note: SAMPLE_SIZE - posts - books };
     const picked = Object.entries(quota).flatMap(([kind, n]) =>
-      shuffle(items.filter((item) => item[0] === kind)).slice(0, n),
+      weightedSample(
+        items.filter((item) => item[0] === kind),
+        n,
+        weight,
+      ),
     );
     sampleOut.replaceChildren(
       ...shuffle(picked).map(([kind, title, href]) => {
@@ -461,6 +493,20 @@ for (const kind of kinds) {
       transform 0.15s;
     pointer-events: none;
   }
+  /* right-column tooltips grow leftward so they never push past the page edge */
+  .chips :global(.chip:nth-child(2n).clipped)::after {
+    left: auto;
+    right: 0;
+  }
+  @media (max-width: 480px) {
+    .chips :global(.chip:nth-child(2n).clipped)::after {
+      left: 0;
+      right: auto;
+    }
+    .chips :global(.chip.clipped)::after {
+      max-width: 100%;
+    }
+  }
   .chips :global(.chip.clipped:hover)::after {
     opacity: 1;
     transform: translateY(0);
@@ -490,9 +536,25 @@ for (const kind of kinds) {
     transform: translateY(-2px);
     border-color: var(--accent);
   }
+  .pp {
+    margin: 0;
+    padding: 0;
+    background: none;
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    line-height: 1.7;
+    color: color-mix(in srgb, var(--fg) 60%, var(--muted));
+    white-space: pre;
+    overflow-x: auto;
+  }
+  .pp .str {
+    color: inherit;
+  }
   .social {
     display: flex;
-    gap: 0.6rem;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.4rem;
   }
   .social a {
     color: color-mix(in srgb, var(--fg) 50%, var(--muted));

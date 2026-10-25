@@ -121,7 +121,7 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
     </div>
 
     {
-      !isDetailPage && (
+      !isDetailPage && !isHome && (
         <footer>
           <svg
             width="13"
