@@ -628,7 +628,8 @@ for (const kind of kinds) {
     animation: blink 1s steps(1) infinite;
   }
   @media (hover: none) {
-    .choices .cursor {
+    .choices .cursor,
+    .choices:not(:hover):not(:focus-within) a:first-child .cursor {
       visibility: visible;
       animation: none;
     }
