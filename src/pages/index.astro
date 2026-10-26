@@ -82,69 +82,30 @@ for (const kind of kinds) {
         >
       </div>
       <div class="output">
-        <dl class="kv">
-          <dt>name</dt>
-          <dd>Youngshin Son</dd>
-          <dt>class</dt>
-          <dd>ML Engineer</dd>
-          <dt>passive</dt>
-          <dd>Makes things people enjoy, and makes a point of enjoying it.</dd>
-          <dt>links</dt>
-          <dd>
-            <div class="social">
-              <a href="https://github.com/pizzathiefz" aria-label="GitHub" target="_blank" rel="noopener">
-                <svg
-                  width="17"
-                  height="17"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22" />
-                </svg>
-              </a>
-              <a
-                href="https://www.linkedin.com/in/youngshin-son/"
-                aria-label="LinkedIn"
-                target="_blank"
-                rel="noopener"
-              >
-                <svg
-                  width="17"
-                  height="17"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                  <rect x="2" y="9" width="4" height="12" />
-                  <circle cx="4" cy="4" r="2" />
-                </svg>
-              </a>
-              <a href="mailto:pizzathief0@gmail.com" aria-label="Email">
-                <svg
-                  width="17"
-                  height="17"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <rect x="2" y="4" width="20" height="16" rx="2" />
-                  <polyline points="22,6 12,13 2,6" />
-                </svg>
-              </a>
-            </div>
-          </dd>
-        </dl>
+        <div class="dialog">
+          <svg class="frame" aria-hidden="true"></svg>
+          <dl class="kv">
+            <dt>name</dt>
+            <dd>Youngshin Son</dd>
+            <dt>lv</dt>
+            <dd>???</dd>
+            <dt>class</dt>
+            <dd>ML Engineer</dd>
+            <dt>passive</dt>
+            <dd class="passive">Makes things people enjoy, and makes a point of enjoying it.</dd>
+          </dl>
+          <div class="choices" role="group" aria-label="Contact">
+            <a href="https://www.linkedin.com/in/youngshin-son/" target="_blank" rel="noopener"
+              ><span class="cursor" aria-hidden="true">▶</span>linkedin</a
+            >
+            <a href="https://github.com/pizzathiefz" target="_blank" rel="noopener"
+              ><span class="cursor" aria-hidden="true">▶</span>github</a
+            >
+            <a href="mailto:pizzathief0@gmail.com"
+              ><span class="cursor" aria-hidden="true">▶</span>email</a
+            >
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -304,6 +265,27 @@ for (const kind of kinds) {
   const sampleOut = document.getElementById("sample-out")!;
   const sampleIn = document.getElementById("sample-in")!;
   const items: [string, string, string, string][] = JSON.parse(sampleOut.dataset.items!);
+  // about dialog frame: two 1px lines with stepped, pixel-style corners
+  const dialog = document.querySelector<HTMLElement>(".dialog")!;
+  const frame = dialog.querySelector("svg")!;
+  function steppedRect(o: number, w: number, h: number, s = 3) {
+    const [l, t, r, b] = [o, o, w - o, h - o];
+    return (
+      `M${l + 2 * s},${t}H${r - 2 * s}V${t + s}H${r - s}V${t + 2 * s}H${r}` +
+      `V${b - 2 * s}H${r - s}V${b - s}H${r - 2 * s}V${b}` +
+      `H${l + 2 * s}V${b - s}H${l + s}V${b - 2 * s}H${l}` +
+      `V${t + 2 * s}H${l + s}V${t + s}H${l + 2 * s}Z`
+    );
+  }
+  function drawFrame() {
+    const { width: w, height: h } = dialog.getBoundingClientRect();
+    frame.setAttribute("viewBox", `0 0 ${w} ${h}`);
+    frame.innerHTML = [0.5, 4.5]
+      .map((o) => `<path d="${steppedRect(o, w, h)}" fill="none" stroke="currentColor" />`)
+      .join("");
+  }
+  new ResizeObserver(drawFrame).observe(dialog);
+
   // [3] has already run, so re-running [2] continues from [4]
   let runCount = 3;
 
@@ -389,7 +371,7 @@ for (const kind of kinds) {
   }
   .notebook {
     width: 100%;
-    max-width: 600px;
+    max-width: 640px;
     text-align: left;
   }
   .start {
@@ -564,17 +546,64 @@ for (const kind of kinds) {
     margin: 0;
     color: color-mix(in srgb, var(--fg) 65%, var(--muted));
   }
-  .social {
+  /* keep the passive on one line wherever there's room; phones may wrap */
+  @media (min-width: 700px) {
+    .kv .passive {
+      white-space: nowrap;
+    }
+  }
+  /* retro RPG dialog box: double border, links as a choice menu */
+  .dialog {
+    --dialog-line: color-mix(in srgb, var(--muted) 70%, var(--bg));
+    padding: 0.9rem 1.1rem 0.8rem;
+    position: relative;
+  }
+  .frame {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    color: var(--dialog-line);
+    pointer-events: none;
+    shape-rendering: crispEdges;
+  }
+  .choices {
     display: flex;
-    gap: 0.7rem;
-    padding-top: 0.15rem;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.6rem;
+    margin-top: 0.9rem;
+    padding-top: 0.7rem;
+    border-top: 1px dashed var(--border);
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
   }
-  .social a {
-    color: color-mix(in srgb, var(--fg) 50%, var(--muted));
-    line-height: 0;
+  .choices a {
+    color: color-mix(in srgb, var(--fg) 65%, var(--muted));
+    text-decoration: none;
   }
-  .social a:hover {
+  .choices a:hover,
+  .choices a:focus-visible {
     color: var(--fg);
+    outline: none;
+  }
+  .cursor {
+    display: inline-block;
+    width: 1.2em;
+    font-size: 0.7em;
+    color: var(--accent);
+    visibility: hidden;
+  }
+  /* the cursor rests on the first choice and follows hover/focus */
+  .choices:not(:hover):not(:focus-within) a:first-child .cursor,
+  .choices a:hover .cursor,
+  .choices a:focus-visible .cursor {
+    visibility: visible;
+    animation: blink 1s steps(1) infinite;
+  }
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
   }
 
   .grid {
