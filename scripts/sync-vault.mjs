@@ -1,17 +1,37 @@
 // Syncs published content from the Obsidian vault (a separate git repo) into
 // src/content/*, so Astro's glob() loader can pick it up like any other
-// local content collection. Runs automatically before `astro dev`/`build`
-// (see package.json) — there's nothing to do by hand.
-//
-// VAULT_PATH points at a local checkout of the vault repo. Locally this
-// defaults to the iCloud-synced Obsidian vault itself; in CI it should be set
-// to wherever the vault repo was freshly cloned before this script runs.
+// local content collection. Runs automatically before `astro build` (see
+// package.json) and on start/vault changes during `astro dev` (see
+// vault-sync-integration.mjs) — there's nothing to do by hand.
 import fs from "node:fs";
 import path from "node:path";
+import { VAULT_ROOT } from "./vault-path.mjs";
 
-const VAULT_ROOT =
-  process.env.VAULT_PATH ??
-  "/Users/yshin/Library/Mobile Documents/iCloud~md~obsidian/Documents/notes";
+// Outputs are written only when their content changed, and stale ones are
+// pruned at the end, so a resync during `astro dev` touches just what moved
+// instead of flooding Vite's watcher with a full rewrite.
+const written = new Set();
+function writeIfChanged(file, data) {
+  written.add(path.resolve(file));
+  try {
+    if (fs.readFileSync(file).equals(Buffer.from(data))) return;
+  } catch {}
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, data);
+}
+function pruneUnwritten(dir) {
+  if (!fs.existsSync(dir)) return;
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.resolve(dir, entry.name);
+    if (entry.isDirectory()) {
+      pruneUnwritten(full);
+      if (fs.readdirSync(full).length === 0) fs.rmdirSync(full);
+    } else if (!written.has(full)) {
+      fs.rmSync(full);
+    }
+  }
+}
+
 const VAULT = path.join(VAULT_ROOT, "content");
 
 function parseFrontmatter(raw) {
@@ -200,8 +220,7 @@ function resolveImages(body, kind, slug, names) {
       .map((dir) => findFileCaseInsensitive(dir, baseFilename))
       .find(Boolean);
     if (!srcPath) return whole;
-    fs.mkdirSync(publicDir, { recursive: true });
-    fs.copyFileSync(srcPath, path.join(publicDir, baseFilename));
+    writeIfChanged(path.join(publicDir, baseFilename), fs.readFileSync(srcPath));
     const widthAttr = width ? ` width="${width}"` : "";
     return `<img src="/${kind}/${slug}/${baseFilename}"${widthAttr} alt="" />`;
   });
@@ -355,6 +374,89 @@ for (const e of books) {
   e.title = e.fm.title ?? path.basename(e.file, ".md");
   e.slug = bookSlug(e.title);
 }
+
+// Related books, picked here so the vault's topics/keywords never reach
+// src/content — only the chosen slugs do. Up to 5: same author first (max 2),
+// then a shared keyword, then shared topics (same category, or ≥2 shared).
+// The page shuffles their order on load; the selection itself is fixed.
+const RELATED_LIMIT = 5;
+const AUTHOR_LIMIT = 2;
+const asList = (v) => (Array.isArray(v) ? v : v ? [v] : []).map(String).filter(Boolean);
+const shelf = books.map((e) => ({
+  slug: e.slug,
+  authors: new Set(asList(e.fm.author)),
+  categories: new Set(asList(e.fm.category)),
+  topics: new Set(asList(e.fm.topics)),
+  keywords: new Set(asList(e.fm.keywords)),
+  rating: Number(e.fm.rating) || 0,
+  created: String(e.fm.created),
+}));
+const topicCount = new Map();
+for (const b of shelf) for (const t of b.topics) topicCount.set(t, (topicCount.get(t) ?? 0) + 1);
+const idf = (t) => Math.log(shelf.length / topicCount.get(t));
+const overlap = (a, b) => [...a].filter((x) => b.has(x));
+// Each comparator returns negative when x should come first.
+const byRatingThenRecency = (x, y) => y.rating - x.rating || y.created.localeCompare(x.created);
+for (const [i, e] of books.entries()) {
+  const self = shelf[i];
+  const others = shelf
+    .filter((b) => b !== self)
+    .map((b) => {
+      const topics = overlap(self.topics, b.topics);
+      return {
+        ...b,
+        sameAuthor: overlap(self.authors, b.authors).length > 0,
+        sameCategory: overlap(self.categories, b.categories).length > 0,
+        sharedKeywords: overlap(self.keywords, b.keywords).length,
+        sharedTopics: topics.length,
+        topicRarity: topics.reduce((sum, t) => sum + idf(t), 0),
+      };
+    });
+  const picked = new Set();
+  const take = (candidates, max) => {
+    for (const c of candidates) {
+      if (picked.size >= RELATED_LIMIT || max-- <= 0) break;
+      picked.add(c.slug);
+    }
+  };
+  take(
+    others
+      .filter((b) => b.sameAuthor)
+      .sort(
+        (x, y) =>
+          Number(y.sharedKeywords + y.sharedTopics > 0) -
+            Number(x.sharedKeywords + x.sharedTopics > 0) || byRatingThenRecency(x, y)
+      ),
+    AUTHOR_LIMIT
+  );
+  take(
+    others
+      .filter((b) => !picked.has(b.slug) && b.sharedKeywords > 0)
+      .sort(
+        (x, y) =>
+          Number(y.sameCategory) - Number(x.sameCategory) ||
+          y.sharedKeywords - x.sharedKeywords ||
+          byRatingThenRecency(x, y)
+      ),
+    RELATED_LIMIT
+  );
+  take(
+    others
+      .filter(
+        (b) =>
+          !picked.has(b.slug) && b.sharedTopics > 0 && (b.sameCategory || b.sharedTopics >= 2)
+      )
+      .sort(
+        (x, y) =>
+          y.sharedTopics - x.sharedTopics ||
+          y.topicRarity - x.topicRarity ||
+          Number(y.sameCategory) - Number(x.sameCategory) ||
+          byRatingThenRecency(x, y)
+      ),
+    RELATED_LIMIT
+  );
+  e.related = [...picked];
+}
 const noteSlug = makeSlugger();
 for (const e of notes) {
   e.title = e.fm.title ?? path.basename(e.file, ".md");
@@ -394,12 +496,6 @@ const outDirs = {
   posts: "src/content/posts",
 };
 
-for (const [kind, dir] of Object.entries(outDirs)) {
-  fs.rmSync(dir, { recursive: true, force: true });
-  fs.mkdirSync(dir, { recursive: true });
-  fs.rmSync(path.join("public", kind), { recursive: true, force: true });
-}
-
 films.forEach(({ fm, title, slug }) => {
   const fmOut = [
     "---",
@@ -414,10 +510,10 @@ films.forEach(({ fm, title, slug }) => {
   ]
     .filter(Boolean)
     .join("\n");
-  fs.writeFileSync(path.join(outDirs.films, `${slug}.md`), fmOut);
+  writeIfChanged(path.join(outDirs.films, `${slug}.md`), fmOut);
 });
 
-books.forEach(({ fm, body, title, slug, file }) => {
+books.forEach(({ fm, body, title, slug, file, related }) => {
   const author = Array.isArray(fm.author) ? fm.author.join(", ") : fm.author;
   const fmOut = [
     "---",
@@ -430,6 +526,7 @@ books.forEach(({ fm, body, title, slug, file }) => {
       : null,
     `created: ${fm.created}`,
     fm.rating != null ? `rating: ${fm.rating}` : null,
+    related.length ? `related: ${JSON.stringify(related)}` : null,
     `publish: true`,
     "---",
     "",
@@ -437,7 +534,7 @@ books.forEach(({ fm, body, title, slug, file }) => {
   ]
     .filter((line) => line !== null)
     .join("\n");
-  fs.writeFileSync(path.join(outDirs.books, `${slug}.md`), fmOut);
+  writeIfChanged(path.join(outDirs.books, `${slug}.md`), fmOut);
 });
 
 notes.forEach(({ fm, body, title, slug, file }) => {
@@ -454,7 +551,7 @@ notes.forEach(({ fm, body, title, slug, file }) => {
   ]
     .filter((line) => line !== null)
     .join("\n");
-  fs.writeFileSync(path.join(outDirs.notes, `${slug}.md`), fmOut);
+  writeIfChanged(path.join(outDirs.notes, `${slug}.md`), fmOut);
 });
 
 posts.forEach(({ fm, body, title, slug, file }) => {
@@ -471,7 +568,12 @@ posts.forEach(({ fm, body, title, slug, file }) => {
   ]
     .filter((line) => line !== null)
     .join("\n");
-  fs.writeFileSync(path.join(outDirs.posts, `${slug}.md`), fmOut);
+  writeIfChanged(path.join(outDirs.posts, `${slug}.md`), fmOut);
 });
+
+for (const [kind, dir] of Object.entries(outDirs)) {
+  pruneUnwritten(dir);
+  pruneUnwritten(path.join("public", kind));
+}
 
 console.log("done");

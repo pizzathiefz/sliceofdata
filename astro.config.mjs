@@ -5,10 +5,12 @@ import remarkMath from 'remark-math';
 import remarkBreaks from 'remark-breaks';
 import rehypeKatex from 'rehype-katex';
 import { remarkCallouts } from './remark-callouts.mjs';
+import vaultSync from './scripts/vault-sync-integration.mjs';
 
 // https://astro.build/config
 export default defineConfig({
   adapter: cloudflare(),
+  integrations: [vaultSync()],
   markdown: {
     // remarkBreaks: Obsidian renders a single newline as a line break;
     // standard markdown collapses it into a space.

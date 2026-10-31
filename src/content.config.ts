@@ -17,6 +17,7 @@ const books = defineCollection({
     title: z.string(),
     author: z.string().optional(),
     publisher: z.string().optional(),
+    related: z.array(z.string()).default([]),
     yearOfPublication: z.coerce.number().optional(),
     originalTitle: z.string().optional(),
     created: z.coerce.date(),

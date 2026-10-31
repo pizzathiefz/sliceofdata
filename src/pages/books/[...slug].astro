@@ -12,6 +12,10 @@ export async function getStaticPaths() {
 
 const { book } = Astro.props;
 const { Content } = await render(book);
+const allBooks = await getCollection("books");
+const related = book.data.related
+  .map((slug) => allBooks.find((b) => b.id === slug))
+  .filter((b) => b != null);
 
 function formatAuthors(author?: string) {
   if (!author) return author;
@@ -45,7 +49,40 @@ const readDateLabel = readDateIso.replace(/-/g, ".");
   <article>
     <Content />
   </article>
+  {
+    related.length > 0 && (
+      <section class="shelf">
+        <h2 class="shelf-label">
+          <svg class="shelf-icon" viewBox="0 0 16 16" aria-hidden="true">
+            <path d="M2 2.5v11M14 2.5v11M1.5 13.5h13M4 13.5V5h2v8.5M6.5 13.5V4h2v9.5M9.3 13.3l2-7 1.8.5-2 7" />
+          </svg>
+          more from the shelf
+        </h2>
+        <ul>
+          {related.map((b) => (
+            <li>
+              <a href={`/books/${b.id}`}>{b.data.title}</a>
+              {b.data.author && <span class="shelf-author">{formatAuthors(b.data.author)}</span>}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
 </Layout>
+
+<script>
+  // The picks are fixed at build time; only their order changes per visit.
+  const list = document.querySelector(".shelf ul");
+  if (list) {
+    const items = [...list.children];
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    list.append(...items);
+  }
+</script>
 
 <style>
   .book-meta {
@@ -61,5 +98,66 @@ const readDateLabel = readDateIso.replace(/-/g, ".");
     margin-top: 0.2rem;
     font-size: 0.78rem;
     font-variant-numeric: tabular-nums;
+  }
+  .shelf {
+    margin: 4.5rem 0 1rem;
+    padding: 0.9rem 1.1rem 1rem;
+    background: var(--chip-bg);
+    border-radius: 6px;
+  }
+  .shelf-label {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  .shelf-icon {
+    width: 0.95rem;
+    height: 0.95rem;
+    margin-right: 0.55rem;
+    vertical-align: -0.2rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .shelf ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .shelf li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0 0.5rem;
+    padding: 0.1rem 0;
+    line-height: 1.5;
+    font-size: 0.92rem;
+  }
+  .shelf li::before {
+    content: "▶";
+    flex: 0 0 0.9em;
+    font-size: 0.55rem;
+    color: var(--muted);
+    align-self: center;
+  }
+  .shelf li:hover::before {
+    color: var(--accent);
+  }
+  .shelf a {
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .shelf a:hover {
+    color: var(--accent);
+  }
+  .shelf-author {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
   }
 </style>
