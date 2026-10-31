@@ -113,7 +113,7 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
     <div id="tag-overlay" class="search-overlay" hidden>
       <div class="search-modal" role="dialog" aria-modal="true" aria-label="Tagged items">
         <div class="tag-modal-header">
-          <span class="tag-modal-label">#<span id="tag-modal-name"></span></span>
+          <span class="tag-modal-label"><span id="tag-modal-prefix">#</span><span id="tag-modal-name"></span><span id="tag-modal-count"></span></span>
           <button id="tag-modal-close" aria-label="Close">✕</button>
         </div>
         <div id="tag-modal-results" class="search-results"></div>
@@ -347,6 +347,7 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
       });
 
       const tagOverlay = document.getElementById("tag-overlay") as HTMLDivElement;
+      const tagModalPrefix = document.getElementById("tag-modal-prefix")!;
       const tagModalName = document.getElementById("tag-modal-name")!;
       const tagModalResults = document.getElementById("tag-modal-results") as HTMLDivElement;
       const tagModalClose = document.getElementById("tag-modal-close")!;
@@ -373,12 +374,31 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
           .join("");
       }
 
-      function openTagModal(tag: string) {
-        tagModalName.textContent = tag;
-        tagModalResults.innerHTML = `<p class="search-empty">Loading…</p>`;
+      const tagModalCount = document.getElementById("tag-modal-count")!;
+
+      function showTagModal(mode: "tag" | "author", prefix: string, name: string, count = "") {
+        tagOverlay.dataset.mode = mode;
+        tagModalPrefix.textContent = prefix;
+        tagModalName.textContent = name;
+        tagModalCount.textContent = count;
         tagOverlay.hidden = false;
         document.body.style.overflow = "hidden";
+      }
+
+      function openTagModal(tag: string) {
+        tagModalResults.innerHTML = `<p class="search-empty">Loading…</p>`;
+        showTagModal("tag", "#", tag);
         loadIndex().then((data) => renderTagResults(tag, data));
+      }
+
+      // Book pages render each author's book list into a <template>, so the
+      // modal shows every book by them (the search index skips empty notes).
+      function openAuthorModal(author: string) {
+        const list = [...document.querySelectorAll<HTMLTemplateElement>("template[data-author-books]")]
+          .find((t) => t.dataset.authorBooks === author);
+        if (!list) return;
+        tagModalResults.replaceChildren(list.content.cloneNode(true));
+        showTagModal("author", "books by", author, `${list.content.childElementCount}권`);
       }
 
       function closeTagModal() {
@@ -390,7 +410,8 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
         const tagEl = (e.target as HTMLElement).closest<HTMLElement>(".tag-link");
         if (tagEl) {
           e.preventDefault();
-          openTagModal(tagEl.dataset.tag!);
+          if (tagEl.dataset.author) openAuthorModal(tagEl.dataset.author);
+          else openTagModal(tagEl.dataset.tag!);
         }
       });
 
@@ -712,6 +733,21 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
     font-family: var(--font-mono);
     font-size: 0.95rem;
     color: var(--fg);
+  }
+  [data-mode="author"] .tag-modal-label {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    font-family: var(--font-sans);
+  }
+  [data-mode="author"] #tag-modal-prefix,
+  [data-mode="author"] #tag-modal-count {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  [data-mode="author"] #tag-modal-name {
+    font-weight: 600;
   }
   #tag-modal-close {
     background: none;

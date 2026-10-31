@@ -17,6 +17,22 @@ const related = book.data.related
   .map((slug) => allBooks.find((b) => b.id === slug))
   .filter((b) => b != null);
 
+const splitAuthors = (author?: string) =>
+  (author ?? "")
+    .split(",")
+    .map((n) => n.trim())
+    .filter(Boolean);
+
+// Up to three authors become buttons that list every book by them.
+const authorNames = splitAuthors(book.data.author);
+const shownAuthors = authorNames.slice(0, 3);
+const booksByAuthor = shownAuthors.map((name) => ({
+  name,
+  books: allBooks
+    .filter((b) => splitAuthors(b.data.author).includes(name))
+    .sort((a, b) => b.data.created.getTime() - a.data.created.getTime()),
+}));
+
 function formatAuthors(author?: string) {
   if (!author) return author;
   const names = author
@@ -28,7 +44,6 @@ function formatAuthors(author?: string) {
 }
 
 const metaParts = [
-  formatAuthors(book.data.author),
   book.data.publisher,
   book.data.yearOfPublication,
   book.data.originalTitle,
@@ -43,12 +58,44 @@ const readDateLabel = readDateIso.replace(/-/g, ".");
   <a class="back" href={`/books#${bookYear}`}>← books</a>
   <h1>{book.data.title}</h1>
   <div class="book-meta">
-    {metaParts.length > 0 && <p>{metaParts.join(" · ")}</p>}
+    {(shownAuthors.length > 0 || metaParts.length > 0) && (
+      <p>
+        {shownAuthors.map((name, i) => (
+          <Fragment>
+            {i > 0 && ", "}
+            <button type="button" class="tag-link" data-author={name}>
+              {name}
+            </button>
+          </Fragment>
+        ))}
+        {authorNames.length > 3 && ` 외 ${authorNames.length - 3}인`}
+        {shownAuthors.length > 0 && metaParts.length > 0 && " · "}
+        {metaParts.join(" · ")}
+      </p>
+    )}
     <p class="read-date"><time datetime={readDateIso}>{readDateLabel} 읽음</time></p>
   </div>
   <article>
     <Content />
   </article>
+  {
+    booksByAuthor.map(({ name, books }) => (
+      <template data-author-books={name}>
+        {books.map((b) => (
+          <a
+            href={`/books/${b.id}`}
+            class="author-book"
+            aria-current={b.id === book.id ? "page" : undefined}
+          >
+            <span class="author-book-title">{b.data.title}</span>
+            <span class="author-book-date">
+              {b.data.created.toISOString().slice(0, 10).replace(/-/g, ".")}
+            </span>
+          </a>
+        ))}
+      </template>
+    ))
+  }
   {
     related.length > 0 && (
       <section class="shelf">
@@ -158,6 +205,44 @@ const readDateLabel = readDateIso.replace(/-/g, ".");
   .shelf-author {
     font-family: var(--font-mono);
     font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .author-book {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 6px;
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 0.92rem;
+  }
+  .author-book::before {
+    content: "▶";
+    flex: 0 0 0.9em;
+    align-self: center;
+    font-size: 0.55rem;
+    color: var(--muted);
+  }
+  .author-book:hover {
+    background: var(--chip-bg);
+  }
+  .author-book:hover::before,
+  .author-book[aria-current]::before {
+    color: var(--accent);
+  }
+  .author-book[aria-current] {
+    color: var(--muted);
+    pointer-events: none;
+  }
+  .author-book-title {
+    flex: 1;
+    min-width: 0;
+  }
+  .author-book-date {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
     color: var(--muted);
   }
 </style>
