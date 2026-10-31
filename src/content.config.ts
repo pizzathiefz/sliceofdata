@@ -7,6 +7,8 @@ const posts = defineCollection({
     title: z.string(),
     tags: z.array(z.string()).default([]),
     created: z.coerce.date(),
+    // "notes/<slug>" or "posts/<slug>", picked by scripts/related-notes.mjs
+    related: z.array(z.string()).default([]),
     publish: z.boolean().default(true),
   }),
 });
@@ -32,6 +34,8 @@ const notes = defineCollection({
     title: z.string(),
     tags: z.array(z.string()).default([]),
     created: z.coerce.date(),
+    // "notes/<slug>" or "posts/<slug>", picked by scripts/related-notes.mjs
+    related: z.array(z.string()).default([]),
     publish: z.boolean().default(true),
   }),
 });

@@ -6,6 +6,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { VAULT_ROOT } from "./vault-path.mjs";
+import { relateNotes } from "./related-notes.mjs";
 
 // Outputs are written only when their content changed, and stale ones are
 // pruned at the end, so a resync during `astro dev` touches just what moved
@@ -467,6 +468,14 @@ for (const e of posts) {
   e.title = e.fm.title ?? path.basename(e.file, ".md");
   e.slug = postSlug(path.basename(e.file, ".md"));
 }
+const notebookEntries = [
+  ...notes.map((e) => [e, `notes/${e.slug}`]),
+  ...posts.map((e) => [e, `posts/${e.slug}`]),
+];
+const relatedNotes = relateNotes(
+  notebookEntries.map(([e, ref]) => ({ ref, title: e.title, file: e.file, fm: e.fm, body: e.body }))
+);
+for (const [e, ref] of notebookEntries) e.related = relatedNotes.get(ref).map((p) => p.ref);
 
 // Films have no individual page (just the /films listing), so they're left
 // out of the map — a wikilink to a film falls back to plain text.
@@ -537,13 +546,14 @@ books.forEach(({ fm, body, title, slug, file, related }) => {
   writeIfChanged(path.join(outDirs.books, `${slug}.md`), fmOut);
 });
 
-notes.forEach(({ fm, body, title, slug, file }) => {
+notes.forEach(({ fm, body, title, slug, file, related }) => {
   const tags = Array.isArray(fm.tags) ? fm.tags : fm.tags ? [fm.tags] : [];
   const fmOut = [
     "---",
     `title: ${JSON.stringify(title)}`,
     tags.length ? `tags: [${tags.map((t) => JSON.stringify(t)).join(", ")}]` : null,
     `created: ${fm.created}`,
+    related.length ? `related: ${JSON.stringify(related)}` : null,
     `publish: true`,
     "---",
     "",
@@ -554,13 +564,14 @@ notes.forEach(({ fm, body, title, slug, file }) => {
   writeIfChanged(path.join(outDirs.notes, `${slug}.md`), fmOut);
 });
 
-posts.forEach(({ fm, body, title, slug, file }) => {
+posts.forEach(({ fm, body, title, slug, file, related }) => {
   const tags = Array.isArray(fm.tags) ? fm.tags : fm.tags ? [fm.tags] : [];
   const fmOut = [
     "---",
     `title: ${JSON.stringify(title)}`,
     tags.length ? `tags: [${tags.map((t) => JSON.stringify(t)).join(", ")}]` : null,
     `created: ${fm.created}`,
+    related.length ? `related: ${JSON.stringify(related)}` : null,
     `publish: true`,
     "---",
     "",

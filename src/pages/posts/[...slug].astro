@@ -1,7 +1,9 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import Comments from "../../components/Comments.astro";
+import Shelf from "../../components/Shelf.astro";
 import { getCollection, render } from "astro:content";
+import { RELATED_LABEL, relatedShelfItems } from "../../lib/related-notes";
 
 export async function getStaticPaths() {
   const posts = await getCollection("posts");
@@ -13,6 +15,7 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content } = await render(post);
+const related = await relatedShelfItems(post.data.related);
 
 const writtenDateIso = post.data.created.toISOString().slice(0, 10);
 const writtenDateLabel = writtenDateIso.replace(/-/g, ".");
@@ -21,9 +24,9 @@ const writtenDateLabel = writtenDateIso.replace(/-/g, ".");
 <Layout title={post.data.title}>
   <a class="back" href="/posts">← posts</a>
   <h1>{post.data.title}</h1>
-  <p class="post-meta">
+  <div class="post-meta">
     {post.data.tags.length > 0 && (
-      <Fragment>
+      <p>
         {post.data.tags.map((tag, i) => (
           <Fragment>
             {i > 0 && ", "}
@@ -32,14 +35,14 @@ const writtenDateLabel = writtenDateIso.replace(/-/g, ".");
             </button>
           </Fragment>
         ))}
-        <span class="sep" aria-hidden="true">|</span>
-      </Fragment>
+      </p>
     )}
-    <time class="written-date" datetime={writtenDateIso}>{writtenDateLabel} 씀</time>
-  </p>
+    <p class="written-date"><time datetime={writtenDateIso}>{writtenDateLabel} 씀</time></p>
+  </div>
   <article>
     <Content />
   </article>
+  <Shelf label={RELATED_LABEL} icon="notebook" items={related} />
   <Comments path={Astro.url.pathname} />
 </Layout>
 
@@ -47,14 +50,15 @@ const writtenDateLabel = writtenDateIso.replace(/-/g, ".");
   .post-meta {
     text-align: right;
     color: var(--muted);
-    font-size: 0.85rem;
     margin: 0.4rem 0 2rem;
   }
-  .post-meta .sep {
-    margin: 0 0.6em;
-    color: var(--border);
+  .post-meta p {
+    margin: 0;
+    font-size: 0.85rem;
   }
   .post-meta .written-date {
+    margin-top: 0.2rem;
+    font-size: 0.78rem;
     font-variant-numeric: tabular-nums;
   }
 </style>

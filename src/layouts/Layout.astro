@@ -351,6 +351,7 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
       const tagModalName = document.getElementById("tag-modal-name")!;
       const tagModalResults = document.getElementById("tag-modal-results") as HTMLDivElement;
       const tagModalClose = document.getElementById("tag-modal-close")!;
+      const tagModalCount = document.getElementById("tag-modal-count")!;
 
       function renderTagResults(tag: string, data: SearchItem[]) {
         const matches = data
@@ -360,24 +361,21 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
           tagModalResults.innerHTML = `<p class="search-empty">No results</p>`;
           return;
         }
+        const here = decodeURIComponent(location.pathname).replace(/\/$/, "");
         tagModalResults.innerHTML = matches
           .map(
             (item) => `
-          <a href="${item.url}" class="search-result">
-            <span class="search-row">
-              <span class="search-section">${SECTION_LABEL[item.section]}</span>
-              <span class="search-title">${escapeHtml(item.title)}</span>
-            </span>
-            ${item.created ? `<span class="search-meta">${item.created.slice(0, 10)}</span>` : ""}
+          <a href="${item.url}" class="modal-item"${item.url === here ? ' aria-current="page"' : ""}>
+            <span class="modal-item-title">${escapeHtml(item.title)}</span>
+            ${item.created ? `<span class="modal-item-date">${item.created.slice(0, 10).replace(/-/g, ".")}</span>` : ""}
           </a>`
           )
           .join("");
+        tagModalCount.textContent = `${matches.length}개`;
       }
 
-      const tagModalCount = document.getElementById("tag-modal-count")!;
 
-      function showTagModal(mode: "tag" | "author", prefix: string, name: string, count = "") {
-        tagOverlay.dataset.mode = mode;
+      function showTagModal(prefix: string, name: string, count = "") {
         tagModalPrefix.textContent = prefix;
         tagModalName.textContent = name;
         tagModalCount.textContent = count;
@@ -387,7 +385,7 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
 
       function openTagModal(tag: string) {
         tagModalResults.innerHTML = `<p class="search-empty">Loading…</p>`;
-        showTagModal("tag", "#", tag);
+        showTagModal("tagged", tag);
         loadIndex().then((data) => renderTagResults(tag, data));
       }
 
@@ -398,7 +396,7 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
           .find((t) => t.dataset.authorBooks === author);
         if (!list) return;
         tagModalResults.replaceChildren(list.content.cloneNode(true));
-        showTagModal("author", "books by", author, `${list.content.childElementCount}권`);
+        showTagModal("books by", author, `${list.content.childElementCount}권`);
       }
 
       function closeTagModal() {
@@ -735,24 +733,59 @@ const isDetailPage = path.split("/").filter(Boolean).length >= 2;
     flex-shrink: 0;
   }
   .tag-modal-label {
-    font-family: var(--font-mono);
-    font-size: 0.95rem;
-    color: var(--fg);
-  }
-  [data-mode="author"] .tag-modal-label {
     display: flex;
     align-items: baseline;
     gap: 0.5rem;
     font-family: var(--font-sans);
+    font-size: 0.95rem;
+    color: var(--fg);
   }
-  [data-mode="author"] #tag-modal-prefix,
-  [data-mode="author"] #tag-modal-count {
+  #tag-modal-prefix,
+  #tag-modal-count {
     font-family: var(--font-mono);
     font-size: 0.72rem;
     color: var(--muted);
   }
-  [data-mode="author"] #tag-modal-name {
+  #tag-modal-name {
     font-weight: 600;
+  }
+  .modal-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 6px;
+    color: var(--fg);
+    text-decoration: none;
+    font-size: 0.92rem;
+  }
+  .modal-item::before {
+    content: "▶";
+    flex: 0 0 0.9em;
+    align-self: center;
+    font-size: 0.55rem;
+    color: var(--muted);
+  }
+  .modal-item:hover {
+    background: var(--chip-bg);
+  }
+  .modal-item:hover::before,
+  .modal-item[aria-current]::before {
+    color: var(--accent);
+  }
+  .modal-item[aria-current] {
+    color: var(--muted);
+    pointer-events: none;
+  }
+  .modal-item-title {
+    flex: 1;
+    min-width: 0;
+  }
+  .modal-item-date {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
   }
   #tag-modal-close {
     background: none;

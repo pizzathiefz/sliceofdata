@@ -1,0 +1,124 @@
+---
+// The "more from …" box at the bottom of book, note and post pages.
+interface Props {
+  label: string;
+  icon: "books" | "notebook";
+  items: { href: string; title: string; meta?: string }[];
+  // Book picks are an unordered set, so their order changes per visit; note
+  // picks are ranked by score and keep that order.
+  shuffle?: boolean;
+}
+
+const { label, icon, items, shuffle = false } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <section class="shelf" data-shuffle={shuffle ? "" : undefined}>
+      <h2 class="shelf-label">
+        <svg class="shelf-icon" viewBox="0 0 16 16" aria-hidden="true">
+          {icon === "books" ? (
+            <path d="M2 2.5v11M14 2.5v11M1.5 13.5h13M4 13.5V5h2v8.5M6.5 13.5V4h2v9.5M9.3 13.3l2-7 1.8.5-2 7" />
+          ) : (
+            <path d="M3.5 1.5h8a1 1 0 0 1 1 1v11a1 1 0 0 1-1 1h-8zM3.5 1.5v13M2 4h3M2 8h3M2 12h3M6.5 5h4M6.5 7.5h4" />
+          )}
+        </svg>
+        {label}
+      </h2>
+      <ul>
+        {items.map((item) => (
+          <li>
+            <span class="shelf-text">
+              <a href={item.href}>{item.title}</a>
+              {item.meta && <span class="shelf-meta">{item.meta}</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<script>
+  // The picks are fixed at build time; only their order changes per visit.
+  const list = document.querySelector(".shelf[data-shuffle] ul");
+  if (list) {
+    const items = [...list.children];
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    list.append(...items);
+  }
+</script>
+
+<style>
+  .shelf {
+    margin: 4.5rem 0 1rem;
+    padding: 0.9rem 1.1rem 1rem;
+    background: var(--chip-bg);
+    border-radius: 6px;
+  }
+  .shelf-label {
+    margin: 0 0 0.5rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: normal;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  .shelf-icon {
+    width: 0.95rem;
+    height: 0.95rem;
+    margin-right: 0.55rem;
+    vertical-align: -0.2rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .shelf ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  /* The marker sits in its own column, so a long title wraps under itself
+     (hanging indent) instead of dropping below the marker. */
+  .shelf li {
+    display: grid;
+    grid-template-columns: 0.9em 1fr;
+    column-gap: 0.5rem;
+    padding: 0.1rem 0;
+    line-height: 1.5;
+    font-family: var(--font-ui);
+    font-size: 0.92rem;
+  }
+  .shelf li::before {
+    content: "▶";
+    font-size: 0.55rem;
+    line-height: calc(0.92rem * 1.5);
+    color: var(--muted);
+  }
+  .shelf-text {
+    min-width: 0;
+  }
+  .shelf-meta {
+    margin-left: 0.5rem;
+  }
+  .shelf li:hover::before {
+    color: var(--accent);
+  }
+  .shelf a {
+    color: var(--fg);
+    text-decoration: none;
+  }
+  .shelf a:hover {
+    color: var(--accent);
+  }
+  .shelf-meta {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+</style>

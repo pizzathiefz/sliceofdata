@@ -1,5 +1,6 @@
 ---
 import Layout from "../../layouts/Layout.astro";
+import Shelf from "../../components/Shelf.astro";
 import { getCollection, render } from "astro:content";
 
 export async function getStaticPaths() {
@@ -84,11 +85,11 @@ const readDateLabel = readDateIso.replace(/-/g, ".");
         {books.map((b) => (
           <a
             href={`/books/${b.id}`}
-            class="author-book"
+            class="modal-item"
             aria-current={b.id === book.id ? "page" : undefined}
           >
-            <span class="author-book-title">{b.data.title}</span>
-            <span class="author-book-date">
+            <span class="modal-item-title">{b.data.title}</span>
+            <span class="modal-item-date">
               {b.data.created.toISOString().slice(0, 10).replace(/-/g, ".")}
             </span>
           </a>
@@ -96,40 +97,17 @@ const readDateLabel = readDateIso.replace(/-/g, ".");
       </template>
     ))
   }
-  {
-    related.length > 0 && (
-      <section class="shelf">
-        <h2 class="shelf-label">
-          <svg class="shelf-icon" viewBox="0 0 16 16" aria-hidden="true">
-            <path d="M2 2.5v11M14 2.5v11M1.5 13.5h13M4 13.5V5h2v8.5M6.5 13.5V4h2v9.5M9.3 13.3l2-7 1.8.5-2 7" />
-          </svg>
-          more from the shelf
-        </h2>
-        <ul>
-          {related.map((b) => (
-            <li>
-              <a href={`/books/${b.id}`}>{b.data.title}</a>
-              {b.data.author && <span class="shelf-author">{formatAuthors(b.data.author)}</span>}
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
+  <Shelf
+    label="more from the shelf"
+    icon="books"
+    shuffle
+    items={related.map((b) => ({
+      href: `/books/${b.id}`,
+      title: b.data.title,
+      meta: formatAuthors(b.data.author),
+    }))}
+  />
 </Layout>
-
-<script>
-  // The picks are fixed at build time; only their order changes per visit.
-  const list = document.querySelector(".shelf ul");
-  if (list) {
-    const items = [...list.children];
-    for (let i = items.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [items[i], items[j]] = [items[j], items[i]];
-    }
-    list.append(...items);
-  }
-</script>
 
 <style>
   .book-meta {
@@ -145,104 +123,5 @@ const readDateLabel = readDateIso.replace(/-/g, ".");
     margin-top: 0.2rem;
     font-size: 0.78rem;
     font-variant-numeric: tabular-nums;
-  }
-  .shelf {
-    margin: 4.5rem 0 1rem;
-    padding: 0.9rem 1.1rem 1rem;
-    background: var(--chip-bg);
-    border-radius: 6px;
-  }
-  .shelf-label {
-    margin: 0 0 0.5rem;
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-weight: normal;
-    letter-spacing: 0.04em;
-    color: var(--muted);
-  }
-  .shelf-icon {
-    width: 0.95rem;
-    height: 0.95rem;
-    margin-right: 0.55rem;
-    vertical-align: -0.2rem;
-    fill: none;
-    stroke: currentColor;
-    stroke-width: 1.1;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
-  .shelf ul {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-  .shelf li {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0 0.5rem;
-    padding: 0.1rem 0;
-    line-height: 1.5;
-    font-size: 0.92rem;
-  }
-  .shelf li::before {
-    content: "▶";
-    flex: 0 0 0.9em;
-    font-size: 0.55rem;
-    color: var(--muted);
-    align-self: center;
-  }
-  .shelf li:hover::before {
-    color: var(--accent);
-  }
-  .shelf a {
-    color: var(--fg);
-    text-decoration: none;
-  }
-  .shelf a:hover {
-    color: var(--accent);
-  }
-  .shelf-author {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    color: var(--muted);
-  }
-  .author-book {
-    display: flex;
-    align-items: baseline;
-    gap: 0.6rem;
-    padding: 0.45rem 0.7rem;
-    border-radius: 6px;
-    color: var(--fg);
-    text-decoration: none;
-    font-size: 0.92rem;
-  }
-  .author-book::before {
-    content: "▶";
-    flex: 0 0 0.9em;
-    align-self: center;
-    font-size: 0.55rem;
-    color: var(--muted);
-  }
-  .author-book:hover {
-    background: var(--chip-bg);
-  }
-  .author-book:hover::before,
-  .author-book[aria-current]::before {
-    color: var(--accent);
-  }
-  .author-book[aria-current] {
-    color: var(--muted);
-    pointer-events: none;
-  }
-  .author-book-title {
-    flex: 1;
-    min-width: 0;
-  }
-  .author-book-date {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    font-variant-numeric: tabular-nums;
-    color: var(--muted);
   }
 </style>
